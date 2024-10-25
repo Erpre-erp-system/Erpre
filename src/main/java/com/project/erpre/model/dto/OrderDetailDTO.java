@@ -22,6 +22,7 @@ public class OrderDetailDTO {
 
     private LocalDateTime orderDInsertDate;
     private LocalDateTime orderDUpdateDate;
+    @Builder.Default
     private String orderDDeleteYn = "N"; // 기본값 설정
     private Timestamp orderDDeleteDate; // 삭제 일시
 

@@ -52,6 +52,7 @@ public class OrderDetail {
     @Column(name = "order_d_update_date")
     private LocalDateTime orderDUpdateDate;
 
+    @Builder.Default
     @Column(name = "order_d_delete_yn", nullable = false)
     private String orderDDeleteYn="N";
 
