@@ -4,7 +4,6 @@ import '../../../resources/static/css/common/Main.css'; // 공통 CSS 파일
 import Layout from "../../layout/Layout"; // 공통 레이아웃 컴포넌트를 임포트 (헤더, 푸터 등)
 import { BrowserRouter } from "react-router-dom";
 import '../../../resources/static/css/sales/OrderDispatch.css';
-import { Modal, Table, Input, Button } from 'antd';
 
 // 날짜 포맷팅 함수
 const formatDateTime = (dateString) => {
@@ -19,139 +18,202 @@ const formatDateTime = (dateString) => {
 };
 
 //출고지시 모달창
-const DispatchInstructionModal = ({ show, onClose, onSave, warehouseData }) => {
+const DispatchInstructionModal = ({ show, onClose, onSave, warehouseData,assignedWarehouse }) => {
     const [form, setForm] = useState({
       //고객사
-      customerName: '', // 고객사 이름 - customer
-      customerAddr: '', // 고객사 주소(납품지주소) - customer 
+      customerName: customer.customerName, // 고객사 이름 - customer
+      customerAddr: customer.customerAddr, // 고객사 주소(납품지주소) - customer 
       //출하창고
-      warehouseName: '', //창고명 - warehouse 
-      orderDDeliveryRequestDate: '', //납품요청일 - orderD
-      //상품
-      productNm: '', //품목명 - product
-      orderDPrice: '', //출고단가 - orderD
-      orderDQty: '', //수량(단위포함) - orderD
-      orderDTotalPrice: '', //총금액(orderD
+      warehouseName: '', //창고명 - warehouse
+      warehouseManagerName: '', //창고명 담당자 - warehouse
+      orderDDeliveryRequestDate: orderDetail.orderDDeliveryRequestDate, //납품요청일 - orderD
+      //상품(orderH)
+      productNm: product.productNm, //품목명 - product
+      orderDPrice: orderDetail.orderDPrice, //출고단가 - orderD
+      orderDQty: orderDetail.orderDQty, //수량(단위포함) - orderD
+      orderDTotalPrice: orderDetail.orderDTotalPrice, //총금액 - orderD
+      //qr코드
+      qrCodeData: qr_code.qrCodeData //qr코드 데이터 - qr_code
     });
-  
-    const columns = [
-      {
-        title: '상품',
-        dataIndex: 'productNm',
-        key: 'productNm',
-      },
-      {
-        title: '품목명',
-        dataIndex: 'productNm',
-        key: 'productNm',
-      },
-      {
-        title: '출고단가',
-        dataIndex: 'orderDPrice',
-        key: 'orderDPrice',
-        render: (price) => `${price.toLocaleString()} 원`,
-      },
-      {
-        title: '수량(단위포함)',
-        dataIndex: 'orderDQty',
-        key: 'orderDQty',
-      },
-      {
-        title: '총금액',
-        dataIndex: 'orderDTotalPrice',
-        key: 'orderDTotalPrice',
-        render: (totalPrice) => `${totalPrice.toLocaleString()} 원`,
-      },
-    ];
-  
+
+
+    //모달 알림창 2번 뜨는거 방지
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+    //모달이 열릴 때마다 폼 초기화
+    useEffect(() => {
+        if (show) {
+            if (warehouseData) {
+                setForm(warehouseData); // 기존 고객 데이터를 폼에 반영
+            } else {
+                //새로운 출고지시 하면 폼 초기화
+                setForm({
+                    //고객사
+                    customerName: customer.customerName, // 고객사 이름 - customer
+                    customerAddr: customer.customerAddr, // 고객사 주소(납품지주소) - customer 
+                    //출하창고
+                    warehouseName: '', //창고명 - warehouse
+                    warehouseManagerName: '', //창고명 담당자 - warehouse
+                    orderDDeliveryRequestDate: orderDetail.orderDDeliveryRequestDate, //납품요청일 - orderD
+                    //상품(orderH)
+                    productNm: product.productNm, //품목명 - product
+                    orderDPrice: orderDetail.orderDPrice, //출고단가 - orderD
+                    orderDQty: orderDetail.orderDQty, //수량(단위포함) - orderD
+                    orderDTotalPrice: orderDetail.orderDTotalPrice, //총금액 - orderD
+                    //qr코드
+                    qrCodeData: qr_code.qrCodeData //qr코드 데이터 - qr_code
+
+
+                });
+            }
+        }
+    }, [show, customerData]);
+
+    //창고배정에서 선택한 창고명으로 저장
+    useEffect(() => {
+        if (show) {
+          setForm({
+            warehouseName: assignedWarehouse || '',
+          });
+        }
+      }, [show, assignedWarehouse]);
+
+    // 입력 값 변경 시 폼 상태 업데이트
     const handleInputChange = (e) => {
-      const { name, value } = e.target;
-      setForm({ ...form, [name]: value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
     };
-  
-    const handleSave = () => {
-      onSave(form);
+
+    // 폼 제출 처리
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(form); // 상위 컴포넌트로 저장된 데이터 전달
+        onClose(); // 모달 닫기
     };
+
+    if (!show) return null; // 모달 표시 여부 체크
   
     return (
-      <Modal
-        title="출고지시 모달"
-        visible={show}
-        onCancel={onClose}
-        footer={[
-          <Button key="cancel" onClick={onClose}>취소</Button>,
-          <Button key="save" type="primary" onClick={handleSave}>저장</Button>,
-        ]}
-        width={800}
-      >
-        <div className="form-fields">
-          <Input
-            placeholder="고객사 이름"
-            name="customerName"
-            value={form.customerName}
-            onChange={handleInputChange}
-            style={{ marginBottom: '10px' }}
-          />
-          <Input
-            placeholder="고객사 주소"
-            name="customerAddr"
-            value={form.customerAddr}
-            onChange={handleInputChange}
-            style={{ marginBottom: '10px' }}
-          />
-          <Input
-            placeholder="출하창고"
-            name="warehouseName"
-            value={form.warehouseName}
-            onChange={handleInputChange}
-            style={{ marginBottom: '10px' }}
-          />
-          <Input
-            placeholder="납품요청일"
-            name="orderDDeliveryRequestDate"
-            value={form.orderDDeliveryRequestDate}
-            onChange={handleInputChange}
-            style={{ marginBottom: '10px' }}
-          />
-          <Input
-            placeholder="상품명"
-            name="productNm"
-            value={form.productNm}
-            onChange={handleInputChange}
-            style={{ marginBottom: '10px' }}
-          />
-          <Input
-            placeholder="출고단가"
-            name="orderDPrice"
-            value={form.orderDPrice}
-            onChange={handleInputChange}
-            style={{ marginBottom: '10px' }}
-          />
-          <Input
-            placeholder="수량(단위포함)"
-            name="orderDQty"
-            value={form.orderDQty}
-            onChange={handleInputChange}
-            style={{ marginBottom: '10px' }}
-          />
-          <Input
-            placeholder="총금액"
-            name="orderDTotalPrice"
-            value={form.orderDTotalPrice}
-            onChange={handleInputChange}
-            style={{ marginBottom: '10px' }}
-          />
+        <div className="modal_overlay">
+            <div className="modal_container dispatch">
+        
+                <button className="btn_close" onClick={onClose}><i className="bi bi-x-lg"></i></button> {/* 모달 닫기 버튼 */}
+                
+                <div className="form-group">
+                    <label>고객사 이름</label>
+                <Input
+                    name="customerName"
+                    value={form.customerName}
+                />
+                </div>
+                <div className="form-group">
+                    <label>공급자 상호</label>
+                        <p>이케아</p>
+                
+                </div>
+                <div className="form-group">
+                    <label>공급자 주소</label>
+                        <p>이케아</p>
+                </div>
+                <div className="form-group">
+                    <label>공급자 대표성명</label>
+                        <p>박인욱</p>
+                </div>
+                <div className="form-group">
+                    <label>공급자 전화번호</label>
+                        <p>02-111-5555</p>
+                </div>
+                <div className="form-group">
+                    <label>공급자 사업자 등록번호</label>
+                        <p>123-456-7890</p>
+                </div>
+                <div className="form-group">
+                    <label>납품지 주소</label>
+                <Input
+                    name="customerAddr"
+                    value={form.customerAddr}
+                />
+                </div>
+                <div className="form-group">
+                    <label>출하창고</label>
+                <Input
+                    name="warehouseName"
+                    value={form.warehouseName}
+                />
+                </div>
+                <div className="form-group">
+                    <label>납품 요청일</label>
+                <Input
+                    name="orderDDeliveryRequestDate"
+                    value={form.orderDDeliveryRequestDate}
+                />
+                </div>
+                <div className="form-group">
+                    <label>품목명</label>
+                <Input
+                    name="productNm"
+                    value={form.productNm}
+                />
+                </div>
+                <div className="form-group">
+                    <label>출고단가</label>
+                <Input
+                    name="orderDPrice"
+                    value={form.orderDPrice}
+                />
+                </div>
+                <div className="form-group">
+                    <label>수량(단위포함)</label>
+                <Input
+                    name="orderDQty"
+                    value={form.orderDQty}
+                />
+                </div>
+                <div className="form-group">
+                    <label>총금액</label>
+                <Input
+                    name="orderDTotalPrice"
+                    value={form.orderDTotalPrice}
+                />
+                </div>
+                <div className="form-group">
+                    <label>수량</label>
+                <Input
+                    name="totalOrderDQty"
+                    value={form.totalOrderDQty}
+                />
+                </div>
+                <div className="form-group">
+                    <label>인수</label>
+                        <p>인</p>
+                </div>
+                <div className="form-group">
+                    <label>QR코드</label>
+                </div>
+                <div className="form-group">
+                    <label>다운로드</label>
+                        <option>pdf로 다운받기</option>
+                        <option>excel로 다운받기</option>
+                </div>
+                <div className="form-group">
+                    <button className="dispatch instruction">출고</button>
+                </div>
+            <div className="modal-actions">
+                <button type="submit" className="box blue" onClick={handleSubmit}>등록</button>
+            </div>
+            {/* 출고지시 확인 모달 */}
+            {showConfirmModal && (
+            <ConfirmationModal
+                message="출고 지시 하시겠습니까?"
+                onConfirm={handleConfirmSave}
+                onCancel={() => setShowConfirmModal(false)}
+                />
+            )}
+
+             </div>
         </div>
-  
-        <Table
-          dataSource={warehouseData}
-          columns={columns}
-          pagination={false}
-          rowKey={(record) => record.orderNo}
-        />
-      </Modal>
     );
-  };
+};
 
 //창고배정 모달창
 function WarehouseAssignmentModal({ show, onClose, warehouse, onSave, onDelete }) {
@@ -160,6 +222,8 @@ function WarehouseAssignmentModal({ show, onClose, warehouse, onSave, onDelete }
     const [editableWarehouse, setEditableWarehouse] = useState(warehouse || {}); // 편집 가능한 창고 데이터
     const [showEditConfirmModal, setShowEditConfirmModal] = useState(false); // 수정 확인 모달 표시 여부
     const [showSaveConfirmModal, setShowSaveConfirmModal] = useState(false); // 저장 확인 모달 표시 여부
+    const [warehouseManagers, setWarehouseManagers] = useState([]); //창고명->창고담당자
+    const [warehouseInfo, setWarehouseInfo] = useState({});
     const [errors, setErrors] = useState({ // 필수값 검증 에러 메시지
         warehouseName: '',
         warehouseManagerName: '',
@@ -179,15 +243,31 @@ function WarehouseAssignmentModal({ show, onClose, warehouse, onSave, onDelete }
 
     // 편집 모드 토글 함수
     const toggleEditMode = () => {
-        if (isEditMode) return; // 편집 모드일 경우 동작하지 않음
-        setShowEditConfirmModal(true); // 수정 확인 모달 표시
-    };
+        if (dispatchStatus !== 'pending') {
+            window.showToast("출고 대기 상태에서만 수정 가능합니다.", 'error');
+            return;
+          }
+          setShowEditConfirmModal(true);
+        };
 
     // 수정 확인 모달에서 확인을 누르면 편집 모드 활성화
     const handleConfirmEdit = () => {
         setIsEditMode(true); // 편집 모드 활성화
         setShowEditConfirmModal(false); // 수정 확인 모달 닫기
     };
+
+    const handleWarehouseNameChange = async (e) => {
+        const selectedWarehouseName = e.target.value;
+        setEditableWarehouse({ ...editableWarehouse, warehouseName: selectedWarehouseName });
+        
+        // 선택된 창고 정보 가져오기
+        const response = await axios.get(`/api/warehouse/info?warehouseName=${selectedWarehouseName}`);
+        setWarehouseInfo(response.data);
+      
+        // 창고 담당자 목록도 업데이트
+        // ...
+      };
+
 
     // 입력 값 변경 시 상태 업데이트 함수
     const handleChange = (e) => {
@@ -197,8 +277,13 @@ function WarehouseAssignmentModal({ show, onClose, warehouse, onSave, onDelete }
 
     // 저장 처리 함수 : 저장 확인 모달 표시
     const handleSave = () => {
-        setShowSaveConfirmModal(true); //저장 확인 모달 표시
-    };
+        if (dispatchStatus !== 'pending') {
+          window.showToast("출고 대기 상태에서만 저장 가능합니다.", 'error');
+          return;
+        }
+        setShowSaveConfirmModal(true);
+      };
+    
 
         // 저장 확인 모달에서 확인을 누르면 실제 저장 동작 수행
         const handleConfirmSave = () => {
@@ -238,7 +323,8 @@ function WarehouseAssignmentModal({ show, onClose, warehouse, onSave, onDelete }
 
     return (
         <div className="modal_overlay">
-            <div className="header">
+            <div className="modal_container dispatch">
+                <div className="header">
                     <div>{isEditMode ? '창고 정보 수정' : '창고 배정'}</div>
                     <button className="btn_close" onClick={onClose}><i className="bi bi-x-lg"></i></button> {/* 모달 닫기 버튼 */}
             </div>
@@ -248,7 +334,7 @@ function WarehouseAssignmentModal({ show, onClose, warehouse, onSave, onDelete }
                         <select 
                             name="warehouseName" 
                             value={editableWarehouse.warehouseName || ''} 
-                            onChange={handleChange}
+                            onChange={handleWarehouseNameChange}
                             disabled={!isEditMode}
                             className={errors.warehouseName ? 'invalid' : ''}>
                             {errors.warehouseName && (
@@ -274,32 +360,19 @@ function WarehouseAssignmentModal({ show, onClose, warehouse, onSave, onDelete }
                                 <p className="field_error_msg">
                                 <i className="bi bi-exclamation-circle-fill"></i>
                             {errors.warehouseName}</p>)}
-                                <option value="">선택</option>
-                                <option value="kim">김호진</option>
-                                <option value="sim">심유정</option>
-                                <option value="park">박서희</option>
-                                <option value="son">손민석</option>
+                            {/* warehouseManagers 상태를 기반으로 옵션 렌더링 */}
+                            {warehouseManagers.map(manager => (
+                                <option key={manager.id} value={manager.name}>{manager.name}</option>
+                            ))}   
                         </select>
                     </div>
                     <div className="form-group">
                         <label>창고 전화번호</label>
-                        <input
-                            type="text"
-                            name="warehouseTel"
-                            value="warehouseTel"
-                            onChange={handleChange}
-                            readOnly={!isEditMode}
-                        />
+                        <p>{warehouseInfo.warehouseTel || '-'}</p>
                     </div>
                     <div className="form-group">
                         <label>창고 주소</label>
-                        <input
-                            type="text"
-                            name="warehouseAddr"
-                            value="warehouseAddr"
-                            onChange={handleChange}
-                            readOnly={!isEditMode}
-                        />
+                        <p>{warehouseInfo.warehouseAddr || '-'}</p>
                     </div>
                 </div>
                 <div className="modal-actions">
@@ -334,6 +407,7 @@ function WarehouseAssignmentModal({ show, onClose, warehouse, onSave, onDelete }
                         onCancel={() => setShowSaveConfirmModal(false)}
                     />
                 )}
+            </div>
         </div>
     );
 };
@@ -385,7 +459,29 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
     const [sortColumn, setSortColumn] = useState('orderDDeliveryRequestDate'); // 기본적으로 정렬 열 orderDDeliveryRequestDate 설정
     const [sortOrder, setSortOrder] = useState('asc'); // 기본 정렬은 오름차순
 
- 
+    //순서보장 : 창고배정->출고지시
+    const [isWarehouseAssigned, setIsWarehouseAssigned] = useState(false);
+
+    //창고배정->출고증 창고명 통일
+    //*부모 컴포넌트(OrderDispatch)에서 창고배정 모달에서 저장된 창고명을 상태로 관리하고, 이를 출고지시 모달에 prop으로 전달
+    //*창고배정 모달에서 저장된 데이터를 부모 컴포넌트로 전달하고, 출고지시 모달에서 해당 데이터를 표시
+    const [assignedWarehouse, setAssignedWarehouse] = useState(null);
+
+    // 창고배정 모달에서 저장된 데이터 받기
+    const handleWarehouseAssignmentSave = (warehouseData) => {
+        setAssignedWarehouse(warehouseData.warehouseName);
+        setIsWarehouseAssigned(true); //순서보장 : 창고배정->출고지시
+    };
+
+    // 출고지시 버튼 클릭 시
+    const handleDispatchInstruction = () => {
+        if (!isWarehouseAssigned) {
+        window.showToast("창고배정이 필요합니다.", 'error');
+        return;
+        }
+        setDispatchInstructionModal(true);
+    };
+
     // 출고 데이터 가져오기 - 초기화면은 pending만
     useEffect(() => {
         fetchData();
@@ -449,6 +545,21 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
         })
     };
 
+    //출고 상태 변경(pending->in progress)
+    const handleDispatchInstructionSave = (formData) => {
+        axios.post('/api/orderdispatch/dispatch', {
+        dispatchNo: selectedDispatchNo,
+        ...formData
+        })
+        .then(response => {
+        window.showToast("출고 지시가 완료되었습니다.");
+        fetchData();
+        })
+        .catch(error => {
+        console.error('출고 지시 중 에러 발생:', error);
+        });
+    };
+
     //전체 체크박스
     const handleSelectAll = () => {
         const newSelectAll = !selectAll;
@@ -456,11 +567,11 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
         setSelectedEmployees(new Array(Dispatches.length).fill(newSelectAll));
     };
 
-      //개별 체크박스
-      const handleSelect = (index) => {
-        const updatedSelection = [...selectedDispatches];
-        updatedSelection[index] = !updatedSelection[index];
-        setSelectedDispatches(updatedSelection);
+    //개별 체크박스
+    const handleSelect = (index) => {
+    const updatedSelection = [...selectedDispatches];
+    updatedSelection[index] = !updatedSelection[index];
+    setSelectedDispatches(updatedSelection);
 
         if (updatedSelection.includes(false)) {
             setSelectAll(false);
@@ -468,6 +579,11 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
             setSelectAll(true);
         }
     };
+
+    // 선택된 출고 번호 가져오기
+    const selectedDispatchNo = dispatches
+    .filter((_, index) => selectedDispatches[index])
+    .map(dispatch => dispatch.dispatchNo);
 
     
     //페이지바뀔때 상태 바뀜
@@ -512,6 +628,12 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                 console.log('삭제한 출고정보 No : ', selectedNo);  // 선택된 출고정보 번호 로그 출력
             }
         });
+
+        // 출고지시 모달에 prop으로 전달
+        <DispatchInstructionModal
+        assignedWarehouse={assignedWarehouse} //창고배정 창고명=출고지시창고명
+        onSave={handleDispatchInstructionSave} //출고지시 상태변경(pending->in progress)
+    />
     };
 
 
@@ -576,7 +698,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                 </div>
                             </div>
                             <div className="right">
-                                <button className="box color" >
+                                <button className="box color"  onClick={handleDispatchInstruction}>
                                   <i className="bi bi-plus-circle"></i> 출고지시
                                 </button>
                             </div>
@@ -659,7 +781,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                     
                                     <td>
                                         <div className="btn_group">
-                                        <button className="box small" >창고배정</button>
+                                            <button className="box small">배정</button>
                                         </div>
                                     </td>
 
@@ -673,8 +795,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
             </main>
         </Layout>
     );
-}
-
+};
 
 //최종 렌더링
 const root = ReactDOM.createRoot(document.getElementById('root'));

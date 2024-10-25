@@ -32,7 +32,7 @@ public class ChatRepositoryImpl implements ChatRepositoryCustom {
         return queryFactory
                 .select(Projections.constructor(ChatDTO.class,
                         chat.chatNo,
-                        chatParticipant.chatTitle,
+                        chatParticipant.chat.chatTitle,
                         chatParticipant.chatParticipantId.participantId,
                         chatParticipant.employee.employeeName,
                         chatMessage.chatMessageContent,
@@ -47,7 +47,7 @@ public class ChatRepositoryImpl implements ChatRepositoryCustom {
                         .and(searchKeywordIsNullOrEmpty(searchKeyword)))
                 .groupBy(
                         chat.chatNo,
-                        chatParticipant.chatTitle,
+                        chatParticipant.chat.chatTitle,
                         chatParticipant.chatParticipantId.participantId,
                         chatParticipant.employee.employeeName,
                         chatMessage.chatMessageContent,
@@ -64,7 +64,7 @@ public class ChatRepositoryImpl implements ChatRepositoryCustom {
         }
         QChatParticipant chatParticipant = QChatParticipant.chatParticipant;
 
-        return chatParticipant.chatTitle.containsIgnoreCase(keyword)
+        return chatParticipant.chat.chatTitle.containsIgnoreCase(keyword)
                 .or(chatParticipant.employee.employeeName.containsIgnoreCase(keyword));
     }
 
