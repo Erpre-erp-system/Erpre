@@ -14,16 +14,41 @@ import java.time.LocalDateTime;
 public class ChatDTO {
 
     private Long chatNo;
-
     private String chatTitle;
     private String participantId;
     private String employeeName;
     private String chatMessageContent;
     private LocalDateTime chatSendDate;
     private String chatFilename;
+    private String chatFileUrl;
+    private Long participantCount;  // 참여자 수
 
-    // 1. 현재 참여하고 있는 채팅 목록 조회 및 검색 생성자 (기본 생성자)
+    // 1. 현재 참여하고 있는 채팅 목록 조회 및 검색 생성자
+    public ChatDTO(Long chatNo, String chatTitle, String participantId, String employeeName,
+                   String chatMessageContent, LocalDateTime chatSendDate,
+                   String chatFilename, Long participantCount) {
+        this.chatNo = chatNo;
+        this.chatTitle = chatTitle;
+        this.participantId = participantId;
+        this.employeeName = employeeName;
+        this.chatMessageContent = chatMessageContent;
+        this.chatSendDate = chatSendDate;
+        this.chatFilename = chatFilename;
+        this.participantCount = participantCount;
+    }
 
+    // 2. 선택된 채팅방 조회 생성자
+    public ChatDTO(Long chatNo, String chatTitle, String employeeName,
+                   String chatMessageContent, LocalDateTime chatSendDate,
+                   String chatFilename, String chatFileUrl) {
+        this.chatNo = chatNo;
+        this.chatTitle = chatTitle;
+        this.employeeName = employeeName;
+        this.chatMessageContent = chatMessageContent;
+        this.chatSendDate = chatSendDate;
+        this.chatFilename = chatFilename;
+        this.chatFileUrl = chatFileUrl;
+    }
 
 
 }

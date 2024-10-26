@@ -1,6 +1,7 @@
 package com.project.erpre.controller;
 
 import com.project.erpre.model.dto.ChatDTO;
+import com.project.erpre.model.dto.ChatMessageDTO;
 import com.project.erpre.model.dto.EmployeeDTO;
 import com.project.erpre.service.EmployeeService;
 import com.project.erpre.service.MessengerService;
@@ -11,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,35 +33,22 @@ public class MessengerController {
         this.employeeService = employeeService;
     }
 
-    // 1. 메신저 직원 조회 (조직도)
+    // 1. 메신저 직원 조회 API (조직도)
     @GetMapping("/employeeList")
     public List<EmployeeDTO> getEmployeesWithDept() {
         return employeeService.getEmployeesWithDept();
     }
 
-    // 2. 현재 참여하고 있는 채팅 목록 조회 및 검색
+    // 2. 현재 참여하고 있는 채팅 목록 조회 및 검색 API
     @GetMapping("/chatList")
     public List<ChatDTO> getChatListByUser(String searchKeyword) {
+        return messengerService.getChatListByUser(searchKeyword);
+    }
 
-        // SecurityContext에서 현재 인증된 사용자 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("인증된 사용자를 찾을 수 없습니다. 로그인이 필요합니다.");
-        }
-
-        // UserDetails로 변환하여 ID 가져오기
-        Object principal = authentication.getPrincipal();
-        String employeeId;
-
-        if (principal instanceof User) {
-            employeeId = ((User) principal).getUsername();
-        } else {
-            employeeId = principal.toString();
-        }
-
-        // 검색 키워드와 함께 채팅 목록 조회
-        return messengerService.getChatListByUser(employeeId, searchKeyword);
+    // 3. 특정 채팅방 상세 조회 API (새 창)
+    @GetMapping("/chat/{chatNo}")
+    public List<ChatMessageDTO> getChatDetails(@PathVariable Long chatNo, String searchKeyword) {
+        return messengerService.getSelectedChat(chatNo, searchKeyword);
     }
 
 

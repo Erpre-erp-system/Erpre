@@ -15,7 +15,12 @@ export const useMessengerHooks = () => {
     /////////////////////////////////////////////////////////////////////////
 
     // ⭐ 활성화된 뷰 관리
-    const [activeView, setActiveView] = useState('home');
+    const [activeView, setActiveView] = useState(() => localStorage.getItem('activeView') || 'home');
+
+    // ⭐ 동적 뷰 변경시 local Storage에 저장
+    useEffect(() => {
+        localStorage.setItem('activeView', activeView);
+    }, [activeView]);
 
     // ⭐ 로딩 관리 state
     const [isLoading, setIsLoading] = useState(true);
@@ -134,6 +139,24 @@ export const useMessengerHooks = () => {
                 });
             }
     }, [activeView]);
+
+    // 🔴 개별 채팅 모달
+    const [selectedChat, setSelectedChat] = useState(() => localStorage.getItem('selectedChat') || null);
+    const [isChatModalOpen, setIsChatModalOpen] = useState(() => localStorage.getItem('isChatModalOpen') === 'true');
+
+    const openChatModal = (chatNo) => {
+        setSelectedChat(chatNo);
+        setIsChatModalOpen(true);
+        localStorage.setItem('selectedChat', chatNo);
+        localStorage.setItem('isChatModalOpen', true);
+    };
+
+    const closeChatModal = () => {
+        setSelectedChat(null);
+        setIsChatModalOpen(false);
+        localStorage.removeItem('selectedChat');
+        localStorage.setItem('isChatModalOpen', false);
+    };
     
     // 🟢 날짜 변환 함수
     const formatDate = (dateString) => {
@@ -177,6 +200,10 @@ export const useMessengerHooks = () => {
 
         // 🔴 채팅
         chatList,
+        selectedChat,
+        isChatModalOpen,
+        openChatModal,
+        closeChatModal,
 
         // 🟢 공통
         formatDate,

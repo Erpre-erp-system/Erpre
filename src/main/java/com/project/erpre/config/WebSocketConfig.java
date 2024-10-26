@@ -17,11 +17,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
         // 클라이언트가 메시지를 전송할 때 "/app"으로 시작하도록 설정
-        config.setApplicationDestinationPrefixes("/app");
+        registry.setApplicationDestinationPrefixes("/app");
         // 구독 경로를 "/topic"으로 설정
         // 구독 - 클라이언트가 특정 주제를 구독하면 서버가 그 주제와 관련된 메시지를 클라이언트에게 푸시해주는 기능
-        config.enableSimpleBroker("/topic");
+        registry.enableSimpleBroker("/topic");
     }
 }

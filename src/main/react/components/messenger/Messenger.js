@@ -62,6 +62,10 @@ function Messenger({isOpen, toggleMessenger}) {
 
         // 🔴 채팅
         chatList,
+        selectedChat,
+        isChatModalOpen,
+        openChatModal,
+        closeChatModal,
 
         // 🟢 공통
         formatDate,
@@ -334,6 +338,10 @@ function Messenger({isOpen, toggleMessenger}) {
                             <ChatList
                                 chatList={chatList}
                                 formatDate={formatDate}
+                                selectedChat={selectedChat}
+                                isChatModalOpen={isChatModalOpen}
+                                openChatModal={openChatModal}
+                                closeChatModal={closeChatModal}
                             />}
                         {activeView === 'message' && <Message/>}
                     </>

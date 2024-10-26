@@ -44,7 +44,7 @@ module.exports = {
         emailViewer: `${email}EmailViewer.js`, //
 
         // messenger 관련 엔트리 포인트
-        messenger: `${messenger}Messenger`, // 메신저 메인
+
     },
     devtool: 'source-map', // 소스 맵 생성 설정
     cache: true, // 캐싱 활성화

@@ -4,6 +4,8 @@ import { BrowserRouter } from "react-router-dom";
 import Layout from "../../layout/Layout";
 import '../../../resources/static/css/common/Main.css';
 import axios from 'axios';
+import {MessengerProvider} from "../../context/MessengerContext";
+
 
 function Main() {
     const [totalCustomers, setTotalCustomers] = useState(0);
@@ -94,6 +96,7 @@ function Main() {
     }, []);
 
     return (
+        <MessengerProvider>
         <Layout currentMenu="main">
             <main className="main-content dashboard-container">
                 <div className="card card-large" onClick={() => window.location.href = '/orderList?mode=Assigned'}>
@@ -165,6 +168,7 @@ function Main() {
                 </div>
             </main>
         </Layout>
+        </MessengerProvider>
     );
 }
 

@@ -1,9 +1,10 @@
 import React, {useContext} from 'react';
 import '../../resources/static/css/common/Header.css';
 import {FaBell, FaCommentDots, FaEnvelope} from 'react-icons/fa'; // React Icons를 사용
-import Messenger from '../components/messenger/Messenger';
+import Messenger from '../components/messenger/Messenger'
 import {MessengerContext} from '../../react/context/MessengerContext';
-import '../../resources/static/css/messenger/Messenger.css'; // 메신저 관련 스타일 파일
+import '../../resources/static/css/messenger/Messenger.css';
+import "../../resources/static/css/messenger/ChatList.css";
 
 
 function Header() {

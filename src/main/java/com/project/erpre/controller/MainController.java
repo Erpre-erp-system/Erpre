@@ -51,6 +51,7 @@ public class MainController {
         return "view";
     }
 
+
     private boolean isAnonymous(Authentication authentication) {
         return authentication.getPrincipal() instanceof String && authentication.getPrincipal().equals("anonymousUser");
     }
