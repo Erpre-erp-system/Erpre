@@ -30,7 +30,7 @@ public class OrderDispatchService {
     private WarehouseRepository warehouseRepository;
 
     //DispatchDTO -> Dispatch 엔티티로 변환하는 메서드
-    private Dispatch convertToEntity(DispatchDTO dispatchDTO) {
+    private Dispatch convertToDispatchEntity(DispatchDTO dispatchDTO) {
         Dispatch dispatch = new Dispatch();
         dispatch.setDispatchNo(dispatchDTO.getDispatchNo());
         dispatch.setDispatchStatus(dispatchDTO.getDispatchStatus());
@@ -52,7 +52,7 @@ public class OrderDispatchService {
     }
 
     // Dispatch 엔티티를 DispatchDTO로 변환하는 메서드
-    private DispatchDTO convertToDTO(Dispatch dispatch) {
+    private DispatchDTO convertToDispatchDTO(Dispatch dispatch) {
         Integer orderHNo = dispatch.getOrder() != null ? dispatch.getOrder().getOrderNo() : null;
         Integer orderDNo = dispatch.getOrderDetail() != null ? dispatch.getOrderDetail().getOrderNo() : null;
         Integer warehouseNo = dispatch.getWarehouse() != null ? dispatch.getWarehouse().getWarehouseNo() : null;
@@ -75,7 +75,7 @@ public class OrderDispatchService {
     public Page<DispatchDTO> getPagePending(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Dispatch> dispatchPage = orderDispatchRepository.findByDispatchStatus("pending", pageable);
-        return dispatchPage.map(this::convertToDTO);
+        return dispatchPage.map(this::convertToDispatchDTO);
     }
 
 
@@ -83,14 +83,14 @@ public class OrderDispatchService {
     public Page<DispatchDTO> getPageInProgress(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Dispatch> dispatchPage = orderDispatchRepository.findByDispatchStatus("in_progress", pageable);
-        return dispatchPage.map(this::convertToDTO);
+        return dispatchPage.map(this::convertToDispatchDTO);
     }
 
     // 페이징해서 complete 목록 보여주기
     public Page<DispatchDTO> getPageComplete(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Dispatch> dispatchPage = orderDispatchRepository.findByDispatchStatus("complete", pageable);
-        return dispatchPage.map(this::convertToDTO);
+        return dispatchPage.map(this::convertToDispatchDTO);
     }
 
     //목록화면에서 체크된 직원 logical 삭제(delete_yn만 바꾸기)

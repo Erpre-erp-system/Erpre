@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/warehouse")
 public class WarehouseController {
@@ -17,17 +19,21 @@ public class WarehouseController {
     @Autowired
     private WarehouseService warehouseService;
 
-    //창고 출고 지시 모달
-    @PostMapping("/warehouseAssignment")
-    public ResponseEntity<String> warehouseAssignment(@RequestBody WarehouseDTO warehouseDTO) {
-        warehouseService.warehouseAssignment(warehouseDTO);
-        return ResponseEntity.ok("출고 지시가 완료되었습니다.");
+    // 창고명으로 창고 정보 가져오기
+    @GetMapping("/info")
+    public ResponseEntity<WarehouseDTO> getWarehouseInfo(@RequestParam String warehouseName) {
+        WarehouseDTO warehouseDTO = warehouseService.getWarehouseInfoByName(warehouseName);
+        if (warehouseDTO != null) {
+            return ResponseEntity.ok(warehouseDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    //창고명과 창고담당자명 수정(프론트에서 순서 보장 로직 구현 필요)
-    @PostMapping("/updateWarehouse/{warehouseNo}")
-    public ResponseEntity<String> updateWarehouse(@PathVariable Integer warehouseNo, @RequestBody WarehouseDTO warehouseDTO) {
-        warehouseService.updateWarehouse(warehouseNo, warehouseDTO);
-        return ResponseEntity.ok("창고 정보가 수정되었습니다.");
+    // 창고명으로 창고 담당자 목록 가져오기
+    @GetMapping("/managers")
+    public ResponseEntity<List<String>> getWarehouseManagers(@RequestParam String warehouseName) {
+        List<String> managers = warehouseService.getWarehouseManagersByName(warehouseName);
+        return ResponseEntity.ok(managers);
     }
 }
