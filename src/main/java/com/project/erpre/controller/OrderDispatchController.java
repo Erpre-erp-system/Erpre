@@ -11,9 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/orderdispatch")
+@RequestMapping("/api/orderDispatch")
 public class OrderDispatchController {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderDispatchController.class); // Logger 선언
@@ -54,6 +55,16 @@ public class OrderDispatchController {
         orderDispatchService.deleteDispatches(no);
         return ResponseEntity.ok("Dispatches deleted successfully");
     }
+
+    //출고 지시
+    @PostMapping("/release")
+    public ResponseEntity<?> releaseDispatches(@RequestBody Map<String, Object> requestData) {
+        orderDispatchService.releaseDispatches(requestData);
+        return ResponseEntity.ok("출고 지시가 완료되었습니다.");
+    }
+
+
+
 
 
 

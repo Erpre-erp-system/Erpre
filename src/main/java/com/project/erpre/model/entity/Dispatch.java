@@ -29,16 +29,16 @@ public class Dispatch {
     @Column(name = "dispatch_end_date")
     private Timestamp dispatchEndDate; // 출고 완료일시
 
-    @Column(name = "dispatch_qr_code", length = 500)
-    private String dispatchQrCode; // 출고 QR 코드
+//    @Column(name = "dispatch_qr_code", length = 500)
+//    private String dispatchQrCode; // 출고 QR 코드
 
     @Column(name = "dispatch_delete_yn", length = 1, nullable = true, columnDefinition = "CHAR(1) DEFAULT 'n'")
     private String dispatchDeleteYn; // 출고 삭제 여부
 
-    // 주문
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_h_no")
-    private Order order;
+    // 주문 - OrderDetail 엔티티를 통해 Order 엔티티로 접근
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "order_h_no")
+//    private Order order;
 
     // 주문 상세
     @ManyToOne(fetch = FetchType.LAZY)
@@ -54,5 +54,6 @@ public class Dispatch {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "qr_code_id", referencedColumnName = "qr_code_id", nullable = false)
     private QrCode qrCode;
+
 
 }

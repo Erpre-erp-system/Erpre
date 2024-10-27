@@ -4,6 +4,8 @@ import com.project.erpre.model.entity.Dispatch;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -20,8 +22,51 @@ public interface OrderDispatchRepository extends JpaRepository<Dispatch, Integer
     ---------------------------------------
     */
 
+    // 주문 상태가 '결제완료'인 Dispatch를 페이징하여 조회
+    // JOIN FETCH - 연관된 엔티티를 한 번에 가져옴
+    // countQuery - JPA에서 JOIN FETCH를 사용한 쿼리와 페이징을 함께 사용할 때 발생하는 count 쿼리 생성
+    @Query(value = "SELECT d FROM Dispatch d " +
+            "JOIN FETCH d.orderDetail od " +
+            "JOIN FETCH od.order o " +
+            "JOIN FETCH o.customer c " +
+            "JOIN FETCH od.product p " +
+            "LEFT JOIN FETCH d.warehouse w " +
+            "WHERE o.orderHStatus = :orderHStatus " +
+            "AND d.dispatchDeleteYn = 'N'",
+            countQuery = "SELECT COUNT(d) FROM Dispatch d " +
+                    "JOIN d.orderDetail od " +
+                    "JOIN od.order o " +
+                    "WHERE o.orderHStatus = :orderHStatus " +
+                    "AND d.dispatchDeleteYn = 'N'")
+    Page<Dispatch> findByOrderDetail_Order_OrderHStatus(@Param("orderHStatus") String orderHStatus, Pageable pageable);
+
     // 상태에 따라 Dispatch를 페이징하여 조회
-    Page<Dispatch> findByDispatchStatus(String dispatchStatus, Pageable pageable);
+    @Query(value = "SELECT d FROM Dispatch d " +
+            "JOIN FETCH d.orderDetail od " +
+            "JOIN FETCH od.order o " +
+            "JOIN FETCH o.customer c " +
+            "JOIN FETCH od.product p " +
+            "LEFT JOIN FETCH d.warehouse w " +
+            "WHERE d.dispatchStatus = :dispatchStatus " +
+            "AND d.dispatchDeleteYn = 'N'",
+            countQuery = "SELECT COUNT(d) FROM Dispatch d " +
+                    "WHERE d.dispatchStatus = :dispatchStatus " +
+                    "AND d.dispatchDeleteYn = 'N'")
+    Page<Dispatch> findByDispatchStatus(@Param("dispatchStatus") String dispatchStatus, Pageable pageable);
+
+    // 출고 완료 상태 조회 메서드
+    @Query(value = "SELECT d FROM Dispatch d " +
+            "JOIN FETCH d.orderDetail od " +
+            "JOIN FETCH od.order o " +
+            "JOIN FETCH o.customer c " +
+            "JOIN FETCH od.product p " +
+            "LEFT JOIN FETCH d.warehouse w " +
+            "WHERE d.dispatchStatus = 'complete' " +
+            "AND d.dispatchDeleteYn = 'N'",
+            countQuery = "SELECT COUNT(d) FROM Dispatch d " +
+                    "WHERE d.dispatchStatus = 'complete' " +
+                    "AND d.dispatchDeleteYn = 'N'")
+    Page<Dispatch> findByDispatchStatusComplete(Pageable pageable);
 
 
 }

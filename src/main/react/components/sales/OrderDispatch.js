@@ -18,8 +18,18 @@ const formatDateTime = (dateString) => {
     return `${year}-${month}-${day} ${hours}:${minutes}`;
 };
 
+// 출고 상태 매핑 함수
+const mapDispatchStatus = (orderStatus) => {
+  switch (orderStatus) {
+    case '결제완료':
+      return '출고대기';
+    default:
+      return orderStatus;
+  }
+};
+
 //출고지시 모달창
-const DispatchInstructionModal = ({ show, onClose, onSave, assignedWarehouse, dispatchData }) => {
+function DispatchInstructionModal ({ show, onClose, onSave, assignedWarehouse, dispatchData }) {
     const [form, setForm] = useState({
       //고객사
       customerName: '', // 고객사 이름 - customer
@@ -41,22 +51,22 @@ const DispatchInstructionModal = ({ show, onClose, onSave, assignedWarehouse, di
     //모달 알림창 2번 뜨는거 방지
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-    useEffect(() => {
+      useEffect(() => {
         if (show && dispatchData) {
-            setForm({
-                customerName: dispatchData.customerName,
-                customerAddr: dispatchData.customerAddr,
-                warehouseName: assignedWarehouse || '',
-                warehouseManagerName: dispatchData.warehouseManagerName || '',
-                orderDDeliveryRequestDate: formatDateTime(dispatchData.orderDDeliveryRequestDate),
-                productNm: dispatchData.productNm,
-                orderDPrice: dispatchData.orderDPrice,
-                orderDQty: dispatchData.orderDQty,
-                orderDTotalPrice: dispatchData.orderDTotalPrice,
-                qrCodeData: dispatchData.qrCodeData,
-            });
+          setForm({
+            customerName: dispatchData.customerName,
+            customerAddr: dispatchData.customerAddr,
+            warehouseName: assignedWarehouse || '',
+            warehouseManagerName: dispatchData.warehouseManagerName || '',
+            orderDDeliveryRequestDate: formatDateTime(dispatchData.orderDDeliveryRequestDate),
+            productNm: dispatchData.productNm,
+            orderDPrice: dispatchData.orderDPrice,
+            orderDQty: dispatchData.orderDQty,
+            orderDTotalPrice: dispatchData.orderDTotalPrice,
+            qrCodeData: dispatchData.qrCodeData,
+          });
         }
-    }, [show, dispatchData, assignedWarehouse]);
+      }, [show, dispatchData, assignedWarehouse]);
 
     //창고배정에서 선택한 창고명으로 저장
     useEffect(() => {
@@ -82,13 +92,13 @@ const DispatchInstructionModal = ({ show, onClose, onSave, assignedWarehouse, di
     };
 
     if (!show) return null; // 모달 표시 여부 체크
-  
+
     return (
         <div className="modal_overlay">
             <div className="modal_container dispatch">
-        
+
                 <button className="btn_close" onClick={onClose}><i className="bi bi-x-lg"></i></button> {/* 모달 닫기 버튼 */}
-                
+
                 <div className="form-group">
                     <label>고객사 이름</label>
                 <input
@@ -227,17 +237,17 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
         warehouseManagerName: '',
     });
 
-    // 모달이 열릴 때마다 편집 모드 초기화 및 창고 데이터 설정
-    useEffect(() => {
+      // 모달이 열릴 때마다 초기화
+      useEffect(() => {
         if (show) {
-            setIsEditMode(false); // 편집 모드 초기화
-            setEditableWarehouse(warehouse || {}); // 기존 창고 데이터 설정
-            setErrors({
-                warehouseName: '',
-                warehouseManagerName: '',
-            }); // 에러 메시지 초기화
+          setIsEditMode(true); // 창고 배정이므로 편집 모드로 시작
+          setEditableWarehouse({});
+          setErrors({
+            warehouseName: '',
+            warehouseManagerName: '',
+          });
         }
-    }, [show, warehouse]);
+      }, [show]);
 
     // 편집 모드 토글 함수
     const toggleEditMode = () => {
@@ -254,29 +264,29 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
         setShowEditConfirmModal(false); // 수정 확인 모달 닫기
     };
 
-    // 창고명 변경 핸들러
+  // 창고명 변경 핸들러
     const handleWarehouseNameChange = async (e) => {
-        const selectedWarehouseName = e.target.value;
-        setEditableWarehouse({ ...editableWarehouse, warehouseName: selectedWarehouseName });
+    const selectedWarehouseName = e.target.value;
+    setEditableWarehouse({ ...editableWarehouse, warehouseName: selectedWarehouseName });
 
-        // 선택된 창고 정보 가져오기
-        try {
-            const response = await axios.get(`/api/warehouse/info?warehouseName=${selectedWarehouseName}`);
-            setWarehouseInfo(response.data);
+    // 선택된 창고 정보 가져오기
+    try {
+      const response = await axios.get(`/api/warehouse/info?warehouseName=${selectedWarehouseName}`);
+      setWarehouseInfo(response.data);
 
-            // 창고 담당자 목록 가져오기
-            const managersResponse = await axios.get(`/api/warehouse/managers?warehouseName=${selectedWarehouseName}`);
-            setWarehouseManagers(managersResponse.data);
-        } catch (error) {
-            console.error('Error fetching warehouse data:', error);
-        }
-    };
+      // 창고 담당자 목록 가져오기
+      const managersResponse = await axios.get(`/api/warehouse/managers?warehouseName=${selectedWarehouseName}`);
+      setWarehouseManagers(managersResponse.data);
+    } catch (error) {
+      console.error('Error fetching warehouse data:', error);
+    }
+  };
 
     // 입력 값 변경 시 상태 업데이트 함수
     const handleChange = (e) => {
         const { name, value } = e.target;
         setEditableWarehouse((prev) => ({ ...prev, [name]: value }));
-    };
+      };
 
     // 저장 처리 함수 : 저장 확인 모달 표시
     const handleSave = () => {
@@ -288,39 +298,39 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
       };
     
 
-        // 저장 확인 모달에서 확인을 누르면 실제 저장 동작 수행
-        const handleConfirmSave = () => {
+    // 저장 확인 모달에서 확인을 누르면 실제 저장 동작 수행
+    const handleConfirmSave = () => {
 
-        // 필수 필드 값 검증
-        let valid = true;
-        let newErrors = {
-            warehouseName: '',
-            warehouseManagerName: '',
-        };
-
-        if (!editableWarehouse.warehouseName.trim()) {
-            newErrors.warehouseName = '창고명은 필수 선택 항목입니다.';
-            valid = false;
-        }
-        if (!editableWarehouse.warehouseManagerName.trim()) {
-            newErrors.warehouseManagerName = '창고 담당자는 필수 선택 항목입니다.';
-            valid = false;
-        }
-
-        // 에러 상태 업데이트
-        setErrors(newErrors);
-
-        // 필수 필드 검증 실패 시 저장 중단
-        if (!valid) {
-            setShowSaveConfirmModal(false); // 저장 확인 모달 닫기
-            return;
-        }
-
-        // 저장 동작 수행
-        onSave(editableWarehouse); // 상위 컴포넌트로 저장된 데이터 전달
-        onClose(); // 상세 모달 닫기
-        setShowSaveConfirmModal(false); // 저장 확인 모달 닫기
+    // 필수 필드 값 검증
+    let valid = true;
+    let newErrors = {
+        warehouseName: '',
+        warehouseManagerName: '',
     };
+
+    if (!editableWarehouse.warehouseName.trim()) {
+        newErrors.warehouseName = '창고명은 필수 선택 항목입니다.';
+        valid = false;
+    }
+    if (!editableWarehouse.warehouseManagerName.trim()) {
+        newErrors.warehouseManagerName = '창고 담당자는 필수 선택 항목입니다.';
+        valid = false;
+    }
+
+    // 에러 상태 업데이트
+    setErrors(newErrors);
+
+    // 필수 필드 검증 실패 시 저장 중단
+    if (!valid) {
+        setShowSaveConfirmModal(false); // 저장 확인 모달 닫기
+        return;
+    }
+
+    // 저장 동작 수행
+    onSave(editableWarehouse); // 상위 컴포넌트로 저장된 데이터 전달
+    onClose(); // 상세 모달 닫기
+    setShowSaveConfirmModal(false); // 저장 확인 모달 닫기
+};
 
     if (!show ) return null; // 모달 표시 여부 체크
 
@@ -328,48 +338,50 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
         <div className="modal_overlay">
             <div className="modal_container dispatch">
                 <div className="header">
-                    <div>{isEditMode ? '창고 정보 수정' : '창고 배정'}</div>
+                    <div>창고 배정</div>
                     <button className="btn_close" onClick={onClose}><i className="bi bi-x-lg"></i></button> {/* 모달 닫기 버튼 */}
             </div>
             <div className="detail-form">
                     <div className="form-group">
                         <label>창고명{isEditMode && (<span className='span_red'>*</span>)}</label>
-                        <select 
-                            name="warehouseName" 
-                            value={editableWarehouse.warehouseName || ''} 
-                            onChange={handleWarehouseNameChange}
-                            disabled={!isEditMode}
-                            className={errors.warehouseName ? 'invalid' : ''}>
-                            {errors.warehouseName && (
-                                <p className="field_error_msg">
-                                <i className="bi bi-exclamation-circle-fill"></i>
-                            {errors.warehouseName}</p>)}
-                                <option value="">선택</option>
-                                <option value="01">01. 본사창고</option>
-                                <option value="02">02. 천안창고</option>
-                                <option value="03">03. 인천창고</option>
-                                <option value="04">04. 대전창고</option>
+                         <select
+                              name="warehouseName"
+                              value={editableWarehouse.warehouseName || ''}
+                              onChange={handleWarehouseNameChange}
+                              className={errors.warehouseName ? 'invalid' : ''}
+                            >
+                              <option value="">선택</option>
+                              <option value="01">01. 본사창고</option>
+                              <option value="02">02. 천안창고</option>
+                              <option value="03">03. 인천창고</option>
+                              <option value="04">04. 대전창고</option>
                         </select>
+                       {errors.warehouseName && (
+                          <p className="field_error_msg">
+                            <i className="bi bi-exclamation-circle-fill"></i>
+                            {errors.warehouseName}
+                          </p>
+                        )}
                     </div>
                     <div className="form-group">
                         <label>창고 담당자명{isEditMode && (<span className='span_red'>*</span>)}</label>
-                        <select 
-                            name="warehouseManagerName" 
-                            value={editableWarehouse.warehouseManagerName || ''} 
-                            onChange={handleChange}
-                            disabled={!isEditMode}
-                            className={errors.warehouseManagerName ? 'invalid' : ''}>
-                            {errors.warehouseManagerName && (
-                              <p className="field_error_msg">
-                                <i className="bi bi-exclamation-circle-fill"></i>
-                                {errors.warehouseManagerName}
-                              </p>
-                            )}
-                            {/* warehouseManagers 상태를 기반으로 옵션 렌더링 */}
-                            {warehouseManagers.map((managerName, index) => (
-                              <option key={index} value={managerName}>{managerName}</option>
-                            ))}
+                         <select
+                              name="warehouseManagerName"
+                              value={editableWarehouse.warehouseManagerName || ''}
+                              onChange={handleChange}
+                              className={errors.warehouseManagerName ? 'invalid' : ''}
+                            >
+                              <option value="">선택</option>
+                              {warehouseManagers.map((managerName, index) => (
+                                <option key={index} value={managerName}>{managerName}</option>
+                              ))}
                         </select>
+                        {errors.warehouseManagerName && (
+                          <p className="field_error_msg">
+                            <i className="bi bi-exclamation-circle-fill"></i>
+                            {errors.warehouseManagerName}
+                          </p>
+                        )}
                     </div>
                     <div className="form-group">
                         <label>창고 전화번호</label>
@@ -381,29 +393,8 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
                     </div>
                 </div>
                 <div className="modal-actions">
-                    {isEditMode ? (
-                        <button className="box blue" type="button" onClick={handleSave}>저장</button>
-                    ) : (
-                        <>
-                            {/* 삭제된 상태에 따라 조건부 렌더링 */}
-                            {editableWarehouse.warehouseDeleteYn !== 'Y' ? (
-                                <>
-                                    <button className="box blue" type="button" onClick={toggleEditMode}>수정</button>
-                                    <button className="box red" type="button" onClick={onDelete}>삭제</button>
-                                </>
-                            ) : (<></>)}
-                        </>
-                    )}
+                  <button className="box blue" type="button" onClick={() => setShowSaveConfirmModal(true)}>저장</button>
                 </div>
-                {/* 수정 확인 모달 */}
-                {showEditConfirmModal && (
-                    <ConfirmationModal
-                        message="수정하시겠습니까?"
-                        onConfirm={handleConfirmEdit}
-                        onCancel={() => setShowEditConfirmModal(false)}
-                    />
-                )}
-
                 {/* 저장 확인 모달 */}
                 {showSaveConfirmModal && (
                     <ConfirmationModal
@@ -453,6 +444,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
     // 페이지
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 번호
 
     // 검색어 필터
     const [filter, setFilter] = useState('');
@@ -488,11 +480,11 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
         setLoading(true);
         let url = '';
         if (filterType === 'pending') {
-            url = `/api/orderDispatch/pending?page=${page}&size=20`;
+          url = `/api/orderDispatch/pending?page=${page}&size=10`;
         } else if (filterType === 'inProgress') {
-            url = `/api/orderDispatch/inProgress?page=${page}&size=20`;
+          url = `/api/orderDispatch/inProgress?page=${page}&size=10`;
         } else if (filterType === 'complete') {
-            url = `/api/orderDispatch/complete?page=${page}&size=20`;
+          url = `/api/orderDispatch/complete?page=${page}&size=10`;
         }
         axios.get(url)
             .then(response => {
@@ -558,34 +550,42 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
 
     // 창고배정 버튼 클릭 핸들러
     const handleWarehouseAssignmentClick = () => {
+        const selectedIndices = dispatches
+          .map((_, index) => selectedDispatches[index] ? index : -1)
+          .filter(index => index !== -1);
+
+        if (selectedIndices.length === 0) {
+          window.showToast("창고 배정할 항목을 선택해주세요.", 'error');
+          return;
+        }
+
         setWarehouseAssignmentModal(true);
     };
 
     // 창고배정 모달에서 저장된 데이터 받기
     const handleWarehouseAssignmentSave = (warehouseData) => {
-        setAssignedWarehouse(warehouseData.warehouseName);
-        setIsWarehouseAssigned(true);
-        setWarehouseAssignmentModal(false);
+    setAssignedWarehouse(warehouseData.warehouseName);
+    setWarehouseAssignmentModal(false);
     };
 
     // 출고지시 모달에서 저장된 데이터 받기
     const handleDispatchInstructionSave = (formData) => {
-        const selectedDispatchNo = dispatches
-            .filter((_, index) => selectedDispatches[index])
-            .map(dispatch => dispatch.dispatchNo);
+    const selectedDispatchNos = dispatches
+        .filter((_, index) => selectedDispatches[index])
+        .map(dispatch => dispatch.dispatchNo);
 
-        axios.post('/api/orderdispatch/dispatch', {
-            dispatchNo: selectedDispatchNo,
-            ...formData
+    axios.post('/api/orderDispatch/release', {
+        dispatchNos: selectedDispatchNos,
+        ...formData
+    })
+        .then(response => {
+        window.showToast("출고 지시가 완료되었습니다.");
+        setDispatchInstructionModal(false);
+        fetchData();
         })
-            .then(response => {
-                window.showToast("출고 지시가 완료되었습니다.");
-                setDispatchInstructionModal(false);
-                fetchData();
-            })
-            .catch(error => {
-                console.error('출고 지시 중 에러 발생:', error);
-            });
+        .catch(error => {
+        console.error('출고 지시 중 에러 발생:', error);
+        });
     };
 
     // Pagination
@@ -611,7 +611,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
         window.confirmDispatch('선택한 출고 사항을 삭제하시겠습니까?').then(result => {
             if (result) {
                 // 서버로 삭제 요청 보내기
-                axios.post('/api/delete', selectedNo)
+                    axios.post('/api/orderDispatch/delete', { dispatchNos: selectedDispatchNos })
                     .then(response => {
                         window.showToast("삭제가 완료 되었습니다.");
                         fetchData();  // 삭제 후 데이터 갱신
@@ -624,209 +624,270 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                 console.log('삭제한 출고정보 No : ', selectedNo);  // 선택된 출고정보 번호 로그 출력
             }
         });
+
+
     };
 
-
     return (
-      <Layout currentMenu="orderDispatch">
-          <main className="main-content menu_orderDispatch">
-               {/* 제목 영역 */}
-               <div className="menu_title">
-                  <div className="sub_title">영업 관리</div>
-                  <div className="main_title">주문 출고</div>
-               </div>
-              <div className="menu_content">
-                  <div className="left">
-                      {/* 검색어 입력 */}
-                          <div className={`search_box ${filter ? 'has_text' : ''}`}>
-                              <label className={`label_floating ${filter ? 'active' : ''}`}>고객사, 상품명, 출고창고명 입력</label>
-                              <i className="bi bi-search"></i>
-                              <input
-                                  type="text"
-                                  className="box search"
-                                  value={filter}
-                                  onChange={handleFilterChange}
-                              />
-                              {/* 검색어 삭제 버튼 */}
-                              {filter && (
-                                  <button
-                                      className="btn-del"
-                                      onClick={() => setFilter('')}
-                                  >
-                                      <i className="bi bi-x"></i>
-                                  </button>
-                              )}
-                          </div>
-                          <div className="radio_box">
-                                  <span>상태</span>
-                                  <input
-                                      type="radio"
-                                      id="pending"
-                                      name="filterType"
-                                      value="pending"
-                                      checked={filterType === 'pending'}
-                                      onChange={handleFilterTypeChange}
-                                  />
-                                  <label htmlFor="pending">출고대기</label>
-                                  <input
-                                      type="radio"
-                                      id="inProgress"
-                                      name="filterType"
-                                      value="inProgress"
-                                      checked={filterType === 'inProgress'}
-                                      onChange={handleFilterTypeChange}
-                                  />
-                                  <label htmlFor="inProgress">출고요청</label>
-                                  <input
-                                      type="radio"
-                                      id="complete"
-                                      name="filterType"
-                                      value="complete"
-                                      checked={filterType === 'complete'}
-                                      onChange={handleFilterTypeChange}
-                                  />
-                                  <label htmlFor="complete">출고완료</label>
-                              </div>
-                          </div>
-                          <div className="right">
-                              <button className="box color"  onClick={handleDispatchInstructionClick}>
-                                <i className="bi bi-plus-circle"></i> 출고지시
-                              </button>
-                              <button className="box color" onClick={handleWarehouseAssignmentClick}>
-                                  창고배정
-                              </button>
-                          </div>
-                          <div className="table_wrap">
-                              <table>
-                                  <thead>
-                                      <tr>
-                                          <th>
-                                              <label className="chkbox_label">
-                                                  <input
-                                                      type="checkbox"
-                                                      className="chkbox"
-                                                      checked={selectAll}
-                                                      onChange={handleSelectAll}
-                                                  />
-                                                  <i className="chkbox_icon">
-                                                      <i className="bi bi-check-lg"></i>
-                                                  </i>
-                                              </label>
-                                          </th>
-                                          <th>출고번호</th>
-                                          <th>
-                                              <div className={`order_wrap ${sortColumn === 'customerName' ? 'pending' : ''}`}>
-                                                  <span>고객사</span>
-                                                  <button className="btn_order" onClick={() => sortCustomer('customerName')}>
-                                                      <i className={`bi ${sortColumn === 'customerName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
-                                                  </button>
-                                              </div>
-                                          </th>
-                                          <th>
-                                              <div className={`order_wrap ${sortColumn === 'productName' ? 'pending' : ''}`}>
-                                                  <span>상품명</span>
-                                                  <button className="btn_order" onClick={() => sortProduct('productName')}>
-                                                      <i className={`bi ${sortColumn === 'productName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
-                                                  </button>
-                                              </div>
-                                          </th>
-                                          <th>
-                                              <div className={`order_wrap ${sortColumn === 'deliveryRequestDate' ? 'pending' : ''}`}>
-                                                  <span>납품 요청일</span>
-                                                  <button className="btn_order" onClick={() => sortDeliveryRequestDate('deliveryRequestDate')}>
-                                                      <i className={`bi ${sortColumn === 'deliveryRequestDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
-                                                  </button>
-                                              </div>
-                                          </th>
-                                          <th>
-                                              <div className={`order_wrap ${sortColumn === 'dispatchStatus' ? 'pending' : ''}`}>
-                                                  <span>출고상태</span>
-                                                  <button className="btn_order" onClick={() => sortDispatchStatus('dispatchStatus')}>
-                                                      <i className={`bi ${sortColumn === 'dispatchStatus' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
-                                                  </button>
-                                              </div>
-                                          </th>
-                                          <th>
-                                              <div className={`order_wrap ${sortColumn === 'dispatchStartDate' ? 'pending' : ''}`}>
-                                                  <span>출고 시작일시</span>
-                                                  <button className="btn_order" onClick={() => sortDispatchStartDate('dispatchStartDate')}>
-                                                      <i className={`bi ${sortColumn === 'dispatchStartDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
-                                                  </button>
-                                              </div>
-                                          </th>
-                                          <th>
-                                              <div className={`order_wrap ${sortColumn === 'dispatchEndDate' ? 'pending' : ''}`}>
-                                                  <span>출고 완료일시</span>
-                                                  <button className="btn_order" onClick={() => sortDispatchEndDate('dispatchEndDate')}>
-                                                      <i className={`bi ${sortColumn === 'dispatchEndDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
-                                                  </button>
-                                              </div>
-                                          </th>
-                                          <th>
-                                              <div className={`order_wrap ${sortColumn === 'warehouseName' ? 'pending' : ''}`}>
-                                                  <span>출고 창고명</span>
-                                                  <button className="btn_order" onClick={() => sortWarehouseName('warehouseName')}>
-                                                      <i className={`bi ${sortColumn === 'warehouseName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
-                                                  </button>
-                                              </div>
-                                          </th>
-                                      </tr>
-                                  </thead>
-                                  <tbody>
-                                      {dispatches.map((dispatch, index) => (
-                                          <tr key={dispatch.dispatchNo}>
-                                              <td>
-                                                  <label className="chkbox_label">
-                                                      <input
-                                                          type="checkbox"
-                                                          className="chkbox"
-                                                          checked={selectedDispatches[index] || false}
-                                                          onChange={() => handleSelect(index)}
-                                                      />
-                                                      <i className="chkbox_icon">
-                                                          <i className="bi bi-check-lg"></i>
-                                                      </i>
-                                                  </label>
-                                              </td>
-                                              <td>{dispatch.dispatchNo}</td>
-                                              {/* 필요한 다른 데이터 셀들 추가 */}
-                                              {/* ... */}
-                                              <td>
-                                                  <div className="btn_group">
-                                                      <button className="box small" onClick={handleWarehouseAssignmentClick}>배정</button>
-                                                  </div>
-                                              </td>
-                                          </tr>
-                                      ))}
-                                  </tbody>
-                              </table>
-                           </div>
-                           {/* 페이지네이션 */}
-                      </div>
-          </main>
+        <Layout currentMenu="orderDispatch">
+            <main className="main-content menu_orderDispatch">
+                 {/* 제목 영역 */}
+                 <div className="menu_title">
+                    <div className="sub_title">영업 관리</div>
+                    <div className="main_title">주문 출고</div>
+                 </div>
+                <div className="menu_content">
+                    <div className="left"> {/* 검색, 상태필터 */}
+                        {/* 검색 영역 */}
+                        <div className={`search_box ${filter ? 'has_text' : ''}`}>
+                            <label className={`label_floating ${filter ? 'active' : ''}`}>고객사, 상품명, 출고창고명 입력</label>
+                            <i className="bi bi-search"></i>
+                            <input
+                                type="text"
+                                className="box search"
+                                value={filter}
+                                onChange={handleFilterChange}
+                            />
+                            {/* 검색어 삭제 버튼 */}
+                            {filter && (
+                                <button
+                                    className="btn-del"
+                                    onClick={() => setFilter('')}
+                                >
+                                    <i className="bi bi-x"></i>
+                                </button>
+                            )}
+                        </div>
 
-            {/* 모달 컴포넌트들 */}
-            {warehouseAssignmentModal && (
-                    <WarehouseAssignmentModal
-                        show={warehouseAssignmentModal}
-                        onClose={() => setWarehouseAssignmentModal(false)}
-                        onSave={handleWarehouseAssignmentSave}
-                        dispatchStatus={filterType}
-                    />
-            )}
-            {dispatchInstructionModal && (
-                <DispatchInstructionModal
-                    show={dispatchInstructionModal}
-                    onClose={() => setDispatchInstructionModal(false)}
-                    onSave={handleDispatchInstructionSave}
-                    assignedWarehouse={assignedWarehouse}
-                    dispatchData={selectedDispatchData}
-                />
-            )}
+                        {/* 상태 필터 영역 */}
+                        <div className="radio_box">
+                            <span>상태</span>
+                            <input
+                                type="radio"
+                                id="pending"
+                                name="filterType"
+                                value="pending"
+                                checked={filterType === 'pending'}
+                                onChange={handleFilterTypeChange}
+                            />
+                            <label htmlFor="pending">출고대기</label>
+                            <input
+                                type="radio"
+                                id="inProgress"
+                                name="filterType"
+                                value="inProgress"
+                                checked={filterType === 'inProgress'}
+                                onChange={handleFilterTypeChange}
+                            />
+                            <label htmlFor="inProgress">출고요청</label>
+                            <input
+                                type="radio"
+                                id="complete"
+                                name="filterType"
+                                value="complete"
+                                checked={filterType === 'complete'}
+                                onChange={handleFilterTypeChange}
+                            />
+                            <label htmlFor="complete">출고완료</label>
+                        </div>
+                    </div>
+                    <div className="right"> {/* 출고지시 */}
+                        <button className="box color" onClick={handleDispatchInstructionClick}>
+                        출고지시
+                        </button>
+                    </div>
+                    {/* 테이블 영역 */}
+                    <div className="table_wrap">
+                        <table>
+                            {/* 테이블 헤더 */}
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <label className="chkbox_label">
+                                            <input
+                                                type="checkbox"
+                                                className="chkbox"
+                                                checked={selectAll}
+                                                onChange={handleSelectAll}
+                                            />
+//                                            <i className="chkbox_icon">
+//                                                <i className="bi bi-check-lg"></i>
+//                                            </i>
+                                        </label>
+                                    </th>
+                                    <th>번호</th>
+                                    <th>
+                                        <div className={`order_wrap ${sortColumn === 'customerName' ? 'pending' : ''}`}>
+                                            <span>고객사</span>
+                                            <button className="btn_order" onClick={() => sortCustomer('customerName')}>
+                                                <i className={`bi ${sortColumn === 'customerName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortColumn === 'productName' ? 'pending' : ''}`}>
+                                            <span>상품명</span>
+                                            <button className="btn_order" onClick={() => sortProduct('productName')}>
+                                                <i className={`bi ${sortColumn === 'productName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortColumn === 'deliveryRequestDate' ? 'pending' : ''}`}>
+                                            <span>납품 요청일</span>
+                                            <button className="btn_order" onClick={() => sortDeliveryRequestDate('deliveryRequestDate')}>
+                                                <i className={`bi ${sortColumn === 'deliveryRequestDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortColumn === 'dispatchStatus' ? 'pending' : ''}`}>
+                                            <span>출고상태</span>
+                                            <button className="btn_order" onClick={() => sortDispatchStatus('dispatchStatus')}>
+                                                <i className={`bi ${sortColumn === 'dispatchStatus' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortColumn === 'dispatchStartDate' ? 'pending' : ''}`}>
+                                            <span>출고 시작일시</span>
+                                            <button className="btn_order" onClick={() => sortDispatchStartDate('dispatchStartDate')}>
+                                                <i className={`bi ${sortColumn === 'dispatchStartDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortColumn === 'dispatchEndDate' ? 'pending' : ''}`}>
+                                            <span>출고 완료일시</span>
+                                            <button className="btn_order" onClick={() => sortDispatchEndDate('dispatchEndDate')}>
+                                                <i className={`bi ${sortColumn === 'dispatchEndDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortColumn === 'warehouseName' ? 'pending' : ''}`}>
+                                            <span>출고 창고명</span>
+                                            <button className="btn_order" onClick={() => sortWarehouseName('warehouseName')}>
+                                                <i className={`bi ${sortColumn === 'warehouseName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
 
-      </Layout>
+                                </tr>
+                            </thead>
+                            {/* 테이블 본문 */}
+                            <tbody>
+                            {/* 데이터 매핑 */}
+                            {dispatches.map((dispatch, index) => (
+                                <tr key={dispatch.dispatchNo}>
+                                <td>
+                                    <label className="chkbox_label">
+                                    <input
+                                        type="checkbox"
+                                        className="chkbox"
+                                        checked={selectedDispatches[index] || false}
+                                        onChange={() => handleSelect(index)}
+                                    />
+                                    <i className="chkbox_icon">
+                                        <i className="bi bi-check-lg"></i>
+                                    </i>
+                                    </label>
+                                </td>
+                                    <td>{dispatch.dispatchNo}</td>
+                                    <td>{dispatch.customerName || '-'}</td>
+                                    <td>{dispatch.productNm || '-'}</td>
+                                    <td>{formatDateTime(dispatch.orderDDeliveryRequestDate)}</td>
+                                    <td>{dispatch.dispatchStatus === '결제완료' ? '출고대기' : dispatch.dispatchStatus}</td>
+                                    <td>{formatDateTime(dispatch.dispatchStartDate)}</td>
+                                    <td>{dispatch.dispatchEndDate ? formatDateTime(dispatch.dispatchEndDate) : '-'}</td>
+                                    <td>{dispatch.warehouseName || '-'}</td>
+                                    <td><button className="box color" onClick={handleWarehouseAssignmentClick}>창고배정</button></td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {/* 페이지네이션 */}
+                     <div className="pagination-container">
+                        <div className="pagination-sub left">
+                            {/* 선택 삭제 버튼 */}
+                            <button className="box" onClick={deleteDispatches}>
+                            <i className="bi bi-trash"></i> 선택 삭제</button>
+                        </div>
+                        {/* 가운데: 페이지네이션 */}
+                        <div className="pagination">
+                            {/* '처음' 버튼 */}
+                            {currentPage > 1 && (
+                                <button className="box icon first" onClick={() => setCurrentPage(1)}>
+                                    <i className="bi bi-chevron-double-left"></i>
+                                </button>
+                            )}
+
+                            {/* '이전' 버튼 */}
+                            {currentPage > 1 && (
+                                <button className="box icon left" onClick={() => setCurrentPage(currentPage - 1)}>
+                                    <i className="bi bi-chevron-left"></i>
+                                </button>
+                            )}
+
+                            {/* 페이지 번호 블록 */}
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, index) => {
+                                const startPage = Math.floor((currentPage - 1) / 5) * 5 + 1;
+                                const page = startPage + index;
+                                return (
+                                    page <= totalPages && (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={currentPage === page ? 'box active' : 'box'}
+                                        >
+                                            {page}
+                                        </button>
+                                    )
+                                );
+                            })}
+
+                            {/* '다음' 버튼 */}
+                            {currentPage < totalPages && (
+                                <button className="box icon right" onClick={() => setCurrentPage(currentPage + 1)}>
+                                    <i className="bi bi-chevron-right"></i>
+                                </button>
+                            )}
+
+                            {/* '끝' 버튼 */}
+                            {currentPage < totalPages && (
+                                <button className="box icon last" onClick={() => setCurrentPage(totalPages)}>
+                                    <i className="bi bi-chevron-double-right"></i>
+                                </button>
+                            )}
+                        </div>
+                        <div className="pagination-sub right"></div>
+                    </div>
+                </div>
+            </main>
+
+              {/* 모달 컴포넌트들 */}
+              {warehouseAssignmentModal && (
+                      <WarehouseAssignmentModal
+                          show={warehouseAssignmentModal}
+                          onClose={() => setWarehouseAssignmentModal(false)}
+                          onSave={handleWarehouseAssignmentSave}
+                          dispatchStatus={filterType}
+                      />
+              )}
+              {dispatchInstructionModal && (
+                  <DispatchInstructionModal
+                      show={dispatchInstructionModal}
+                      onClose={() => setDispatchInstructionModal(false)}
+                      onSave={handleDispatchInstructionSave}
+                      assignedWarehouse={assignedWarehouse}
+                      dispatchData={selectedDispatchData}
+                  />
+              )}
+
+        </Layout>
     );
-}
+};
 
 // 최종 렌더링
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -835,5 +896,3 @@ root.render(
         <OrderDispatch />
     </BrowserRouter>
 );
-
-
