@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class WarehouseService {
@@ -51,6 +52,14 @@ public class WarehouseService {
                 .build();
     }
 
+
+    // 창고 배정 모달에서 db 목록 가져오기
+    public List<WarehouseDTO> getAllWarehouses() {
+        List<Warehouse> warehouses = warehouseRepository.findAll();
+        return warehouses.stream()
+                .map(this::convertToWarehouseDTO)
+                .collect(Collectors.toList());
+    }
 
     // 창고명으로 창고 정보 가져오기
     public WarehouseDTO getWarehouseInfoByName(String warehouseName) {

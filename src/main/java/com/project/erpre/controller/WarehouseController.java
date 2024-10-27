@@ -19,6 +19,13 @@ public class WarehouseController {
     @Autowired
     private WarehouseService warehouseService;
 
+    // 창고 배정 모달에서 db 목록 가져오기
+    @GetMapping("/list")
+    public ResponseEntity<List<WarehouseDTO>> getAllWarehouses() {
+        List<WarehouseDTO> warehouseList = warehouseService.getAllWarehouses();
+        return ResponseEntity.ok(warehouseList);
+    }
+
     // 창고명으로 창고 정보 가져오기
     @GetMapping("/info")
     public ResponseEntity<WarehouseDTO> getWarehouseInfo(@RequestParam String warehouseName) {
@@ -36,4 +43,5 @@ public class WarehouseController {
         List<String> managers = warehouseService.getWarehouseManagersByName(warehouseName);
         return ResponseEntity.ok(managers);
     }
+
 }
