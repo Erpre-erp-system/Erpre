@@ -3,21 +3,29 @@ import ReactDOM from 'react-dom/client';
 import '../../../resources/static/css/common/Main.css';
 import Layout from "../../layout/Layout";
 import { BrowserRouter } from "react-router-dom";
-import '../../../resources/static/css/hr/EmployeeList.css'; // 기존 EmployeeList와 동일한 CSS 사용
-import { formatDate } from '../../util/dateUtils'; // 날짜 포맷 유틸리티
-import { useDebounce } from '../common/useDebounce'; // 검색 디바운스 처리
+import '../../../resources/static/css/hr/EmployeeList.css';
+import { formatDate } from '../../util/dateUtils';
+import { useDebounce } from '../common/useDebounce';
+import DatePicker from 'react-datepicker';   //날짜 선택 추가
+import 'react-datepicker/dist/react-datepicker.css'; //날짜 선택 스타일 추가
 
 const ITEMS_PER_PAGE = 20;
 
 function EmployeeAttend() {
-    const [attendanceData, setAttendanceData] = useState([]); // 전체 근태 데이터
-    const [filteredData, setFilteredData] = useState([]); // 검색된 데이터
-    const [page, setPage] = useState(1); // 페이지 상태
-    const [totalPages, setTotalPages] = useState(0); // 전체 페이지 수
-    const [selectAll, setSelectAll] = useState(false); // 전체 선택 체크박스 상태
-    const [selectedAttendances, setSelectedAttendances] = useState([]); // 선택된 근태 목록
-    const [searchAttendance, setSearchAttendance] = useState(''); // 검색 상태 관리
-    const debouncedSearchAttendance = useDebounce(searchAttendance, 300); // 디바운스 처리
+    const [attendanceData, setAttendanceData] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [selectAll, setSelectAll] = useState(false);
+    const [selectedAttendances, setSelectedAttendances] = useState([]);
+    const [searchAttendance, setSearchAttendance] = useState('');
+    const debouncedSearchAttendance = useDebounce(searchAttendance, 300);
+    // 날짜 선택 상태 관리 (Date 객체 사용)
+    const [deliveryDate, setDeliveryDate] = useState(new Date());
+
+    const handleDateChange = (date) => {
+        setDeliveryDate(date);
+    };
 
     useEffect(() => {
         const mockData = [
@@ -27,6 +35,8 @@ function EmployeeAttend() {
                 attendanceDate: new Date(),
                 checkInTime: new Date(),
                 checkOutTime: null,
+                totalHoursWorked: 8.0,
+                overtimeHours: 2.0,
                 attendanceStatus: "출근",
                 approvalStatus: "대기",
                 reason: null,
@@ -37,6 +47,8 @@ function EmployeeAttend() {
                 attendanceDate: new Date(),
                 checkInTime: new Date(),
                 checkOutTime: new Date(),
+                totalHoursWorked: 8.0,
+                overtimeHours: 0.0,
                 attendanceStatus: "퇴근",
                 approvalStatus: "승인",
                 reason: "출장",
@@ -44,26 +56,26 @@ function EmployeeAttend() {
         ];
 
         setAttendanceData(mockData);
-        setFilteredData(mockData); // 필터링된 데이터 초기화
-        setTotalPages(Math.ceil(mockData.length / ITEMS_PER_PAGE)); // 총 페이지 수 설정
-        setSelectedAttendances(new Array(mockData.length).fill(false)); // 체크박스 초기화
+        setFilteredData(mockData);
+        setTotalPages(Math.ceil(mockData.length / ITEMS_PER_PAGE));
+        setSelectedAttendances(new Array(mockData.length).fill(false));
     }, []);
 
     useEffect(() => {
         if (debouncedSearchAttendance === '') {
-            setFilteredData(attendanceData); // 검색어가 없을 때 전체 데이터
+            setFilteredData(attendanceData);
         } else {
             const filtered = attendanceData.filter(attendance =>
                 attendance.employee.employeeName.toLowerCase().includes(debouncedSearchAttendance.toLowerCase())
             );
-            setFilteredData(filtered); // 검색어에 맞는 데이터 설정
+            setFilteredData(filtered);
         }
     }, [debouncedSearchAttendance, attendanceData]);
 
     const handleSelectAll = () => {
         const newSelectAll = !selectAll;
         setSelectAll(newSelectAll);
-        setSelectedAttendances(new Array(filteredData.length).fill(newSelectAll)); // 필터링된 데이터 기준으로 전체 선택
+        setSelectedAttendances(new Array(filteredData.length).fill(newSelectAll));
     };
 
     const handleSelect = (index) => {
@@ -72,9 +84,9 @@ function EmployeeAttend() {
         setSelectedAttendances(updatedSelection);
 
         if (updatedSelection.includes(false)) {
-            setSelectAll(false); // 일부만 선택된 경우 전체 선택 해제
+            setSelectAll(false);
         } else {
-            setSelectAll(true); // 모두 선택된 경우 전체 선택
+            setSelectAll(true);
         }
     };
 
@@ -95,7 +107,7 @@ function EmployeeAttend() {
 
     const PageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
-            setPage(newPage); // 페이지 상태 업데이트
+            setPage(newPage);
         }
     };
 
@@ -122,14 +134,25 @@ function EmployeeAttend() {
                                 {searchAttendance && (
                                     <button
                                         className="btn-del"
-                                        onClick={() => setSearchAttendance('')} // 검색어 초기화
+                                        onClick={() => setSearchAttendance('')}
                                     >
                                         <i className="bi bi-x"></i>
                                     </button>
                                 )}
                             </div>
                         </div>
+                        <div>
+                                                <DatePicker
+                                                    label="근태조회일"
+                                                    value={deliveryDate}
+                                                    onChange={handleDateChange}
+                                                    minDate={new Date().toISOString().split('T')[0]} // 오늘 이후 날짜만 선택 가능
+                                                />
+                                                <p>선택된 날짜: {deliveryDate ? deliveryDate.toLocaleDateString() : '날짜를 선택하세요'}</p>
+
+                        </div>
                     </div>
+
 
                     <div className="table_wrap">
                         <table>
@@ -152,6 +175,8 @@ function EmployeeAttend() {
                                     <th>근무일자</th>
                                     <th>출근 시간</th>
                                     <th>퇴근 시간</th>
+                                    <th>근무 시간</th>
+                                    <th>연장 근무</th>
                                     <th>근무 상태</th>
                                     <th>승인 상태</th>
                                     <th>비고</th>
@@ -160,7 +185,7 @@ function EmployeeAttend() {
                             <tbody>
                                 {filteredData.length === 0 ? (
                                     <tr className="tr_empty">
-                                        <td colSpan="9">
+                                        <td colSpan="11">
                                             <div className="no_data">
                                                 <i className="bi bi-exclamation-triangle"></i>
                                                 조회된 결과가 없습니다.
@@ -188,6 +213,8 @@ function EmployeeAttend() {
                                             <td>{formatDate(attendance.attendanceDate)}</td>
                                             <td>{attendance.checkInTime ? formatDate(attendance.checkInTime, 'HH:mm') : '-'}</td>
                                             <td>{attendance.checkOutTime ? formatDate(attendance.checkOutTime, 'HH:mm') : '-'}</td>
+                                            <td>{attendance.totalHoursWorked} 시간</td>
+                                            <td>{attendance.overtimeHours} 시간</td>
                                             <td>{attendance.attendanceStatus}</td>
                                             <td>{attendance.approvalStatus}</td>
                                             <td>{attendance.reason || '-'}</td>

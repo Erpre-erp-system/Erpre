@@ -4,47 +4,48 @@ import '../../../resources/static/css/common/Main.css';
 import Layout from "../../layout/Layout";
 import { BrowserRouter } from "react-router-dom";
 import '../../../resources/static/css/hr/EmployeeSalary.css'; // 급여 관리 전용 CSS
-import { formatDate } from '../../util/dateUtils'; // 날짜 포맷 유틸리티
-import { useDebounce } from '../common/useDebounce'; // 검색 디바운스 처리
+import { useDebounce } from '../common/useDebounce';
 
 const ITEMS_PER_PAGE = 20;
 
 function EmployeeSalary() {
-    const [salaryData, setSalaryData] = useState([]); // 급여 데이터
-    const [filteredData, setFilteredData] = useState([]); // 검색된 데이터
-    const [page, setPage] = useState(1); // 페이지 상태
-    const [totalPages, setTotalPages] = useState(0); // 전체 페이지 수
-    const [selectAll, setSelectAll] = useState(false); // 전체 선택 체크박스 상태
-    const [selectedSalaries, setSelectedSalaries] = useState([]); // 선택된 급여 목록
-    const [searchSalary, setSearchSalary] = useState(''); // 검색 상태
-    const debouncedSearchSalary = useDebounce(searchSalary, 300); // 검색 디바운스
+    const [salaryData, setSalaryData] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [selectAll, setSelectAll] = useState(false);
+    const [selectedSalaries, setSelectedSalaries] = useState([]);
+    const [searchSalary, setSearchSalary] = useState('');
+    const debouncedSearchSalary = useDebounce(searchSalary, 300);
 
     useEffect(() => {
         const mockData = [
             {
                 salaryId: 1,
                 employee: { employeeName: "홍길동" },
-                baseSalary: 3000000,
-                incentive: 200000,
-                taxDeduction: 250000,
-                totalPayment: 2950000,
-                paymentDate: new Date(),
+                department: { departmentName: "인사부" },
+                job: { jobName: "대리", gradeIncentiveRate: 5.00 },
+                baseSalary: 4000000,
+                performanceIncentiveRate: 10.00,
+                bonus: 300000,
+                totalPayment: 4500000,
             },
             {
                 salaryId: 2,
-                employee: { employeeName: "김영희" },
-                baseSalary: 2800000,
-                incentive: 150000,
-                taxDeduction: 200000,
-                totalPayment: 2750000,
-                paymentDate: new Date(),
+                employee: { employeeName: "김철수" },
+                department: { departmentName: "영업부" },
+                job: { jobName: "직원", gradeIncentiveRate: 5.00 },
+                baseSalary: 4000000,
+                performanceIncentiveRate: 10.00,
+                bonus: 300000,
+                totalPayment: 5000000,
             }
         ];
 
-        setSalaryData(mockData); // 임시 데이터 설정
-        setFilteredData(mockData); // 검색 데이터를 임시 데이터로 초기화
-        setTotalPages(Math.ceil(mockData.length / ITEMS_PER_PAGE)); // 페이지 수 계산
-        setSelectedSalaries(new Array(mockData.length).fill(false)); // 선택 초기화
+        setSalaryData(mockData);
+        setFilteredData(mockData);
+        setTotalPages(Math.ceil(mockData.length / ITEMS_PER_PAGE));
+        setSelectedSalaries(new Array(mockData.length).fill(false));
     }, []);
 
     useEffect(() => {
@@ -144,17 +145,19 @@ function EmployeeSalary() {
                                     </th>
                                     <th>번호</th>
                                     <th>직원명</th>
-                                    <th>기본 급여</th>
-                                    <th>인센티브</th>
-                                    <th>세금 공제</th>
-                                    <th>총 지급액</th>
-                                    <th>지급일</th>
+                                    <th>부서</th>
+                                    <th>직급</th>
+                                    <th>기본급</th>
+                                    <th>실적인센티브</th>
+                                    <th>직급인센티브</th>
+                                    <th>보너스</th>
+                                    <th>예상 총 지급액</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredData.length === 0 ? (
                                     <tr className="tr_empty">
-                                        <td colSpan="8">
+                                        <td colSpan="10">
                                             <div className="no_data">
                                                 <i className="bi bi-exclamation-triangle"></i>
                                                 조회된 결과가 없습니다.
@@ -179,11 +182,13 @@ function EmployeeSalary() {
                                             </td>
                                             <td>{(page - 1) * ITEMS_PER_PAGE + index + 1}</td>
                                             <td>{salary.employee.employeeName}</td>
+                                            <td>{salary.department.departmentName}</td>
+                                            <td>{salary.job.jobName}</td>
                                             <td>{salary.baseSalary.toLocaleString()}원</td>
-                                            <td>{salary.incentive.toLocaleString()}원</td>
-                                            <td>{salary.taxDeduction.toLocaleString()}원</td>
+                                            <td>{salary.performanceIncentiveRate.toLocaleString()}%</td>
+                                            <td>{salary.job.gradeIncentiveRate.toLocaleString()}%</td>
+                                            <td>{salary.bonus.toLocaleString()}원</td>
                                             <td>{salary.totalPayment.toLocaleString()}원</td>
-                                            <td>{formatDate(salary.paymentDate)}</td>
                                         </tr>
                                     ))
                                 )}
