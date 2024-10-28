@@ -52,22 +52,23 @@ function DispatchInstructionModal ({ show, onClose, onSave, assignedWarehouse, d
     //모달 알림창 2번 뜨는거 방지
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-      useEffect(() => {
+    useEffect(() => {
         if (show && dispatchData) {
           setForm({
-            customerName: dispatchData.customerName,
-            customerAddr: dispatchData.customerAddr,
-            warehouseName: assignedWarehouse || '',
-            warehouseManagerName: dispatchData.warehouseManagerName || '',
-            orderDDeliveryRequestDate: formatDateTime(dispatchData.orderDDeliveryRequestDate),
-            productNm: dispatchData.productNm,
-            orderDPrice: dispatchData.orderDPrice,
-            orderDQty: dispatchData.orderDQty,
-            orderDTotalPrice: dispatchData.orderDTotalPrice,
-            qrCodeData: dispatchData.qrCodeData,
+              customerName: dispatchData.customerName,
+              customerAddr: dispatchData.customerAddr,
+              warehouseName: assignedWarehouse || dispatchData.warehouseName || '',
+              warehouseManagerName: dispatchData.warehouseManagerName || '',
+              orderDDeliveryRequestDate: formatDateTime(dispatchData.orderDDeliveryRequestDate),
+              productNm: dispatchData.productNm,
+              orderDPrice: dispatchData.orderDPrice,
+              orderDQty: dispatchData.orderDQty,
+              orderDTotalPrice: dispatchData.orderDTotalPrice,
+              qrCodeData: dispatchData.qrCodeData,
           });
         }
       }, [show, dispatchData, assignedWarehouse]);
+
 
     //창고배정에서 선택한 창고명으로 저장
     useEffect(() => {
@@ -252,7 +253,7 @@ function DispatchInstructionModal ({ show, onClose, onSave, assignedWarehouse, d
                     <table>
                         <tbody>
                             <tr>
-                                <th>수량</th>
+                                <th>총 수량</th>
                                 <td>{form.totalOrderDQty}</td>
                             </tr>
                             <tr>
@@ -691,14 +692,21 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
             return;
         }
 
-        if (!isWarehouseAssigned) {
-            window.showToast("창고배정이 필요합니다.", 'error');
+        // 선택된 출고 건들에 창고 배정이 되어 있는지 확인
+        const selectedDispatchesHaveWarehouse = selectedDispatchIndices.every(index => {
+            const dispatch = filteredDispatches[index];
+            return dispatch.warehouseName && dispatch.warehouseName.trim() !== '';
+        });
+
+        if (!selectedDispatchesHaveWarehouse) {
+            window.showToast("선택한 항목 중 창고 배정이 되지 않은 항목이 있습니다.", 'error');
             return;
         }
 
         setSelectedDispatchData(filteredDispatches[selectedDispatchIndices[0]]);
         setDispatchInstructionModal(true);
     };
+
 
     // 창고배정 버튼 클릭 핸들러
     const handleWarehouseAssignmentClick = () => {
@@ -707,18 +715,42 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
 
     // 창고 배정 후 dispatches 상태 업데이트
     const handleWarehouseAssignmentSave = (warehouseData) => {
-        // 선택된 dispatches에 warehouseName 할당
-        const updatedDispatches = dispatches.map((dispatch) => {
-            return {
-                ...dispatch,
-                warehouseName: warehouseData.warehouseName,
-            };
+        const selectedDispatchNos = filteredDispatches
+            .filter((_, index) => selectedDispatches[index])
+            .map(dispatch => dispatch.dispatchNo);
+
+        if (selectedDispatchNos.length === 0) {
+            window.showToast("창고 배정할 출고 항목을 선택해주세요.", 'error');
+            return;
+        }
+
+        // 백엔드로 창고 배정 정보 전송
+        axios.post('/api/orderDispatch/assignWarehouse', {
+            dispatchNos: selectedDispatchNos,
+            warehouseName: warehouseData.warehouseName,
+            warehouseManagerName: warehouseData.warehouseManagerName,
+        })
+        .then(response => {
+            window.showToast("창고 배정이 완료되었습니다.");
+            // 프론트엔드 상태 업데이트
+            const updatedDispatches = dispatches.map((dispatch) => {
+                if (selectedDispatchNos.includes(dispatch.dispatchNo)) {
+                    return {
+                        ...dispatch,
+                        warehouseName: warehouseData.warehouseName,
+                        warehouseManagerName: warehouseData.warehouseManagerName,
+                    };
+                }
+                return dispatch;
+            });
+            setDispatches(updatedDispatches);
+            setWarehouseAssignmentModal(false);
+        })
+        .catch(error => {
+            console.error('창고 배정 중 에러 발생:', error);
         });
-        setDispatches(updatedDispatches);
-        setAssignedWarehouse(warehouseData.warehouseName);
-        setIsWarehouseAssigned(true);
-        setWarehouseAssignmentModal(false);
     };
+
 
     // 출고지시 모달에서 저장된 데이터 받기
     const handleDispatchInstructionSave = (formData) => {
@@ -733,12 +765,25 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
             .then(response => {
                 window.showToast("출고 지시가 완료되었습니다.");
                 setDispatchInstructionModal(false);
-                fetchData();
+
+                // 상태 업데이트
+                const updatedDispatches = dispatches.map((dispatch) => {
+                    if (selectedDispatchNos.includes(dispatch.dispatchNo)) {
+                        return {
+                            ...dispatch,
+                            dispatchStatus: 'in_progress',
+                            dispatchStartDate: new Date(),
+                        };
+                    }
+                    return dispatch;
+                });
+                setDispatches(updatedDispatches);
             })
             .catch(error => {
                 console.error('출고 지시 중 에러 발생:', error);
             });
     };
+
 
     // Pagination
     const handlePageChange = (newPage) => {

@@ -85,10 +85,5 @@ public class WarehouseService {
         }
     }
 
-    //현재 로그인한 직원 조회
-    public EmployeeDTO getLoginEmployee(String employeeId) {
-        Employee employee = employeeRepository.getLoginEmployee(employeeId);
-        return convertToEmployeeDTO(employee);
-    }
 
 }

@@ -8,6 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +35,7 @@ public class OrderDispatchController {
         return ResponseEntity.ok(dispatchPage);
     }
 
-    //페이징해서 in progress 목록 보여주기
+    // 페이징해서 in progress 목록 보여주기
     @GetMapping("/inProgress")
     public ResponseEntity<Page<DispatchDTO>> getInProgressList(
             @RequestParam(defaultValue = "1") int page,
@@ -41,7 +44,7 @@ public class OrderDispatchController {
         return ResponseEntity.ok(dispatchPage);
     }
 
-    //페이징해서 complete 목록 보여주기
+    // 페이징해서 complete 목록 보여주기
     @GetMapping("/complete")
     public ResponseEntity<Page<DispatchDTO>> getCompleteList(
             @RequestParam(defaultValue = "1") int page,
@@ -50,14 +53,14 @@ public class OrderDispatchController {
         return ResponseEntity.ok(dispatchPage);
     }
 
-    //목록화면에서 체크된 직원 logical 삭제
+    // 목록화면에서 체크된 직원 logical 삭제
     @PostMapping("/delete")
     public ResponseEntity<?> deleteDispatches(@RequestBody List<Integer> no) {
         orderDispatchService.deleteDispatches(no);
         return ResponseEntity.ok("Dispatches deleted successfully");
     }
 
-    //출고 지시
+    // 출고 지시
     @PostMapping("/release")
     public ResponseEntity<?> releaseDispatches(@RequestBody Map<String, Object> requestData) {
         orderDispatchService.releaseDispatches(requestData);
@@ -66,8 +69,25 @@ public class OrderDispatchController {
 
     //로그인한 직원 확인
 
+    // pdf다운로드
+    @GetMapping("/export/pdf/{dispatchNo}")
+    public ResponseEntity<byte[]> exportDispatchAsPdf(@PathVariable int dispatchNo) {
+        byte[] pdfBytes = orderDispatchService.generatePdf(dispatchNo);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "dispatch_" + dispatchNo + ".pdf");
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+    }
 
-
+    // Excel다운로드
+    @GetMapping("/export/excel/{dispatchNo}")
+    public ResponseEntity<byte[]> exportDispatchAsExcel(@PathVariable int dispatchNo) {
+        byte[] excelBytes = orderDispatchService.generateExcel(dispatchNo);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "dispatch_" + dispatchNo + ".xlsx");
+        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+    }
 
 
 

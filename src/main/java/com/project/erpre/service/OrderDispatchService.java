@@ -21,6 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -76,6 +77,11 @@ public class OrderDispatchService {
         String productNm = product != null ? product.getProductNm() : null;
         Timestamp orderDDeliveryRequestDate = orderDetail != null ? orderDetail.getOrderDDeliveryRequestDate() : null;
 
+        String customerAddr = customer != null ? customer.getCustomerAddr() : null;
+        int orderDQty = orderDetail != null ? orderDetail.getOrderDQty() : 0;
+        BigDecimal orderDPrice = orderDetail != null ? orderDetail.getOrderDPrice() : BigDecimal.ZERO;
+        BigDecimal orderDTotalPrice = orderDetail != null ? orderDetail.getOrderDTotalPrice() : BigDecimal.ZERO;
+
         return DispatchDTO.builder()
                 .dispatchNo(dispatch.getDispatchNo())
                 .dispatchStatus(dispatch.getDispatchStatus())
@@ -88,6 +94,10 @@ public class OrderDispatchService {
                 .customerName(customerName)
                 .productNm(productNm)
                 .orderDDeliveryRequestDate(orderDDeliveryRequestDate)
+                .customerAddr(customerAddr)
+                .orderDQty(orderDQty)
+                .orderDPrice(orderDPrice)
+                .orderDTotalPrice(orderDTotalPrice)
                 .build();
     }
 
@@ -146,7 +156,7 @@ public class OrderDispatchService {
                 Dispatch dispatch = dispatchOpt.get();
 
                 // 출고 상태 업데이트
-                dispatch.setDispatchStatus("in_progress");
+                dispatch.setDispatchStatus("inProgress");
                 dispatch.setDispatchStartDate(new Timestamp(System.currentTimeMillis()));
 
                 // 창고 정보 업데이트
@@ -215,8 +225,9 @@ public class OrderDispatchService {
             // PDF 내용 작성
             document.add(new Paragraph("출고증"));
             document.add(new Paragraph("고객사 이름: " + dispatch.getOrderDetail().getOrder().getCustomer().getCustomerName()));
-            document.add(new Paragraph("출하 창고: " + (dispatch.getWarehouse() != null ? dispatch.getWarehouse().getWarehouseName() : "-")));
-            document.add(new Paragraph("출고 시작일시: " + (dispatch.getDispatchStartDate() != null ? dispatch.getDispatchStartDate().toString() : "-")));
+            document.add(new Paragraph("납품지 주소: " + dispatch.getOrderDetail().getOrder().getCustomer().getCustomerAddr()));
+            document.add(new Paragraph("품목명: " + dispatch.getOrderDetail().getProduct().getProductNm()));
+            document.add(new Paragraph("수량: " + dispatch.getOrderDetail().getOrderDQty()));
             // ... 필요한 내용 추가 ...
 
             document.close();
@@ -249,13 +260,12 @@ public class OrderDispatchService {
             row1.createCell(1).setCellValue(dispatch.getOrderDetail().getOrder().getCustomer().getCustomerName());
 
             Row row2 = sheet.createRow(2);
-            row2.createCell(0).setCellValue("출하 창고");
-            row2.createCell(1).setCellValue(dispatch.getWarehouse() != null ? dispatch.getWarehouse().getWarehouseName() : "-");
+            row2.createCell(0).setCellValue("납품지 주소");
+            row2.createCell(1).setCellValue(dispatch.getOrderDetail().getOrder().getCustomer().getCustomerAddr());
 
             Row row3 = sheet.createRow(3);
-            row3.createCell(0).setCellValue("출고 시작일시");
-            row3.createCell(1).setCellValue(dispatch.getDispatchStartDate() != null ? dispatch.getDispatchStartDate().toString() : "-");
-
+            row3.createCell(0).setCellValue("품목명");
+            row3.createCell(1).setCellValue(dispatch.getOrderDetail().getProduct().getProductNm());
             // ... 필요한 내용 추가 ...
 
             workbook.write(byteArrayOutputStream);
