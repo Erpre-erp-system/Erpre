@@ -21,9 +21,9 @@ public class ChatDTO {
     private LocalDateTime chatSendDate;
     private String chatFilename;
     private String chatFileUrl;
-    private Long participantCount;  // 참여자 수
+    private Long participantCount;
 
-    // 1. 현재 참여하고 있는 채팅 목록 조회 및 검색 생성자
+    // 현재 참여하고 있는 채팅 목록 조회 및 검색 생성자
     public ChatDTO(Long chatNo, String chatTitle, String participantId, String employeeName,
                    String chatMessageContent, LocalDateTime chatSendDate,
                    String chatFilename, Long participantCount) {
@@ -37,7 +37,7 @@ public class ChatDTO {
         this.participantCount = participantCount;
     }
 
-    // 2. 선택된 채팅방 조회 생성자
+    // 선택된 채팅방 조회 생성자
     public ChatDTO(Long chatNo, String chatTitle, String employeeName,
                    String chatMessageContent, LocalDateTime chatSendDate,
                    String chatFilename, String chatFileUrl) {

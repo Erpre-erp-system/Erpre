@@ -3,7 +3,7 @@ import axios from "axios";
 import Draggable from "react-draggable";
 import {UserContext} from "../../context/UserContext";
 
-const ChatRoom = ({ chatNo, closeChatModal }) => {
+const ChatRoomModal = ({ chatNo, closeChatModal }) => {
 
     const { user } = useContext(UserContext);
     const userName = user?.employeeName;
@@ -51,7 +51,7 @@ const ChatRoom = ({ chatNo, closeChatModal }) => {
     };
 
     return (
-        <div className="chat-modal-overlay">
+        <div className="chat-room-modal">
             <Draggable handle=".chat-room-header">
             <div className="chat-room">
                 <div className="chat-room-header">
@@ -89,4 +89,4 @@ const ChatRoom = ({ chatNo, closeChatModal }) => {
     );
 };
 
-export default ChatRoom;
+export default ChatRoomModal;

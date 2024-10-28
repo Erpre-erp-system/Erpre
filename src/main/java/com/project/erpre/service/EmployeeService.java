@@ -10,6 +10,7 @@ import com.project.erpre.repository.JobRepository;
 import com.querydsl.core.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -198,15 +199,19 @@ public class EmployeeService {
         return employeeRepository.countDeletedEmployeesLast30Days();
     }
 
-    // 메신저 직원 조회 (조직도)
-    public List<EmployeeDTO> getEmployeesWithDept() {
-        List<Employee> employees = employeeRepository.getEmployeesWithDept();
-        return employees.stream()
+    // 🟡 메신저 직원 조회 (조직도)
+    public Page<EmployeeDTO> getEmployeesWithDept(int page, int size, String searchKeyword) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Employee> employees = employeeRepository.getEmployeesWithDept(pageable, searchKeyword);
+
+        List<EmployeeDTO> employeeDTO = employees.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(employeeDTO, pageable, employees.getTotalElements());
     }
 
-    // 현재 로그인한 직원 조회
+    // 🟡 현재 로그인한 직원 조회
     public EmployeeDTO getLoginEmployee(String employeeId) {
         Employee employee = employeeRepository.getLoginEmployee(employeeId);
         return convertToDTO(employee);

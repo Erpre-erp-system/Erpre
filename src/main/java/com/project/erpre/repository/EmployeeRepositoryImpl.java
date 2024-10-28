@@ -4,10 +4,16 @@ import com.project.erpre.model.entity.Employee;
 import com.project.erpre.model.entity.QDepartment;
 import com.project.erpre.model.entity.QEmployee;
 import com.project.erpre.model.entity.QJob;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
+import javax.persistence.ConstructorResult;
 import javax.persistence.EntityManager;
 import java.util.List;
 
@@ -21,18 +27,32 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
         this.queryFactory = new JPAQueryFactory(entityManager);
     }
 
-    // 1. 메신저 직원 조회 (조직도)
+    // 1. 메신저 직원 조회 (조직도) 및 검색 (직원 이름, 부서명, 직급명)
     @Override
-    public List<Employee> getEmployeesWithDept() {
+    public Page<Employee> getEmployeesWithDept(Pageable pageable, String searchKeyword) {
         QEmployee employee = QEmployee.employee;
         QDepartment department = QDepartment.department;
         QJob job = QJob.job;
 
-        return queryFactory
+        BooleanBuilder builder = new BooleanBuilder();
+
+        List<Employee> results = queryFactory
                 .selectFrom(employee)
-                .leftJoin(employee.department, department).fetchJoin()  // Department 조인
+                .leftJoin(employee.department, department).fetchJoin()
                 .leftJoin(employee.job, job).fetchJoin()
+                .where(employee.employeeDeleteYn.eq("N"),
+                        containsKeyword(searchKeyword))
+                .orderBy(department.departmentName.asc(), employee.employeeName.asc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
+
+        // 총 개수 계산
+        long total = queryFactory.selectFrom(employee)
+                .where(builder)
+                .fetchCount();
+
+        return new PageImpl<>(results, pageable, total);
     }
 
     // 2. 현재 로그인한 직원 조회
@@ -50,5 +70,20 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
                 .fetchOne();
 
     }
+
+    // 직원 검색 메서드 (직원 이름, 부서명, 직급명)
+    private BooleanExpression containsKeyword(String searchKeyword) {
+        if (searchKeyword == null || searchKeyword.isEmpty()) {
+            return null;
+        }
+        QEmployee employee = QEmployee.employee;
+        QDepartment department = QDepartment.department;
+        QJob job = QJob.job;
+
+        return employee.employeeName.containsIgnoreCase(searchKeyword)
+                .or(department.departmentName.containsIgnoreCase(searchKeyword))
+                .or(job.jobName.containsIgnoreCase(searchKeyword));
+    }
+
 }
 

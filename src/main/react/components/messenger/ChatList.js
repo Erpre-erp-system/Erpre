@@ -1,13 +1,27 @@
 import React, {useState} from 'react';
 import { FaUserCircle } from 'react-icons/fa';
-import ChatRoom from './ChatRoom'
+import ChatRoomModal from './ChatRoomModal'
+import NewChatModal from "./NewChatModal";
+import {LuMessageSquarePlus} from "react-icons/lu";
 
 
     const ChatList = ({ chatList, formatDate, isChatModalOpen, selectedChat, openChatModal, closeChatModal }) => {
 
+        const [isNewChatModalOpen, setNewChatModalOpen] = useState(false);
+
+        // 새 채팅 모달 열기/닫기 핸들러
+        const openNewChatModal = () => setNewChatModalOpen(true);
+        const closeNewChatModal = () => setNewChatModalOpen(false);
 
         return (
         <div className="chat-list-container">
+
+            {/* 헤더 */}
+            <div className="chat-list-header">
+                <button className="new-chat-button" onClick={openNewChatModal} aria-label="새로운 채팅">
+                    <LuMessageSquarePlus />
+                </button>
+            </div>
 
             {/* 채팅 목록 */}
             <ul className="chat-list">
@@ -42,15 +56,21 @@ import ChatRoom from './ChatRoom'
                 ))}
             </ul>
 
-            {/* 모달 오버레이 */}
-            {isChatModalOpen && (
-                <div className="chat-modal-overlay">
-                    <div className="chat-modal-content">
-                        <ChatRoom chatNo={selectedChat} closeChatModal={closeChatModal}/>
+            {/* 새 채팅 추가 모달 */}
+            {isNewChatModalOpen && (
+                <div className="new-chat-modal" onClick={(e) => e.target === e.currentTarget && closeNewChatModal()}>
+                    <div className="new-chat-modal-content">
+                        <NewChatModal closeNewChatModal={closeNewChatModal}></NewChatModal>
                     </div>
                 </div>
             )}
 
+            {/* 특정 채팅 조회 모달 */}
+            {isChatModalOpen && (
+                <div>
+                    <ChatRoomModal chatNo={selectedChat} closeChatModal={closeChatModal}/>
+                </div>
+            )}
         </div>
         )
     };

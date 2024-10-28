@@ -126,7 +126,7 @@ export const useMessengerHooks = () => {
     useEffect(() => {
         if (activeView === 'chatList') {
             setIsLoading(true);
-            axios.get('/api/messengers/chatList')
+            axios.get('/api/messengers/chat/chatList')
                 .then((response) => {
                     setChatList(response.data);
                     setIsLoading(false);
@@ -168,13 +168,13 @@ export const useMessengerHooks = () => {
         }
 
         // 원하는 형식: 일-월-년 시:분
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = String(date.getFullYear()).slice(2);
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
 
-        return `${day}-${month}-${year} ${hours}:${minutes}`;
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
     };
 
 

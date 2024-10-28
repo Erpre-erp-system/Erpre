@@ -228,7 +228,7 @@ CREATE TABLE M_CHAT_MESSAGE_READ_FILE (
 -- 18. 직급
 CREATE TABLE m_job (
     job_id               serial PRIMARY KEY,       -- 직급 ID (자동 증가)
-    job_name             varchar(50) NOT NULL,     -- 직급 이름 (CEO(대표이사), Executive(임원), Director(부장), Manager(팀장), Assistant Manager(대리), Senior Staff(계장), Staff(일반사원))
+    job_name             varchar(50) NOT NULL,     -- 직급 이름 (CEO(대표이사), Executive(임원), Director(부장), Manager(팀장), Assistant Manager(대리), Senior Staff(계장), Staff(사원))
     min_years_of_service integer NOT NULL,         -- 최소 근속 연수
     min_salary           integer NOT NULL,         -- 최소 연봉
     grade_incentive_rate       decimal(5, 2) NOT NULL,   -- (직급에 따른)연봉에 추가될 수 있는 인센티브 비율 (decimal(5, 2): 총 5자리 중 소수점 이하 2자리, 예: 5.00은 5%)
@@ -239,10 +239,10 @@ CREATE TABLE m_job (
     job_delete_date      timestamp NULL            -- 직급 삭제 일시
 );
 
--- 19. 부서
+-- 19. 부서ㅅ
 CREATE TABLE m_department (
     department_id         serial PRIMARY KEY,       -- 부서 ID (자동 증가)
-    department_name       varchar(50) NOT NULL,     -- 부서 이름 (CEO Office(대표이사비서실), Executive Office(대표비서실, 임원비서실), HR Department(인사부), Sales Department(영업부), IT Department(IT부서), Legal Department(법무부서), Marketing Department(마케팅부), Accounting Department(회계부서), TBD(미정))
+    department_name       varchar(50) NOT NULL,     -- 부서 이름 (CEO Office(대표이사비서실), Executive Office(대표비서실, 임원비서실), HR Department(인사부), Sales Department(영업부), IT Department(IT부서), Legal Department(법무부서), Marketing Department(마케팅부), Accounting Department(회계부서), TBD(미정), Dispatch Department(출고부))
     department_location   varchar(100),             -- 부서 위치 (예: 본사, 지사 등)
     department_tel        varchar(20),              -- 부서 연락처 (전화번호)
     department_insert_date timestamp NOT NULL DEFAULT current_timestamp,  -- 부서 등록 일시

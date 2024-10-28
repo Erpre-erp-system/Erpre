@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {FaComments, FaInfoCircle, FaSearch, FaUserAltSlash, FaWindowClose} from 'react-icons/fa';
+import {FaComments, FaInfoCircle, FaSearch, FaUserAltSlash} from 'react-icons/fa';
 import {BsEnvelope} from "react-icons/bs";
 import {SlOrganization} from "react-icons/sl"; // react icon 사용
 import Select from 'react-select'; // react-select 라이브러리
@@ -10,6 +10,7 @@ import withReactContent from 'sweetalert2-react-content';
 import axios from "axios";
 import {useMessengerHooks} from "./useMessengerHooks";
 import ChatList from "./ChatList";
+import {IoClose} from "react-icons/io5";
 
 
 // ⭐ 뷰 컴포넌트: Home, InfoView, Message, ChatList
@@ -263,7 +264,7 @@ function Messenger({isOpen, toggleMessenger}) {
                             {activeView === 'message' && '받은 쪽지'}
                             {activeView === 'chatList' && '채팅'}
                         </h3>
-                            <FaWindowClose className="messenger-close" title="닫기" onClick={toggleMessenger}/>
+                            <IoClose className="messenger-close" title="닫기" onClick={toggleMessenger}/>
                         </div>
 
                         {/* 검색창 */}
