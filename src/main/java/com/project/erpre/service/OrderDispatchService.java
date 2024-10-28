@@ -9,6 +9,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+//pdf import
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+
+//excel import
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -83,9 +95,10 @@ public class OrderDispatchService {
     // 주문 상태가 '결제완료'만 페이징하여 pending  목록 보여주기
     public Page<DispatchDTO> getPagePending(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Dispatch> dispatchPage = orderDispatchRepository.findByOrderDetail_Order_OrderHStatus("approved", pageable);
+        Page<Dispatch> dispatchPage = orderDispatchRepository.findByOrderDetail_Order_OrderHStatus(pageable);
         return dispatchPage.map(this::convertToDispatchDTO);
     }
+
 
     //페이징해서 in progress 목록 보여주기
     public Page<DispatchDTO> getPageInProgress(int page, int size) {
@@ -185,6 +198,73 @@ public class OrderDispatchService {
         }
 
         return dispatchNos;
+    }
+
+    //pdf생성
+    public byte[] generatePdf(int dispatchNo) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            Document document = new Document();
+            PdfWriter.getInstance(document, byteArrayOutputStream);
+            document.open();
+
+            // dispatchNo를 사용하여 필요한 데이터 조회
+            Dispatch dispatch = orderDispatchRepository.findById(dispatchNo)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid dispatchNo"));
+
+            // PDF 내용 작성
+            document.add(new Paragraph("출고증"));
+            document.add(new Paragraph("고객사 이름: " + dispatch.getOrderDetail().getOrder().getCustomer().getCustomerName()));
+            document.add(new Paragraph("출하 창고: " + (dispatch.getWarehouse() != null ? dispatch.getWarehouse().getWarehouseName() : "-")));
+            document.add(new Paragraph("출고 시작일시: " + (dispatch.getDispatchStartDate() != null ? dispatch.getDispatchStartDate().toString() : "-")));
+            // ... 필요한 내용 추가 ...
+
+            document.close();
+
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        }
+
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    //excel 생성
+    public byte[] generateExcel(int dispatchNo) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("출고증");
+
+            // dispatchNo를 사용하여 필요한 데이터 조회
+            Dispatch dispatch = orderDispatchRepository.findById(dispatchNo)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid dispatchNo"));
+
+            // 데이터 작성
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("항목");
+            headerRow.createCell(1).setCellValue("내용");
+
+            Row row1 = sheet.createRow(1);
+            row1.createCell(0).setCellValue("고객사 이름");
+            row1.createCell(1).setCellValue(dispatch.getOrderDetail().getOrder().getCustomer().getCustomerName());
+
+            Row row2 = sheet.createRow(2);
+            row2.createCell(0).setCellValue("출하 창고");
+            row2.createCell(1).setCellValue(dispatch.getWarehouse() != null ? dispatch.getWarehouse().getWarehouseName() : "-");
+
+            Row row3 = sheet.createRow(3);
+            row3.createCell(0).setCellValue("출고 시작일시");
+            row3.createCell(1).setCellValue(dispatch.getDispatchStartDate() != null ? dispatch.getDispatchStartDate().toString() : "-");
+
+            // ... 필요한 내용 추가 ...
+
+            workbook.write(byteArrayOutputStream);
+            workbook.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return byteArrayOutputStream.toByteArray();
     }
 
 

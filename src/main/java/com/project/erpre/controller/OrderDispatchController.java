@@ -2,6 +2,7 @@ package com.project.erpre.controller;
 
 
 import com.project.erpre.model.dto.DispatchDTO;
+import com.project.erpre.model.entity.Employee;
 import com.project.erpre.service.OrderDispatchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,8 @@ public class OrderDispatchController {
         orderDispatchService.releaseDispatches(requestData);
         return ResponseEntity.ok("출고 지시가 완료되었습니다.");
     }
+
+    //로그인한 직원 확인
 
 
 

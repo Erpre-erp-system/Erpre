@@ -1,0 +1,201 @@
+/* 창고 배정 모달 */
+/* 모달 컨테이너를 세로 방향으로 정렬하여 저장 버튼을 하단으로 이동 */
+.modal_container.dispatch {
+    display: flex;
+    flex-direction: column;
+    width: 620px;
+}
+
+/* 모달 내용 영역 */
+.modal_container.dispatch .modal-content {
+    flex-grow: 1;
+}
+
+/* 저장 버튼을 모달 하단 중앙에 배치 */
+.modal_container.dispatch .modal-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* 확인 모달 */
+/* 모달 확인 창 스타일 */
+.modal_confirm {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+/* 아이콘과 메시지 */
+.modal_confirm .icon_wrap {
+    font-size: 50px;
+    color: #f0ad4e;
+    margin-bottom: 10px;
+}
+
+.modal_confirm .msg {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+/* 확인 및 취소 버튼을 메시지 바로 아래에 배치 */
+.modal_confirm .modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* 버튼 스타일 */
+.modal_confirm .modal-actions .box {
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* 출고지시 모달 */
+
+/* 모달 컨테이너 크기 조정하여 스크롤 없도록 */
+.modal_container.dispatch {
+    width: 80%;
+    max-width: 900px;
+    position: relative;
+    max-height: none;
+    overflow: visible;
+}
+
+/* 고객사 및 공급자 정보를 테이블 형태로 */
+.customer-info, .supplier-info {
+    margin-bottom: 20px;
+}
+
+.customer-info table,
+.supplier-info table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.customer-info table th,
+.supplier-info table th,
+.customer-info table td,
+.supplier-info table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.customer-info table th,
+.supplier-info table th {
+    width: 30%;
+    background-color: #f9f9f9;
+    text-align: left;
+}
+
+/* QR코드 및 다운로드 버튼 섹션 */
+/* QR 코드 생성 버튼 */
+.qr-and-download {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px; /* 버튼 간격 */
+}
+
+.qr-and-download button {
+    padding: 10px 20px;
+    background-color: #007CC1;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* 다운로드 버튼과 옵션 */
+.download-section {
+    position: relative;
+    display: inline-block;
+}
+
+.download-section .dropbtn {
+    padding: 10px 20px;
+    background-color: #007CC1;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* 다운로드 옵션 드롭다운 */
+.download-section .dropdown-content {
+    display: block;
+    position: absolute;
+    background-color: white;
+    min-width: 100px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    right: 0;
+}
+
+.download-section .dropdown-content button {
+    width: 100%;
+    padding: 8px 12px;
+    background-color: white;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.download-section .dropdown-content button:hover {
+    background-color: #f1f1f1;
+}
+
+/* 출고 버튼을 모달 하단 중앙에 위치 */
+.modal_container.dispatch .modal-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* 각 섹션별 테이블 스타일 */
+/* 출하관련 정보, 상품관련 정보, 수량 및 인수 */
+.dispatch-info table,
+.product-info table,
+.quantity-acceptance table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.dispatch-info table th,
+.product-info table th,
+.quantity-acceptance table th,
+.dispatch-info table td,
+.product-info table td,
+.quantity-acceptance table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.dispatch-info table th,
+.product-info table th,
+.quantity-acceptance table th {
+    width: 30%;
+    background-color: #f9f9f9;
+    text-align: left;
+}
+
+/* 출고증 제목 스타일 */
+.dispatch-note {
+    text-align: center;
+    margin-top: 60px;
+    margin-bottom: 20px;
+}
+
+.dispatch-note h2 {
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 0;
+}

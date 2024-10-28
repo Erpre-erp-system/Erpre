@@ -55,6 +55,12 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test' // 테스트
 	implementation 'org.springframework.boot:spring-boot-starter-websocket' // 웹소켓 의존성 추가
 	implementation 'org.springframework.boot:spring-boot-starter-mail' // Spring Email 의존성
+
+	implementation 'com.itextpdf:itextpdf:5.5.13.3' //pdf 다운로드
+	//Microsoft Office 문서 다운로드
+	implementation 'org.apache.poi:poi:5.2.3'        // POI 라이브러리
+	implementation 'org.apache.poi:poi-ooxml:5.2.3'  // OOXML 지원 라이브러리
+
 }
 
 tasks.named('test') {
