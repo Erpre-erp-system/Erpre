@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 public class ChatDTO {
 
     private Long chatNo;
-    private String chatOriginTitle;
     private String chatTitle;
     private String participantId;
     private List<ChatParticipantDTO> participants;
@@ -30,21 +29,20 @@ public class ChatDTO {
     private Long participantCount;
 
 
-    // 엔티티 -> DTO로 변환하는 생성자
-    public ChatDTO(Long chatNo, String chatOriginTitle, List<ChatParticipant> chatParticipants) {
+    // 엔티티 -> DTO로 변환하는 생성자 (새 채팅방 생성)
+    public ChatDTO(Long chatNo, String chatTitle, List<ChatParticipant> chatParticipants) {
         this.chatNo = chatNo;
-        this.chatOriginTitle = chatOriginTitle;
+        this.chatTitle = chatTitle;
         this.participants = chatParticipants.stream()
                 .map(ChatParticipantDTO::new)
                 .collect(Collectors.toList());
     }
 
     // 현재 참여하고 있는 채팅 목록 조회 및 검색 생성자
-    public ChatDTO(Long chatNo, String chatTitle, String chatOriginTitle, String participantId, String employeeName,
+    public ChatDTO(Long chatNo, String chatTitle, String participantId, String employeeName,
                    String chatMessageContent, LocalDateTime chatSendDate,
                    String chatFilename, Long participantCount) {
         this.chatNo = chatNo;
-        this.chatOriginTitle = chatOriginTitle;
         this.chatTitle = chatTitle;
         this.participantId = participantId;
         this.employeeName = employeeName;

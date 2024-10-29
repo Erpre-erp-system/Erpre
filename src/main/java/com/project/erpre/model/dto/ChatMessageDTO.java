@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
 @NoArgsConstructor
 public class ChatMessageDTO {
 
@@ -20,8 +19,6 @@ public class ChatMessageDTO {
     private LocalDateTime chatSendDate;
     private String chatFileName;
     private String chatFileUrl;
-    private String chatMessageDeleteYn;
-    private LocalDateTime chatMessageDeleteDate;
 
     // 선택된 채팅방 조회 생성자
     public ChatMessageDTO(Long chatMessageNo, Long chatNo, String chatSenderId, String employeeName,

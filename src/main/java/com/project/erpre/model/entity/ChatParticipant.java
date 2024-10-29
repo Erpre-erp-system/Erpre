@@ -17,7 +17,7 @@ public class ChatParticipant {
     @EmbeddedId
     private ChatParticipantId chatParticipantId;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = true, length = 50)
     private String chatTitle;
 
     @ManyToOne
@@ -32,11 +32,11 @@ public class ChatParticipant {
 
 
     // Chat과 Employee를 인자로 받아 ChatParticipantId를 설정하는 생성자
-    public ChatParticipant(Chat chat, Employee employee) {
+    public ChatParticipant(Chat chat, Employee employee, String chatTitle) {
         this.chat = chat;
         this.employee = employee;
         this.chatParticipantId = new ChatParticipantId(chat.getChatNo(), employee.getEmployeeId());
-        this.chatTitle = chat.getChatOriginTitle();
+        this.chatTitle = chatTitle;
     }
 
 }

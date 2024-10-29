@@ -165,8 +165,7 @@ CREATE TABLE m_message_recipient_file (
 
 -- 12. 채팅방
 CREATE TABLE m_chat (
-    chat_no SERIAL PRIMARY KEY,
-    chat_origin_title VARCHAR(50) NOT NULL;
+    chat_no SERIAL PRIMARY KEY
 );
 
 -- 13. 채팅방 참여자
@@ -183,9 +182,7 @@ CREATE TABLE m_chat_message (
     chat_no INT NOT NULL REFERENCES m_chat (chat_no),
     chat_sender_id VARCHAR(50) NOT NULL REFERENCES m_employee (employee_id),
     chat_message_content TEXT NOT NULL,
-    chat_send_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    chat_message_delete_yn VARCHAR(1) NOT NULL DEFAULT 'N',
-    chat_message_delete_date TIMESTAMP
+    chat_send_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 15. 채팅 메세지 수신

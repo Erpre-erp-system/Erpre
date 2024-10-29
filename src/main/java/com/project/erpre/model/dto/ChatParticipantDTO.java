@@ -8,9 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-@Getter
-@Setter
-@ToString
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChatParticipantDTO {
@@ -19,10 +17,19 @@ public class ChatParticipantDTO {
     private String participantId;
     private String chatTitle;
 
-    // DTO -> Entity 변환 메서드
+    // DTO -> Entity 변환 메서드 (새 채팅방 생성)
     public ChatParticipantDTO(ChatParticipant chatParticipant) {
         this.chatNo = chatParticipant.getChat().getChatNo();
         this.participantId = chatParticipant.getEmployee().getEmployeeId();
         this.chatTitle = chatParticipant.getChatTitle();
+    }
+
+    // 내부 클래스 ChatTitleUpdateDTO (채팅방 이름 변경)
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ChatTitleUpdateDTO {
+        private Long chatNo;
+        private String chatTitle;
     }
 }

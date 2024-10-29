@@ -163,8 +163,9 @@ export const useMessengerHooks = () => {
         setIsLoading(true);
         axios.get('/api/messengers/chat/chatList')
             .then((response) => {
-                setChatList(response.data);
+                setChatList([...response.data]); // 새로운 배열로 상태 업데이트
                 setIsLoading(false);
+                console.log("채팅 목록 새로고침 완료:", response.data);
             })
             .catch((error) => {
                 console.error("채팅 목록을 새로 고치는 중 오류 발생:", error);

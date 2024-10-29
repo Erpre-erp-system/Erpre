@@ -6,8 +6,10 @@
     flex-direction: column;
     background-color: #ffffff;
     border-right: 1px solid #e0e0e0;
-    padding: 10px 20px 10px 20px;
+    padding: 3px 20px;
     margin: auto;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .chat-list-header {
@@ -49,6 +51,8 @@
     height: 80px;
     border-bottom: 1px solid #d5d5d5;
     transition: background-color 0.3s;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .chat-item:hover {
@@ -113,7 +117,6 @@
 .chat-time {
     font-size: 12px;
     color: #b2b2b2;
-    margin-left: 107px;
     position: absolute;
     right: 0;
     top: 0;
@@ -303,7 +306,7 @@
     display: none;
 }
 
-.pagination-container .pagination .box.active {
+.new-chat-modal .pagination-container .pagination .box.active {
     background-color: #f0f0f0 !important;
     border-color: #f0f0f0 !important;
     color: #333 !important;
@@ -311,29 +314,16 @@
 
 /* 직원 검색 */
 .modal_container.search_employee .table_wrap table th:nth-child(1),
-.modal_container.search_employee .table_wrap table td:nth-child(1) {
-    width: 16%;
-    cursor: pointer; /* 체크박스 */
-}
+.modal_container.search_employee .table_wrap table td:nth-child(1) { width: 16%; cursor: pointer; /* 체크박스 */ }
 .modal_container.search_employee .table_wrap table th:nth-child(2),
-.modal_container.search_employee .table_wrap table td:nth-child(2) {
-    width: 28%; /* 이름 */
-}
-
+.modal_container.search_employee .table_wrap table td:nth-child(2) { width: 28%; /* 이름 */ }
 .modal_container.search_employee .table_wrap table th:nth-child(3),
-.modal_container.search_employee .table_wrap table td:nth-child(3) {
-    width: 28%; /* 부서 */
-}
-
+.modal_container.search_employee .table_wrap table td:nth-child(3) { width: 28%; /* 부서 */ }
 .modal_container.search_employee .table_wrap table th:nth-child(4),
-.modal_container.search_employee .table_wrap table td:nth-child(4) {
-    width: 28%; /* 직급 */
-}
+.modal_container.search_employee .table_wrap table td:nth-child(4) { width: 28%; /* 직급 */ }
 
 /* 선택된 직원 목록 */
-.selected-employees {
-    margin: 10px 0;
-}
+.selected-employees { margin: 10px 0; }
 
 .selected-employees-list {
     list-style: none;
@@ -373,37 +363,75 @@
 .checkbox-container input[type="checkbox"] {
     appearance: none;
     -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     border: 2px solid #ddd;
-    border-radius: 4px;
+    border-radius: 50%;
+    /*border-radius: 4px;*/
     outline: none;
     cursor: pointer;
     position: relative;
 }
 
 .checkbox-container input[type="checkbox"]:checked {
-    background-color: #4ECDC4;
-    border-color: #4ECDC4;
+
 }
 
 .checkbox-container input[type="checkbox"]:checked::before {
-    content: "✓";
+    content: "";
+    background-color: #FCD53F;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: white;
-    font-size: 14px;
 }
 
 /* 우클릭 메뉴 */
 .context-menu {
-    position: absolute;
-    z-index: 20000;
+    position: fixed;
+    z-index: 2000;
     background: white;
     border: 1px solid #ccc;
     border-radius: 4px;
-    padding: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    visibility: visible;
+    white-space: nowrap;
+    color: black;
+    box-sizing: border-box;
+    width: 130px;
+    font-size: 16px;
+}
+
+.context-menu ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
+    height: 70px;
+}
+
+.context-menu ul li {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+}
+
+.context-menu ul li:hover { background-color: #F4F4F4; }
+
+/* #B1CAE3 #C9DAEC #F1F1F1*/
+
+/* sweetalert2 커스텀 */
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
+    background-color: #C9DAEC;
+}
+
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm):focus-visible {
+    box-shadow: 0 0 0 3px #F1F1F1;
 }

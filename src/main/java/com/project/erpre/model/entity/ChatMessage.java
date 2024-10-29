@@ -35,17 +35,12 @@ public class ChatMessage {
     @Column(nullable = false)
     private LocalDateTime chatSendDate;
 
-    @Column(nullable = false, length = 10)
-    private String chatMessageDeleteYn = "n";
-
-    private LocalDateTime chatMessageDeleteDate;
-
-    @OneToMany(mappedBy = "chatMessage")
+    @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     @ToString.Exclude
     private List<ChatMessageRead> chatMessageReads;
 
-    @OneToMany(mappedBy = "chatMessage")
+    @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     @ToString.Exclude
     private List<ChatFile> chatFiles;

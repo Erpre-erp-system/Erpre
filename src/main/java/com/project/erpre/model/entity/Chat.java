@@ -20,15 +20,12 @@ public class Chat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long chatNo;
 
-    @Column(name = "chat_origin_title", length = 50, nullable = false)
-    private String chatOriginTitle;
-
     @OneToMany(mappedBy = "chat")
     @JsonIgnore
     @ToString.Exclude
     private List<ChatParticipant> chatParticipantList;
 
-    @OneToMany(mappedBy = "chat")
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     @ToString.Exclude
     private List<ChatMessage> chatMessageList;
