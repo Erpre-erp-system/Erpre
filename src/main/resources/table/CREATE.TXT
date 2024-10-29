@@ -243,7 +243,7 @@ CREATE TABLE m_job (
 -- 19. 부서
 CREATE TABLE m_department (
     department_id         serial PRIMARY KEY,       -- 부서 ID (자동 증가)
-    department_name       varchar(50) NOT NULL,     -- 부서 이름 (CEO Office(대표이사비서실), Executive Office(대표비서실, 임원비서실), HR Department(인사부), Sales Department(영업부), IT Department(IT부서), Legal Department(법무부서), Marketing Department(마케팅부), Accounting Department(회계부서), TBD(미정), Dispatch Department(출고부))
+    department_name       varchar(50) NOT NULL,     -- 부서 이름 (Business Support(경영지원부), Strategic Planning(전략기획부), HR(인사부), Sales(영업부), IT(전산부), Legal(법무부), Marketing(마케팅부), Accounting(회계부), Dispatch(출고부))
     department_location   varchar(100),             -- 부서 위치 (예: 본사, 지사 등)
     department_tel        varchar(20),              -- 부서 연락처 (전화번호)
     department_insert_date timestamp NOT NULL DEFAULT current_timestamp,  -- 부서 등록 일시
