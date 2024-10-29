@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {FaComments, FaInfoCircle, FaSearch, FaUserAltSlash} from 'react-icons/fa';
+import {FaComments, FaInfoCircle, FaUserAltSlash} from 'react-icons/fa';
 import {BsEnvelope} from "react-icons/bs";
 import {SlOrganization} from "react-icons/sl"; // react icon 사용
 import Select from 'react-select'; // react-select 라이브러리
@@ -70,6 +70,10 @@ function Messenger({isOpen, toggleMessenger}) {
         closeChatModal,
 
         // 🟢 공통
+        messengerSearchText,
+        setMessengerSearchText,
+        handleSearchDel,
+        handleMessengerSearchTextChange,
         formatDate,
 
     } = useMessengerHooks();
@@ -117,72 +121,72 @@ function Messenger({isOpen, toggleMessenger}) {
     //         }
     //     ];
 
-        const buildTreeData = (data) => {
-            if (!Array.isArray(data)) {
-                console.warn('data가 배열이 아닙니다. 빈 배열로 설정합니다.');
-                data = [];
+    const buildTreeData = (data) => {
+        if (!Array.isArray(data)) {
+            console.warn('data가 배열이 아닙니다. 빈 배열로 설정합니다.');
+            data = [];
+        }
+
+        const departmentMap = {};
+        const tree = [
+            {
+                key: "0",
+                title: "Erpre",
+                icon: <span>🍎</span>,
+                children: []
+            }
+        ];
+
+        //     // 각 직원 데이터를 부서별로 그룹화
+        //     data.forEach(employee => {
+        //         const departmentName = employee.departmentName;
+        //         const employeeNode = {
+        //             key: employee.employeeId,
+        //             title: employee.employeeName,
+        //             isLeaf: true
+        //         };
+        //
+        //         // 해당 부서가 이미 존재하는지 확인
+        //         if (!departmentMap[departmentName]) {
+        //             const departmentNode = {
+        //                 key: employee.departmentId,
+        //                 title: departmentName,
+        //                 children: []
+        //             };
+        //             departmentMap[departmentName] = departmentNode;
+        //             tree[0].children.push(departmentNode);
+        //         }
+        //
+        //         departmentMap[departmentName].children.push(employeeNode);
+        //     });
+        //
+        //     return tree;
+        // }
+
+        // 각 직원 데이터를 부서별로 그룹화
+        data.forEach(employee => {
+            const departmentName = employee.departmentName;
+            const employeeNode = {
+                key: employee.employeeId,
+                title: employee.employeeName,
+                isLeaf: true
+            };
+
+            if (!departmentMap[departmentName]) {
+                const departmentNode = {
+                    key: employee.departmentId,
+                    title: departmentName,
+                    children: []
+                };
+                departmentMap[departmentName] = departmentNode;
+                tree[0].children.push(departmentNode);
             }
 
-            const departmentMap = {};
-            const tree = [
-                {
-                    key: "0",
-                    title: "Erpre",
-                    icon: <span>🍎</span>,
-                    children: []
-                }
-            ];
+            departmentMap[departmentName].children.push(employeeNode);
+        });
 
-    //     // 각 직원 데이터를 부서별로 그룹화
-    //     data.forEach(employee => {
-    //         const departmentName = employee.departmentName;
-    //         const employeeNode = {
-    //             key: employee.employeeId,
-    //             title: employee.employeeName,
-    //             isLeaf: true
-    //         };
-    //
-    //         // 해당 부서가 이미 존재하는지 확인
-    //         if (!departmentMap[departmentName]) {
-    //             const departmentNode = {
-    //                 key: employee.departmentId,
-    //                 title: departmentName,
-    //                 children: []
-    //             };
-    //             departmentMap[departmentName] = departmentNode;
-    //             tree[0].children.push(departmentNode);
-    //         }
-    //
-    //         departmentMap[departmentName].children.push(employeeNode);
-    //     });
-    //
-    //     return tree;
-    // }
-
-            // 각 직원 데이터를 부서별로 그룹화
-            data.forEach(employee => {
-                const departmentName = employee.departmentName;
-                const employeeNode = {
-                    key: employee.employeeId,
-                    title: employee.employeeName,
-                    isLeaf: true
-                };
-
-                if (!departmentMap[departmentName]) {
-                    const departmentNode = {
-                        key: employee.departmentId,
-                        title: departmentName,
-                        children: []
-                    };
-                    departmentMap[departmentName] = departmentNode;
-                    tree[0].children.push(departmentNode);
-                }
-
-                departmentMap[departmentName].children.push(employeeNode);
-            });
-
-            return tree;
-        }
+        return tree;
+    }
 
     // 상태 메시지 저장 여부 확인 창
     function handleStatusMessageSave() {
@@ -311,29 +315,30 @@ function Messenger({isOpen, toggleMessenger}) {
 
                         {/* 검색창 */}
                         {activeView !== 'info' && (
-                            <div className="search-bar">
-                                <div className="search-input-container">
-                                    <FaSearch className="search-icon"/>
+                            <div className="search-wrap">
+                                <div className={`search_box ${messengerSearchText ? 'has_text' : ''}`}>
+                                    <label className="label_floating">
+                                        {activeView === 'home' && '이름, 부서명' ||
+                                            activeView === 'message' && '보낸 사람, 내용' ||
+                                            activeView === 'chatList' && '참여자, 채팅방 이름, 메세지 내용'}
+                                    </label>
+                                    <i className="bi bi-search"></i>
                                     <input
                                         type="text"
-                                        placeholder={
-                                            activeView === 'home' && '이름, 부서를 입력해주세요' ||
-                                            activeView === 'message' && '보낸 사람, 내용을 입력해주세요' ||
-                                            activeView === 'chatList' && '참여자 및 채팅방 명을 입력해주세요'
-                                        }
-                                        onChange={(e) => {
-                                            if (activeView === 'home') {
-                                                // 이름, 부서 검색 로직 추가
-                                                console.log('조직도 검색:', e.target.value);
-                                            } else if (activeView === 'message') {
-                                                // 보낸 사람, 내용 검색 로직 추가
-                                                console.log('이름 또는 부서 검색:', e.target.value);
-                                            } else if (activeView === 'chatList') {
-                                                // 참여자, 채팅방 이름 검색 로직 추가
-                                                console.log('참여자, 채팅방 검색:', e.target.value);
-                                            }
-                                        }}
+                                        className="box search"
+                                        value={messengerSearchText}
+                                        onChange={handleMessengerSearchTextChange}
+                                        style={{ width: '265px' }}
                                     />
+                                    {/* 검색어 삭제 버튼 */}
+                                    {messengerSearchText && (
+                                        <button
+                                            className="btn-del"
+                                            onClick={() => handleSearchDel(setMessengerSearchText)}
+                                        >
+                                            <i className="bi bi-x"></i>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -342,7 +347,7 @@ function Messenger({isOpen, toggleMessenger}) {
                         {(activeView === 'home' || activeView === 'info') && (
                             <div className="messenger-user">
                                 <div className="erpre-logo">
-                                    <img src="/img/erpre.png" alt="회사 로고" />
+                                    <img src="/img/erpre.png" alt="회사 로고"/>
                                 </div>
                                 <div className="info">
                                     <div className="info-wrapper">
@@ -355,7 +360,7 @@ function Messenger({isOpen, toggleMessenger}) {
                                                     onChange={handleStatusChange}
                                                     options={userIcon}
                                                     styles={customStyles}
-                                                    components={{ Option, SingleValue }}
+                                                    components={{Option, SingleValue}}
                                                     isSearchable={false}
                                                 />
                                             </div>

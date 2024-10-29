@@ -1,9 +1,10 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import { UserContext } from '../../context/UserContext';
 import {FaUserAlt, FaUserAltSlash, FaUtensils} from "react-icons/fa";
 import {MdMeetingRoom, MdWork} from "react-icons/md";
 import {PiOfficeChairFill} from "react-icons/pi";
 import axios from "axios";
+import { useDebounce } from "../common/useDebounce";
 
 export const useMessengerHooks = () => {
 
@@ -122,24 +123,6 @@ export const useMessengerHooks = () => {
     // 🔴 채팅 목록 저장 state
     const [chatList, setChatList] = useState([]);
 
-    // 🔴 activeView가 chatList로 변경될 때 채팅 목록 API 호출 useEffect
-    useEffect(() => {
-        if (activeView === 'chatList') {
-            setIsLoading(true);
-            axios.get('/api/messengers/chat/chatList')
-                .then((response) => {
-                    setChatList(response.data);
-                    setIsLoading(false);
-
-                    console.log("불러온 채팅 목록:", response.data); // 디버깅용
-                })
-                .catch((error) => {
-                    console.error('채팅 목록 조회 실패:', error);
-                    setIsLoading(false);
-                });
-            }
-    }, [activeView]);
-
     // 🔴 개별 채팅 모달
     const [selectedChat, setSelectedChat] = useState(() => localStorage.getItem('selectedChat') || null);
     const [isChatModalOpen, setIsChatModalOpen] = useState(() => localStorage.getItem('isChatModalOpen') === 'true');
@@ -158,21 +141,18 @@ export const useMessengerHooks = () => {
         localStorage.setItem('isChatModalOpen', false);
     };
 
-    // 🔴 채팅 목록 새로고침 함수
-    const refreshChatList = () => {
-        setIsLoading(true);
-        axios.get('/api/messengers/chat/chatList')
-            .then((response) => {
-                setChatList([...response.data]); // 새로운 배열로 상태 업데이트
-                setIsLoading(false);
-                console.log("채팅 목록 새로고침 완료:", response.data);
-            })
-            .catch((error) => {
-                console.error("채팅 목록을 새로 고치는 중 오류 발생:", error);
-                setIsLoading(false);
-            });
-    };
-    
+    // 🟢  검색 state
+    const [messengerSearchText, setMessengerSearchText] = useState('');
+    const debouncedSearchText = useDebounce(messengerSearchText, 300);
+
+    // 🟢 검색어 변경 함수
+    const handleMessengerSearchTextChange = (event) => {
+        setMessengerSearchText(event.target.value);
+    }
+    const handleSearchDel = () => {
+        setMessengerSearchText('')
+    }
+
     // 🟢 날짜 변환 함수
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -192,7 +172,63 @@ export const useMessengerHooks = () => {
         return `${year}-${month}-${day} ${hours}:${minutes}`;
     };
 
+    // 🔴 activeView에 따른 채팅 목록 API 호출 useEffect
+    useEffect(() => {
+        if (activeView === 'chatList') {
+            fetchChatList(debouncedSearchText);
+        }
+    }, [activeView, debouncedSearchText, fetchChatList]);
 
+    // 🔴 목록 조회 fetch data
+    const fetchChatList = useCallback((keyword) => {
+        setIsLoading(true);
+        const params = keyword ? { searchKeyword: keyword } : {}; // 검색어가 있으면 추가, 없으면 전체 조회
+
+        axios.get('/api/messengers/chat/chatList', { params })
+            .then((response) => {
+                const newChatList = response.data;
+                if (JSON.stringify(chatList) !== JSON.stringify(newChatList)) {
+                    setChatList(newChatList);
+                }
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.error('채팅 목록 조회 실패:', error);
+                setIsLoading(false);
+            });
+    }, [chatList]);
+
+    // 🔴 검색어에 따른 채팅 목록 API 호출 useEffect
+    const searchChatList = useCallback((keyword) => {
+        setIsLoading(true);
+        const params = keyword ? { searchKeyword: keyword } : {}; // 검색어가 없으면 전체 조회
+
+        axios.get('/api/messengers/chat/chatList', { params })
+            .then((response) => {
+                setChatList(response.data);
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.error('채팅 목록 검색 실패:', error);
+                setIsLoading(false);
+            });
+    }, []);
+
+    // 🔴 검색어 변경에 따른 채팅 목록 검색 useEffect
+    useEffect(() => {
+        if (activeView === 'chatList') {
+            searchChatList(debouncedSearchText);
+        }
+    }, [activeView, debouncedSearchText, searchChatList]);
+
+
+    // refreshChatList 쓰는 곳 fetchdata로 바꾸는 작업 하기
+    // 🔴 채팅 목록 새로고침 함수
+    const refreshChatList = () => {
+        fetchChatList(''); // 검색어 없이 전체 목록을 새로고침
+    };
+
+    // 검색어든 채팅이든 훅 분리하기,,
 
     /////////////////////////////////////////////////////////////////////////
     return {
@@ -222,6 +258,10 @@ export const useMessengerHooks = () => {
         closeChatModal,
 
         // 🟢 공통
+        messengerSearchText,
+        setMessengerSearchText,
+        handleSearchDel,
+        handleMessengerSearchTextChange,
         formatDate,
 
 

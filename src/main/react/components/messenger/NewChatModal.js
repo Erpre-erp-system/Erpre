@@ -2,9 +2,6 @@ import React, {useCallback, useEffect, useState} from 'react';
 import { useDebounce } from "../common/useDebounce";
 import Pagination from "../common/Pagination";
 import axios from "axios";
-import {MdCheckCircle} from "react-icons/md";
-import {IoMdCheckmarkCircleOutline} from "react-icons/io";
-import {FaTrashAlt} from "react-icons/fa";
 import {TiDelete} from "react-icons/ti";
 
 const NewChatModal = ({ closeNewChatModal, refreshChatList }) => {

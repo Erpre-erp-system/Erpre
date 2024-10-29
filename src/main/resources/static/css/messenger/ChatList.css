@@ -373,10 +373,6 @@
     position: relative;
 }
 
-.checkbox-container input[type="checkbox"]:checked {
-
-}
-
 .checkbox-container input[type="checkbox"]:checked::before {
     content: "";
     background-color: #FCD53F;
@@ -418,7 +414,6 @@
     flex: 1;
     display: flex;
     align-items: center;
-    justify-content: center;
     padding: 0;
     cursor: pointer;
 }

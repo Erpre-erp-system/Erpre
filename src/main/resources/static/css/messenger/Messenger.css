@@ -94,39 +94,26 @@ h3 {
 }
 
 /* 검색창 */
-.search-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.search-wrap {
     margin: 10px 0;
-    padding: 0 20px;
+    padding: 10px 20px 0 20px;
 }
 
-.search-input-container {
-    display: flex;
-    align-items: center;
-    background-color: #f4f4f4;
-    border-radius: 20px;
-    width: 100%;
-    padding: 5px 10px;
-    height: 35px;
+.messenger-panel .search_box.has_text {
+    border-color: black;
 }
 
-.search-input-container .search-icon {
-    font-size: 20px;
-    color: #999;
-    margin-right: 10px;
-    margin-left: 5px;
+.messenger-panel .search_box.has_text .label_floating, .select_box.selected .label_floating {
+    color: black;
 }
 
-.search-input-container input {
-    border: none;
-    margin-left: 5px;
-    background-color: transparent;
-    outline: none;
-    font-size: 15px;
-    color: #333;
-    width: 100%;
+.messenger-panel .search_box.has_text button i {
+    display: inline;
+    color: black;
+    position: absolute;
+    cursor: pointer;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 /* 유저 프로필*/
