@@ -6,8 +6,6 @@ import { BrowserRouter } from "react-router-dom";
 import '../../../resources/static/css/hr/EmployeeList.css';
 import { formatDate } from '../../util/dateUtils';
 import { useDebounce } from '../common/useDebounce';
-import DatePicker from 'react-datepicker';   //날짜 선택 추가
-import 'react-datepicker/dist/react-datepicker.css'; //날짜 선택 스타일 추가
 
 const ITEMS_PER_PAGE = 20;
 
@@ -20,14 +18,17 @@ function EmployeeAttend() {
     const [selectedAttendances, setSelectedAttendances] = useState([]);
     const [searchAttendance, setSearchAttendance] = useState('');
     const debouncedSearchAttendance = useDebounce(searchAttendance, 300);
-    // 날짜 선택 상태 관리 (Date 객체 사용)
-    const [deliveryDate, setDeliveryDate] = useState(new Date());
 
-    const handleDateChange = (date) => {
-        setDeliveryDate(date);
+    // 날짜 선택 상태 관리 (초기값: 오늘 날짜)
+    const [deliveryDate, setDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
+
+    // 날짜 변경 핸들러
+    const handleDateChange = (e) => {
+        setDeliveryDate(e.target.value); // 선택된 날짜를 YYYY-MM-DD 형식으로 설정
     };
 
     useEffect(() => {
+        // 모의 데이터 생성
         const mockData = [
             {
                 attendanceId: 1,
@@ -140,19 +141,19 @@ function EmployeeAttend() {
                                     </button>
                                 )}
                             </div>
-                        </div>
-                        <div>
-                                                <DatePicker
-                                                    label="근태조회일"
-                                                    value={deliveryDate}
-                                                    onChange={handleDateChange}
-                                                    minDate={new Date().toISOString().split('T')[0]} // 오늘 이후 날짜만 선택 가능
-                                                />
-                                                <p>선택된 날짜: {deliveryDate ? deliveryDate.toLocaleDateString() : '날짜를 선택하세요'}</p>
-
+                            <div>
+                                <label htmlFor="deliveryDate">근태조회일</label>
+                                <input
+                                    type="date"
+                                    id="deliveryDate"
+                                    value={deliveryDate}
+                                    onChange={handleDateChange}
+                                    max={new Date().toISOString().split('T')[0]} // 오늘 포함 이전 날짜 선택 가능
+                                />
+                                <p>선택된 날짜: {deliveryDate || '날짜를 선택하세요'}</p>
+                            </div>
                         </div>
                     </div>
-
 
                     <div className="table_wrap">
                         <table>
