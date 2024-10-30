@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/messengers")
@@ -53,11 +54,7 @@ public class MessengerController {
     }
 
 
-    // 특정 채팅방 상세 조회 API (새 창)
-    @GetMapping("/chat/{chatNo}")
-    public List<ChatMessageDTO> getChatDetails(@PathVariable Long chatNo, String searchKeyword) {
-        return messengerService.getSelectedChat(chatNo, searchKeyword);
-    }
+
 
 
     /////////////////////////////////////////////////////////////////////// 🔴 채팅
@@ -68,14 +65,22 @@ public class MessengerController {
         return messengerService.getChatListByUser(searchKeyword);
     }
 
-    // 새 채팅방 생성
+    //  개별 채팅방 조회 API
+    @GetMapping("/chat/{chatNo}")
+    public ResponseEntity<Map<String, Object>> getSelectedChat(@PathVariable Long chatNo,
+                                                               @RequestParam(required = false) String searchKeyword) {
+        Map<String, Object> response = messengerService.getSelectedChat(chatNo, searchKeyword);
+        return ResponseEntity.ok(response);
+    }
+
+    // 새 채팅방 생성 API
     @PostMapping("/chat/create")
     public ResponseEntity<ChatDTO> createChatRoom(@RequestBody List<String> participantIds) {
         ChatDTO newChatRoom = messengerService.createChatRoom(participantIds);
         return ResponseEntity.ok(newChatRoom);
     }
 
-    // 채팅방 이름 변경
+    // 채팅방 이름 변경 API
     @PutMapping("/chat/update/title")
     public ResponseEntity<Void> updateChatTitle(@RequestBody ChatParticipantDTO.ChatTitleUpdateDTO chatTitleUpdateDTO) {
         Long chatNo = chatTitleUpdateDTO.getChatNo();
@@ -85,7 +90,7 @@ public class MessengerController {
         return ResponseEntity.ok().build();
     }
 
-    // 채팅방 나가기
+    // 채팅방 나가기 API
     @DeleteMapping("/chat/delete/{chatNo}")
     public ResponseEntity<String> leaveChatRoom(@PathVariable Long chatNo) {
         try {
@@ -95,6 +100,7 @@ public class MessengerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("채팅방 나가기 실패: " + e.getMessage());
         }
     }
+
 
 
 }

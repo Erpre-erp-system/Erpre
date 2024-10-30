@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {FaComments, FaInfoCircle, FaUserAltSlash} from 'react-icons/fa';
 import {BsEnvelope} from "react-icons/bs";
 import {SlOrganization} from "react-icons/sl"; // react icon 사용
@@ -63,7 +63,7 @@ function Messenger({isOpen, toggleMessenger}) {
 
         // 🔴 채팅
         chatList,
-        refreshChatList,
+        fetchChatList,
         selectedChat,
         isChatModalOpen,
         openChatModal,
@@ -108,6 +108,7 @@ function Messenger({isOpen, toggleMessenger}) {
             setExpandedKeys(allKeys);  // 모든 노드를 확장
         }
     }, [treeData]);
+
 
     // 서버에서 받은 평면 데이터를 트리 구조로 변환하는 함수
     // const buildTreeData = (data) => {
@@ -290,19 +291,7 @@ function Messenger({isOpen, toggleMessenger}) {
                     <div className="button bottom"></div>
                 </div>
 
-                {/* 로딩 적용*/}
-                {isLoading ? (
-                    <div className="tr_empty">
-                        <div colSpan="10">
-                            <div className="loading">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <>
+
                         {/* 메신저 헤더 */}
                         <div className="messenger-header"><h3>
                             {activeView === 'home' && 'ERPRE'}
@@ -315,7 +304,7 @@ function Messenger({isOpen, toggleMessenger}) {
 
                         {/* 검색창 */}
                         {activeView !== 'info' && (
-                            <div className="search-wrap">
+                            <div className="search-wrap messenger-search">
                                 <div className={`search_box ${messengerSearchText ? 'has_text' : ''}`}>
                                     <label className="label_floating">
                                         {activeView === 'home' && '이름, 부서명' ||
@@ -374,6 +363,20 @@ function Messenger({isOpen, toggleMessenger}) {
                             </div>
                         )}
 
+                {/* 로딩 적용*/}
+                {isLoading ? (
+                    <div className="tr_empty">
+                        <div>
+                            <div className="loading">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+
                         {/* 메신저 본문 동적 뷰*/}
                         {activeView === 'home' &&
                             <Home
@@ -385,7 +388,8 @@ function Messenger({isOpen, toggleMessenger}) {
                         {activeView === 'chatList' &&
                             <ChatList
                                 chatList={chatList}
-                                refreshChatList={refreshChatList}
+                                setChatList={setChatList}
+                                fetchChatList={fetchChatList}
                                 formatDate={formatDate}
                                 selectedChat={selectedChat}
                                 isChatModalOpen={isChatModalOpen}

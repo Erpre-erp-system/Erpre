@@ -4,7 +4,7 @@ import Pagination from "../common/Pagination";
 import axios from "axios";
 import {TiDelete} from "react-icons/ti";
 
-const NewChatModal = ({ closeNewChatModal, refreshChatList }) => {
+const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
 
     // 🔴 로딩 state
     const [isLoading, setLoading] = useState(false);
@@ -168,7 +168,7 @@ const NewChatModal = ({ closeNewChatModal, refreshChatList }) => {
 
             console.log('채팅방 생성 성공', response.data)
 
-            refreshChatList();
+            fetchChatList();
             closeNewChatModal();
 
         } catch (error) {
@@ -192,7 +192,7 @@ const NewChatModal = ({ closeNewChatModal, refreshChatList }) => {
                             className="box search"
                             value={employeeSearchText}
                             onChange={handleEmployeeSearchTextChange}
-                            style={{ width: '250px' }}
+                            style={{ width: '280px' }}
                         />
                         {/* 검색어 삭제 버튼 */}
                         {employeeSearchText && (

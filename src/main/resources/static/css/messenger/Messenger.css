@@ -107,10 +107,10 @@ h3 {
     color: black;
 }
 
-.messenger-panel .search_box.has_text button i {
+.messenger-panel .messenger-search .search_box.has_text button i {
     display: inline;
     color: black;
-    position: absolute;
+    position: absolute !important;
     cursor: pointer;
     top: 50%;
     transform: translateY(-50%);

@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import axios from "axios";
 
 
-    const ChatList = ({ chatList, formatDate, isChatModalOpen, selectedChat, openChatModal, closeChatModal, refreshChatList }) => {
+    const ChatList = ({ chatList, setChatList, formatDate, isChatModalOpen, selectedChat, openChatModal, closeChatModal, fetchChatList }) => {
 
         const [isNewChatModalOpen, setNewChatModalOpen] = useState(false);
 
@@ -122,7 +122,7 @@ import axios from "axios";
 
                 console.log('채팅방 이름 업데이트:', response.data)
 
-                refreshChatList();
+                fetchChatList();
             } catch (error) {
                 console.error('채팅방 이름 업데이트 중 오류 발생', error);
             }
@@ -133,9 +133,7 @@ import axios from "axios";
             try {
                 const response
                     = await axios.delete(`/api/messengers/chat/delete/${ChatNo}`);
-
-                console.log('해당 채팅방을 나감', response.data)
-                refreshChatList();
+                fetchChatList();
             } catch (error) {
                 console.error('채팅방을 나가는 중 오류 발생', error)
             }
@@ -225,18 +223,22 @@ import axios from "axios";
                     <div className="new-chat-modal-content">
                         <NewChatModal
                             closeNewChatModal={closeNewChatModal}
-                            refreshChatList={refreshChatList}
+                            fetchChatList={fetchChatList}
                         />
                     </div>
                 </div>
             )}
 
-            {/* 특정 채팅 조회 모달 */}
+            {/* 개별 채팅방 조회 모달 */}
             {isChatModalOpen && (
                 <div>
                     <ChatRoomModal
+                        chatList={chatList}
+                        setChatList={setChatList}
                         chatNo={selectedChat}
                         closeChatModal={closeChatModal}
+                        formatDate={formatDate}
+                        fetchChatList={fetchChatList}
                     />
                 </div>
             )}

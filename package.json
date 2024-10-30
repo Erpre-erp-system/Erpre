@@ -23,6 +23,7 @@
   "dependencies": {
     "@minoru/react-dnd-treeview": "^3.4.4",
     "@remix-run/router": "^1.20.0",
+    "@stomp/stompjs": "^7.0.0",
     "@types/react-modal": "^3.16.3",
     "antd": "^5.21.5",
     "axios": "^1.7.7",
@@ -58,7 +59,6 @@
     "react-scripts": "^5.0.1",
     "react-select": "^5.8.1",
     "sockjs-client": "^1.6.1",
-    "stompjs": "^2.3.3",
     "sweetalert2": "^11.14.4",
     "sweetalert2-react-content": "^5.0.7",
     "url": "^0.11.4"
@@ -67,6 +67,7 @@
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.4",
     "@babel/preset-react": "^7.24.7",
+    "@types/sockjs-client": "^1.5.4",
     "babel-loader": "^9.1.3",
     "cross-env": "^7.0.3",
     "css-loader": "^7.1.2",

@@ -131,7 +131,8 @@
     text-overflow: ellipsis;
 }
 
-/* 채팅방 모달 */
+/* 채팅방  */
+
 .chat-room {
     width: 380px;
     height: 550px;
@@ -141,9 +142,14 @@
     display: flex;
     flex-direction: column;
     position: fixed;
-    top: 50%;
-    left: 50%;
+    top: 12%;
+    left: 39%;
+    transform: translate(-50%, -50%);
     z-index: 10011;
+}
+
+.chat-room-modal {
+    color: black;
 }
 
 .chat-room-header {
@@ -218,20 +224,25 @@
     border-top: 1px solid #ddd;
 }
 
+.file-icon {
+    font-size: 18px;
+    color: #5b5b5f;
+    margin-right: 5px;
+}
+
 .chat-room-footer input[type="text"] {
     flex: 1;
     padding: 8px;
-    border-radius: 20px;
     border: 1px solid #ddd;
     outline: none;
 }
 
 .chat-room-footer button {
-    background-color: #007bff;
+    background-color: #0057A2;
     color: #fff;
     border: none;
     padding: 8px 12px;
-    border-radius: 20px;
+    border-radius: 4px;
     cursor: pointer;
 }
 
@@ -321,6 +332,17 @@
 .modal_container.search_employee .table_wrap table td:nth-child(3) { width: 28%; /* 부서 */ }
 .modal_container.search_employee .table_wrap table th:nth-child(4),
 .modal_container.search_employee .table_wrap table td:nth-child(4) { width: 28%; /* 직급 */ }
+
+.search_employee .search_box.has_text .btn-del {
+    color: black;
+}
+
+.search_employee .messenger-panel .search_box.has_text button i {
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+}
+
 
 /* 선택된 직원 목록 */
 .selected-employees { margin: 10px 0; }

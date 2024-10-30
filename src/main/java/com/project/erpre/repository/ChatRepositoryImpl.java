@@ -23,7 +23,7 @@ public class ChatRepositoryImpl implements ChatRepositoryCustom {
         this.queryFactory = new JPAQueryFactory(entityManager);
     }
 
-    // 1. 현재 참여하고 있는 채팅 목록 조회 및 검색
+    // 1. 현재 참여하고 있는 채팅 목록 조회 및 검색 
     @Override
     public List<ChatDTO> getChatListByUser(String employeeId, String searchKeyword) {
         QChat chat = QChat.chat;
@@ -70,7 +70,7 @@ public class ChatRepositoryImpl implements ChatRepositoryCustom {
                 .fetch();
     }
 
-    // 검색 조건 관리
+    // 1 -1. 검색 조건 관리
     private BooleanExpression searchKeywordIsNullOrEmpty(String searchKeyword) {
         if (searchKeyword == null || searchKeyword.isEmpty()) {
             return null;
@@ -84,33 +84,75 @@ public class ChatRepositoryImpl implements ChatRepositoryCustom {
     }
 
 
-    // 2. 선택된 채팅방 조회
+    // 2. 개별 채팅방 조회
     @Override
-    public List<ChatMessageDTO> getSelectedChat(Long chatNo, String searchKeyword) {
-        QChat chat = QChat.chat;
-        QChatParticipant chatParticipant = QChatParticipant.chatParticipant;
+    public List<ChatMessageDTO> getSelectedChat(Long chatNo, String searchKeyword, String employeeId) {
         QChatMessage chatMessage = QChatMessage.chatMessage;
         QChatFile chatFile = QChatFile.chatFile;
+        QChatParticipant chatParticipant = QChatParticipant.chatParticipant;
+        QChatMessageRead chatMessageRead = QChatMessageRead.chatMessageRead;
+
+        QChatParticipant subChatParticipant = new QChatParticipant("subChatParticipant");
+        QChatMessageRead subChatMessageRead = new QChatMessageRead("subChatMessageRead");
 
         return queryFactory
                 .select(Projections.constructor(ChatMessageDTO.class,
                         chatMessage.chatMessageNo,
-                        chatMessage.chat.chatNo,
-                        chatMessage.employee.employeeId,
-                        chatMessage.employee.employeeName,
+                        chatMessage.employee.employeeId, // 발신자의 ID (보낸 메세지 띄울 때 프론트단에서 비교할 것)
+                        chatMessage.employee.employeeName, // 발신자의 이름
                         chatMessage.chatMessageContent,
                         chatMessage.chatSendDate,
+
+                        // 로그인한 사용자의 chatTitle 조회
+                        JPAExpressions.select(subChatParticipant.chatTitle)
+                                .from(subChatParticipant)
+                                .where(subChatParticipant.chat.chatNo.eq(chatNo)
+                                        .and(subChatParticipant.chatParticipantId.participantId.eq(employeeId))),
+
                         chatFile.chatFileName,
-                        chatFile.chatFileUrl
+                        chatFile.chatFileUrl,
+                        chatFile.chatFileSize,
+                        chatFile.chatFileType,
+
+                        chatMessageRead.chatMessageReadYn, // 현재 메세지 읽음 여부 상태
+
+                        // 특정 메세지를 읽지 않은 사람의 수 조회
+                        JPAExpressions.select(subChatMessageRead.count())
+                                .from(subChatMessageRead)
+                                .where(subChatMessageRead.chatMessage.chatMessageNo.eq(chatMessage.chatMessageNo)
+                                        .and(subChatMessageRead.chatMessageReadYn.eq("N"))),
+
+                        // 채팅 참여자 수
+                        JPAExpressions.select(subChatParticipant.chatParticipantId.chatNo.count())
+                                .from(subChatParticipant)
+                                .where(subChatParticipant.chat.chatNo.eq(chatNo))
                 ))
                 .from(chatMessage)
                 .leftJoin(chatFile).on(chatFile.chatMessage.chatMessageNo.eq(chatMessage.chatMessageNo))
+                .leftJoin(chatParticipant).on(chatParticipant.chat.chatNo.eq(chatMessage.chat.chatNo))
+                .leftJoin(chatMessageRead)
+                .on(chatMessageRead.chatMessage.chatMessageNo.eq(chatMessage.chatMessageNo)
+                        .and(chatMessageRead.employee.employeeId.eq(chatMessage.employee.employeeId))) // 메시지 수신자 ID와 비교, 같으면 읽음여부가 'y'로 업데이트되는 메서드 추가하기
                 .where(
                         chatMessage.chat.chatNo.eq(chatNo)
-                                .and(searchKeywordIsNullOrEmpty(searchKeyword))
+                                .and(searchKeywordIsNullOrEmptyWithoutChatTitle(searchKeyword))
                 )
                 .orderBy(chatMessage.chatSendDate.asc())
                 .fetch();
     }
+
+    // 2 - 1. 검색 조건 관리
+    private BooleanExpression searchKeywordIsNullOrEmptyWithoutChatTitle(String searchKeyword) {
+        if (searchKeyword == null || searchKeyword.isEmpty()) {
+            return null;
+        }
+        QChatParticipant chatParticipant = QChatParticipant.chatParticipant;
+        QChatMessage chatMessage = QChatMessage.chatMessage;
+
+        return chatParticipant.employee.employeeName.containsIgnoreCase(searchKeyword)
+                .or(chatMessage.chatMessageContent.containsIgnoreCase(searchKeyword));
+    }
+    
+    // 3. 특정 메세지 읽음 관리
 
 }

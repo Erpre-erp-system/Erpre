@@ -2,17 +2,13 @@ package com.project.erpre.service;
 
 import com.project.erpre.model.dto.ChatDTO;
 import com.project.erpre.model.dto.ChatMessageDTO;
-import com.project.erpre.model.dto.ChatParticipantDTO;
-import com.project.erpre.model.dto.EmployeeDTO;
-import com.project.erpre.model.entity.Chat;
-import com.project.erpre.model.entity.ChatParticipant;
-import com.project.erpre.model.entity.ChatParticipantId;
-import com.project.erpre.model.entity.Employee;
+import com.project.erpre.model.entity.*;
 import com.project.erpre.repository.ChatParticipantRepository;
 import com.project.erpre.repository.ChatRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.project.erpre.repository.EmployeeRepository;
+import com.project.erpre.repository.ChatMessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,7 +16,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -32,23 +30,19 @@ public class MessengerService {
     private final ChatRepository chatRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final EmployeeRepository employeeRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Autowired
-    public MessengerService(ChatRepository chatRepository, ChatParticipantRepository chatParticipantRepository, EmployeeRepository employeeRepository) {
+    public MessengerService(ChatRepository chatRepository, ChatParticipantRepository chatParticipantRepository, EmployeeRepository employeeRepository, ChatMessageRepository chatMessageRepository) {
         this.chatRepository = chatRepository;
         this.chatParticipantRepository = chatParticipantRepository;
         this.employeeRepository = employeeRepository;
-    }
-
-
-    // 2. 선택된 채팅방 조회
-    public List<ChatMessageDTO> getSelectedChat(Long chatNo, String searchKeyword) {
-        String employeeId = getEmployeeIdFromAuthentication();
-        return chatRepository.getSelectedChat(chatNo, searchKeyword);
+        this.chatMessageRepository = chatMessageRepository;
     }
 
 
     /////////////////////////////////////////////////////////////////////// 🟢 공통
+
 
     // 사용자 인증
     private String getEmployeeIdFromAuthentication() {
@@ -64,6 +58,7 @@ public class MessengerService {
         }
     }
 
+
     /////////////////////////////////////////////////////////////////////// 🔴 채팅
 
 
@@ -71,6 +66,18 @@ public class MessengerService {
     public List<ChatDTO> getChatListByUser(String searchKeyword){
         String employeeId = getEmployeeIdFromAuthentication();
         return chatRepository.getChatListByUser(employeeId, searchKeyword);
+    }
+
+    // 개별 채팅방 조회 및 검색 (📌검색 프론트에서 아직 구현 안 함, 하자!)
+    public Map<String, Object> getSelectedChat(Long chatNo, String searchKeyword) {
+        String employeeId = getEmployeeIdFromAuthentication();
+        List<ChatMessageDTO> chatMessages = chatRepository.getSelectedChat(chatNo, searchKeyword, employeeId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("employeeId", employeeId);
+        response.put("chatMessages", chatMessages);
+
+        return response;
     }
 
     // 새 채팅방 생성
@@ -167,6 +174,25 @@ public class MessengerService {
             // 채팅방은 유지되고 참여자만 삭제됨
             logger.info("채팅방 유지");
         }
+    }
+    
+    // 채팅 메시지 저장
+    public ChatMessageDTO saveChatMessage(Long chatNo, ChatMessageDTO chatMessage, String employeeId) {
+
+        Chat chat = chatRepository.findById(chatNo)
+                .orElseThrow(() -> new RuntimeException("해당 채팅방을 찾을 수 없습니다: " + chatNo));
+
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("해당 직원을 찾을 수 없습니다: " + employeeId));
+
+        ChatMessage newMessage = new ChatMessage();
+        newMessage.setChat(chat);
+        newMessage.setEmployee(employee);
+        newMessage.setChatMessageContent(chatMessage.getChatMessageContent());
+
+        ChatMessage savedMessage = chatMessageRepository.save(newMessage);
+
+        return new ChatMessageDTO(savedMessage);
     }
 
 

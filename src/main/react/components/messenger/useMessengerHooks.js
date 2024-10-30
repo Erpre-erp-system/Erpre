@@ -11,6 +11,7 @@ export const useMessengerHooks = () => {
     /////////////////////////////////////////////////////////////////////////
     // ⭐ 동적 뷰
     // 🔵 유저
+    // 🟣 쪽지
     // 🔴 채팅
     // 🟢 공통
     /////////////////////////////////////////////////////////////////////////
@@ -175,9 +176,13 @@ export const useMessengerHooks = () => {
     // 🔴 activeView에 따른 채팅 목록 API 호출 useEffect
     useEffect(() => {
         if (activeView === 'chatList') {
-            fetchChatList(debouncedSearchText);
+            if (debouncedSearchText) {
+                searchChatList(debouncedSearchText);
+            } else {
+                fetchChatList();
+            }
         }
-    }, [activeView, debouncedSearchText, fetchChatList]);
+    }, [activeView, debouncedSearchText, fetchChatList, searchChatList]);
 
     // 🔴 목록 조회 fetch data
     const fetchChatList = useCallback((keyword) => {
@@ -222,14 +227,6 @@ export const useMessengerHooks = () => {
     }, [activeView, debouncedSearchText, searchChatList]);
 
 
-    // refreshChatList 쓰는 곳 fetchdata로 바꾸는 작업 하기
-    // 🔴 채팅 목록 새로고침 함수
-    const refreshChatList = () => {
-        fetchChatList(''); // 검색어 없이 전체 목록을 새로고침
-    };
-
-    // 검색어든 채팅이든 훅 분리하기,,
-
     /////////////////////////////////////////////////////////////////////////
     return {
 
@@ -251,7 +248,7 @@ export const useMessengerHooks = () => {
 
         // 🔴 채팅
         chatList,
-        refreshChatList,
+        fetchChatList,
         selectedChat,
         isChatModalOpen,
         openChatModal,

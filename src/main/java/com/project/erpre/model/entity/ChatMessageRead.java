@@ -8,9 +8,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "m_chat_message_read")
-@Getter
-@Setter
-@ToString
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatMessageRead {
@@ -29,14 +27,22 @@ public class ChatMessageRead {
     private Employee employee;
 
     @Column(nullable = false, length = 10)
-    private String chatMessageReadYn = "n";
+    private String chatMessageReadYn;
 
-    @Column(nullable = false, length=10)
-    private String chatMessageDeleteYn = "n";
+    @Column(nullable = false, length = 10)
+    private String chatMessageDeleteYn;
 
     @ToString.Exclude // 순환참조방지
     @JsonIgnore
     @OneToMany(mappedBy = "chatMessageRead", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMessageReadFile> chatMessageReadFiles;
+
+    // 기본값 설정
+    @PrePersist
+    public void setDefaultValues() {
+        if (this.chatMessageReadYn == null) {
+            this.chatMessageReadYn = "N";
+        }
+    }
 
 }

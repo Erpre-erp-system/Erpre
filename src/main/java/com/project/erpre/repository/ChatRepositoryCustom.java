@@ -11,5 +11,5 @@ public interface ChatRepositoryCustom {
     List<ChatDTO> getChatListByUser(String employeeId, String searchKeyword);
 
     // 2. 선택된 채팅방 조회
-    public List<ChatMessageDTO> getSelectedChat(Long chatNo, String searchKeyword);
+    public List<ChatMessageDTO> getSelectedChat(Long chatNo, String searchKeyword, String employeeId);
 }

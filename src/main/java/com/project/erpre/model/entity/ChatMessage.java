@@ -11,9 +11,7 @@ import java.util.List;
 @Table(name = "m_chat_message")
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@ToString
+@Data
 public class ChatMessage {
 
     @Id
@@ -44,5 +42,11 @@ public class ChatMessage {
     @JsonIgnore
     @ToString.Exclude
     private List<ChatFile> chatFiles;
+
+    // 엔티티가 처음 저장될 때 현재 시간을 자동으로 설정
+    @PrePersist
+    public void prePersist() {
+        this.chatSendDate = (this.chatSendDate == null) ? LocalDateTime.now() : this.chatSendDate;
+    }
 
 }
