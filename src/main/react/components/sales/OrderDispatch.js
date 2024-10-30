@@ -525,9 +525,6 @@ function ConfirmationModal({ message, onConfirm, onCancel }) {
 //주문 출고
 function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
 
-    // 권한 설정 (실제로는 로그인 정보로부터 받아와야 함)
-    const [role, setRole] = useState('admin');
-
     // 로딩 상태
     const [loading, setLoading] = useState(false);
 
@@ -606,13 +603,6 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
     const filteredDispatches = useMemo(() => {
         let filtered = dispatches;
 
-        // 권한에 따른 필터링
-        if (role !== 'admin') {
-            // 현재 사용자 ID로 필터링 (예시로 userId 1 사용)
-            const currentUserId = 1;
-            filtered = filtered.filter(dispatch => dispatch.employeeId === currentUserId);
-        }
-
         // 검색어 필터링
         if (searchTerm) {
             filtered = filtered.filter(dispatch => {
@@ -638,7 +628,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
         }
 
         return filtered;
-    }, [dispatches, role, searchTerm, searchField, sortColumn, sortOrder]);
+    }, [dispatches, searchTerm, searchField, sortColumn, sortOrder]);
 
     // 필터 타입 변경 핸들러 (출고 상태 필터)
     const handleFilterTypeChange = (e) => {
@@ -821,20 +811,18 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
 
     return (
         <Layout currentMenu="orderDispatch">
-             <main className={`main-content menu_orderDispatch ${role === 'admin' ? 'role_admin' : 'role_normal'}`}>
+             <main className={`main-content menu_orderDispatch `}>
                  {/* 제목 영역 */}
                  <div className="menu_title">
                     <div className="sub_title">영업 관리</div>
-                    <div className="main_title">
-                        {!loading ? (role === 'admin' ? '전체 출고 목록' : '담당 출고 목록') : '출고 목록'}
-                    </div>
+                    <div className="main_title">주문 출고</div>
                  </div>
                 <div className="menu_content">
                     <div className="search_wrap">
                         <div className="left"> {/* 검색, 상태필터 */}
                         {/* 검색 영역 */}
                         <select className="box" onChange={handleSearchFieldChange} value={searchField}>
-                            value={filterType}>
+                            value={filterType}
                             <option value="customer">고객사</option>
                             <option value="productName">상품명</option>
                             <option value="warehouse">출고창고명</option>
@@ -898,7 +886,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                             {/* 테이블 헤더 */}
                             <thead>
                                 <tr>
-                                  {role === 'admin' && (
+                                  {
                                         <th className="checkbox-input">
                                             <label className="chkbox_label">
                                                 <input
@@ -912,7 +900,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                                 </i>
                                             </label>
                                         </th>
-                                    )}
+                                    }
                                     <th>번호</th>
                                     <th>
                                         <div className={`dispatch_wrap ${sortColumn === 'customerName' ? 'pending' : ''}`}>
@@ -998,7 +986,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                 ) : (
                                     filteredDispatches.slice((page - 1) * itemsPerPage, page * itemsPerPage).map((dispatch, index) => (
                                         <tr key={dispatch.dispatchNo}>
-                                            {role === 'admin' && (
+                                           (
                                                 <td>
                                                     <label className="chkbox_label">
                                                         <input
@@ -1012,7 +1000,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                                         </i>
                                                     </label>
                                                 </td>
-                                            )}
+                                            )
                                             <td>{dispatch.dispatchNo}</td>
                                             <td>{dispatch.customerName || '-'}</td>
                                             <td>{dispatch.productNm || '-'}</td>

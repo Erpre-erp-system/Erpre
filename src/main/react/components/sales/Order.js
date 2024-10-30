@@ -534,17 +534,34 @@ function Order() {
                             </tbody>
                         </table>
                     </div>
+//                    {customerData.customerName && (
+//                        <div className="table_footer_wrapper">
+//                            <tr>
+//                                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold', padding: '12px 8px' }}>총 금액 :
+//                                    <span style={{ marginLeft: "5px" }}>{(
+//                                        (isCreateMode ? products : isEditMode || isResubmitMode ? displayItemEdit : displayItems || [])
+//                                            .reduce((sum, item) => sum + (isCreateMode ? item?.price || 0 : item?.orderDPrice || 0) * (isCreateMode ? item?.quantity || 0 : item?.orderDQty || 0), 0)
+//                                    ).toLocaleString()} 원</span>
+//                                </td>
+//                            </tr>
+//                        </div>
+//                    )}
                     {customerData.customerName && (
-                        <div className="table_footer_wrapper">
-                            <tr>
-                                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold', padding: '12px 8px' }}>총 금액 :
-                                    <span style={{ marginLeft: "5px" }}>{(
-                                        (isCreateMode ? products : isEditMode || isResubmitMode ? displayItemEdit : displayItems || [])
-                                            .reduce((sum, item) => sum + (isCreateMode ? item?.price || 0 : item?.orderDPrice || 0) * (isCreateMode ? item?.quantity || 0 : item?.orderDQty || 0), 0)
-                                    ).toLocaleString()} 원</span>
-                                </td>
-                            </tr>
-                        </div>
+                        <table className="table_footer_wrapper">
+                            <tbody>
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold', padding: '12px 8px' }}>
+                                        총 금액 :
+                                        <span style={{ marginLeft: "5px" }}>
+                                            {(
+                                                (isCreateMode ? products : isEditMode || isResubmitMode ? displayItemEdit : displayItems || [])
+                                                    .reduce((sum, item) => sum + (isCreateMode ? item?.price || 0 : item?.orderDPrice || 0) * (isCreateMode ? item?.quantity || 0 : item?.orderDQty || 0), 0)
+                                            ).toLocaleString()} 원
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     )}
 
                     <div className="order-buttons">
