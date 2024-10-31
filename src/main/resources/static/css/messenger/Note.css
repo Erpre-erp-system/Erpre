@@ -1,0 +1,174 @@
+/* 드롭 다운 */
+.dropdown-header {
+    position: relative;
+    cursor: pointer;
+}
+
+.dropdown-title {
+    display: flex;
+    align-items: center;
+    font-size: 26px;
+}
+
+.dropdown-content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    margin-top: 5px;
+    z-index: 10;
+    width: 150px;
+    overflow: hidden;
+    font-size: 26px;
+}
+
+.dropdown-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 26px;
+    color: #333;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f0f0f0;
+}
+
+.dropdown-item:active {
+    background-color: #e0e0e0;
+}
+
+.dropdown-header .dropdown-title svg {
+    transition: transform 0.3s;
+    margin-left: 5px;
+    font-size: 23px;
+}
+
+.dropdown-header:hover .dropdown-title svg {
+    transform: rotate(180deg);
+}
+
+/* 전체 */
+.note-list-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    padding: 3px 20px;
+    margin: auto;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+/* 헤더 */
+.note-list-header {
+    padding: 3px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.new-note-button {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 23px;
+    cursor: pointer;
+    color: #a2a2a2;
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.note-header h3 {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.note-search input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    outline: none;
+}
+
+.note-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+}
+
+.note-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 10px 12px 5px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    height: 80px;
+    transition: background-color 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: space-between;
+}
+
+.note-item:hover {
+    background-color: #f9f9f9;
+}
+
+.note-star {
+    margin-right: 10px;
+}
+
+.star-icon {
+    color: #ccc;
+    font-size: 16px;
+}
+
+.star-icon.active {
+    color: #FFD700;
+}
+
+.note-info {
+    flex: 1;
+    overflow: hidden;
+    margin-left: 5px;
+}
+
+.note-sender {
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+    position: relative;
+}
+
+.note-content {
+    font-size: 13px;
+    color: #666;
+    overflow: hidden;
+    margin-top: 8px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.note-date {
+    font-size: 12px;
+    color: #b2b2b2;
+    margin-left: auto;
+    white-space: nowrap;
+    align-self: flex-start;
+    padding-top: 4px;
+}

@@ -1,7 +1,7 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {FaComments, FaInfoCircle, FaUserAltSlash} from 'react-icons/fa';
 import {BsEnvelope} from "react-icons/bs";
-import {SlOrganization} from "react-icons/sl"; // react icon 사용
+import {SlOrganization} from "react-icons/sl";
 import Select from 'react-select'; // react-select 라이브러리
 import Tree from "rc-tree"; // react-tree 라이브러리
 import "rc-tree/assets/index.css"
@@ -9,11 +9,12 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import axios from "axios";
 import {useMessengerHooks} from "./useMessengerHooks";
-import ChatList from "./ChatList";
-import {IoClose} from "react-icons/io5";
+import Chat from "./Chat";
+import Note from "./Note";
+import {IoChevronDown, IoClose} from "react-icons/io5";
 
 
-// ⭐ 뷰 컴포넌트: Home, InfoView, Message, ChatList
+// ⭐ 뷰 컴포넌트: Home, InfoView, Note, Chat
 const Home = ({treeData, expandedKeys, handleCheck}) => (
     <div className="messenger-content">
         <Tree
@@ -32,14 +33,6 @@ const InfoView = () => (
         {/* 유저정보 UI*/}
     </div>
 );
-
-const Message = () => (
-    <div>
-        <h3>쪽지 화면</h3>
-        {/* 쪽지 UI*/}
-    </div>
-);
-
 
 function Messenger({isOpen, toggleMessenger }) {
 
@@ -60,6 +53,14 @@ function Messenger({isOpen, toggleMessenger }) {
         statusMessage,
         setStatusMessage,
         handleStatusMessageChange,
+
+        // 🟠 쪽지
+        isNoteDropdownOpen,
+        setIsNoteDropdownOpen,
+        noteStatus,
+        setNoteStatus,
+        options,
+        handleNoteStatus,
 
         // 🔴 채팅
         chatList,
@@ -212,6 +213,7 @@ function Messenger({isOpen, toggleMessenger }) {
             // 상태명 입력 창 열기
             setIsStatusMessageOpen(true);
         }
+
     }
 
     // 상태명을 업데이트하는 함수
@@ -285,7 +287,7 @@ function Messenger({isOpen, toggleMessenger }) {
                     <div className="messenger-btn top">
                         <button className="btn1" onClick={() => setActiveView('home')}><SlOrganization/></button>
                         <button className="btn2" onClick={() => setActiveView('info')}><FaInfoCircle/></button>
-                        <button className="btn4" onClick={() => setActiveView('message')}><BsEnvelope/></button>
+                        <button className="btn4" onClick={() => setActiveView('note')}><BsEnvelope/></button>
                         <button className="btn3" onClick={() => setActiveView('chatList')}><FaComments/></button>
                     </div>
                     {/* 사이드바 하단*/}
@@ -297,7 +299,29 @@ function Messenger({isOpen, toggleMessenger }) {
                         <div className="messenger-header"><h3>
                             {activeView === 'home' && 'ERPRE'}
                             {activeView === 'info' && 'MY'}
-                            {activeView === 'message' && '받은 쪽지'}
+
+                            {activeView === 'note' ? (
+                                <div className="dropdown-header" onClick={() => setIsNoteDropdownOpen(!isNoteDropdownOpen)}>
+                                    <h3 className="dropdown-title">
+                                        {options.find(opt => opt.value === noteStatus)?.label || '받은 쪽지'}
+                                        <IoChevronDown />
+                                    </h3>
+                                    {isNoteDropdownOpen && (
+                                        <div className="dropdown-content">
+                                            {options.map((option, index) => (
+                                                <div
+                                                    key={index}
+                                                    onClick={() => handleNoteStatus(option)}
+                                                    className="dropdown-item"
+                                                >
+                                                    {option.label}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : null}
+
                             {activeView === 'chatList' && '채팅'}
                         </h3>
                             <IoClose className="messenger-close" title="닫기" onClick={toggleMessenger}/>
@@ -309,7 +333,7 @@ function Messenger({isOpen, toggleMessenger }) {
                                 <div className={`search_box ${messengerSearchText ? 'has_text' : ''}`}>
                                     <label className="label_floating">
                                         {activeView === 'home' && '이름, 부서명' ||
-                                            activeView === 'message' && '보낸 사람, 내용' ||
+                                            activeView === 'note' && '이름, 내용' ||
                                             activeView === 'chatList' && '참여자, 채팅방 이름, 메세지 내용'}
                                     </label>
                                     <i className="bi bi-search"></i>
@@ -387,7 +411,7 @@ function Messenger({isOpen, toggleMessenger }) {
                             />}
                         {activeView === 'info' && <InfoView/>}
                         {activeView === 'chatList' &&
-                            <ChatList
+                            <Chat
                                 chatList={chatList}
                                 setChatList={setChatList}
                                 fetchChatList={fetchChatList}
@@ -397,7 +421,10 @@ function Messenger({isOpen, toggleMessenger }) {
                                 openChatModal={openChatModal}
                                 closeChatModal={closeChatModal}
                             />}
-                        {activeView === 'message' && <Message/>}
+                        {activeView === 'note' && <Note
+                            noteStatus={noteStatus}
+                            formatDate={formatDate}
+                        />}
                     </>
                 )}
             </div>

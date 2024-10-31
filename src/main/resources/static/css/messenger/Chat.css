@@ -29,12 +29,12 @@
     color: #a2a2a2;
 }
 
-.chat-search-input {
-    width: 70%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-}
+/*.chat-search-input {*/
+/*    width: 70%;*/
+/*    padding: 8px;*/
+/*    border: 1px solid #ccc;*/
+/*    border-radius: 20px;*/
+/*}*/
 
 .chat-list {
     list-style: none;
@@ -49,14 +49,14 @@
     padding: 12px 10px 12px 5px;
     cursor: pointer;
     height: 80px;
-    border-bottom: 1px solid #d5d5d5;
+    border-bottom: 1px solid #f0f0f0;
     transition: background-color 0.3s;
     width: 100%;
     box-sizing: border-box;
 }
 
 .chat-item:hover {
-    background-color: #f1f1f1
+    background-color: #f9f9f9
 }
 
 .chat-icon-grid {
@@ -110,7 +110,7 @@
 .chat-name {
     font-weight: bold;
     font-size: 16px;
-    color: black;
+    color: #333;
     position: relative;
 }
 

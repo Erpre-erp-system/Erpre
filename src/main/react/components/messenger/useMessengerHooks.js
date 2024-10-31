@@ -11,7 +11,7 @@ export const useMessengerHooks = () => {
     /////////////////////////////////////////////////////////////////////////
     // ⭐ 동적 뷰
     // 🔵 유저
-    // 🟣 쪽지
+    // 🟠 쪽지
     // 🔴 채팅
     // 🟢 공통
     /////////////////////////////////////////////////////////////////////////
@@ -121,6 +121,19 @@ export const useMessengerHooks = () => {
         }
     }, [user]);
 
+    // 🟠 쪽지 분류 state
+    const [noteStatus, setNoteStatus] = useState('received');
+    const options = [
+        { label: '받은 쪽지', value: 'received' },
+        { label: '새로운 쪽지', value: 'new' },
+        { label: '보낸 쪽지', value: 'sent' },
+        { label: '보관함', value: 'bookmarked' }
+    ];
+    const [isNoteDropdownOpen, setIsNoteDropdownOpen] = useState(false);
+    const handleNoteStatus = (option) => {
+        setNoteStatus(option.value);
+        setIsNoteDropdownOpen(false);
+    };
     // 🔴 채팅 목록 저장 state
     const [chatList, setChatList] = useState([]);
 
@@ -250,6 +263,15 @@ export const useMessengerHooks = () => {
         statusMessage,
         setStatusMessage,
         handleStatusMessageChange,
+
+        // 🟠 쪽지
+        isNoteDropdownOpen,
+        setIsNoteDropdownOpen,
+        noteStatus,
+        setNoteStatus,
+        options,
+        handleNoteStatus,
+
 
         // 🔴 채팅
         chatList,

@@ -48,9 +48,4 @@ public class MessageFile {
 
     private LocalDateTime messageFileDeleteDate;
 
-    @ToString.Exclude
-    @JsonIgnore
-    @OneToMany(mappedBy = "messageFile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MessageRecipientFile> messageRecipientFiles;
-
 }

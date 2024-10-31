@@ -2,6 +2,7 @@ package com.project.erpre.service;
 
 import com.project.erpre.model.dto.ChatDTO;
 import com.project.erpre.model.dto.ChatMessageDTO;
+import com.project.erpre.model.dto.MessageDTO;
 import com.project.erpre.model.entity.*;
 import com.project.erpre.repository.*;
 import org.hibernate.StaleStateException;
@@ -36,15 +37,17 @@ public class MessengerService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatMessageReadRepository chatMessageReadRepository;
     private final ChatFileRepository chatFileRepository;
+    private final MessageRepository messageRepository;
 
     @Autowired
-    public MessengerService(ChatRepository chatRepository, ChatParticipantRepository chatParticipantRepository, EmployeeRepository employeeRepository, ChatMessageRepository chatMessageRepository, ChatMessageReadRepository chatMessageReadRepository, ChatFileRepository chatFileRepository) {
+    public MessengerService(ChatRepository chatRepository, ChatParticipantRepository chatParticipantRepository, EmployeeRepository employeeRepository, ChatMessageRepository chatMessageRepository, ChatMessageReadRepository chatMessageReadRepository, ChatFileRepository chatFileRepository, MessageRepository messageRepository) {
         this.chatRepository = chatRepository;
         this.chatParticipantRepository = chatParticipantRepository;
         this.employeeRepository = employeeRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.chatMessageReadRepository = chatMessageReadRepository;
         this.chatFileRepository = chatFileRepository;
+        this.messageRepository = messageRepository;
     }
 
 
@@ -63,6 +66,16 @@ public class MessengerService {
         } else {
             return principal.toString();
         }
+    }
+
+
+    /////////////////////////////////////////////////////////////////////// 🟠 쪽지
+
+
+    // 상태에 따른 쪽지 목록 조회 및 검색
+    public List<MessageDTO> getMessageListByUser(String searchKeyword, String status) {
+        String employeeId = getEmployeeIdFromAuthentication();
+        return messageRepository.getMessageListByUser(employeeId, searchKeyword, status);
     }
 
 
@@ -175,19 +188,6 @@ public class MessengerService {
                 return;
             }
 
-//            }
-//            if (chatMessageReadRepository.existsByChatMessageReadId_ChatMessageNo(chatNo)) {
-//                chatMessageReadRepository.deleteByChatMessageReadId_ChatMessageNo(chatNo);
-//                entityManager.flush();
-//            }
-//            if (chatFileRepository.existsByChatMessage_ChatMessageNo(chatNo)) {
-//                chatFileRepository.deleteByChatMessage_ChatMessageNo(chatNo);
-//                entityManager.flush();
-//            }
-//            if (chatMessageRepository.existsByChat_ChatNo(chatNo)) {
-//                chatMessageRepository.deleteByChat_ChatNo(chatNo);
-//                entityManager.flush();
-//            }
             if (chatRepository.existsById(chatNo)) {
                 chatRepository.deleteById(chatNo);
                 entityManager.flush();

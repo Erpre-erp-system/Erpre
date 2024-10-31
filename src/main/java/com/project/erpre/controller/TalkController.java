@@ -17,6 +17,7 @@ import java.security.Principal;
 @Controller
 public class TalkController {
 
+
     private final MessengerService messengerService;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -26,12 +27,6 @@ public class TalkController {
         this.messagingTemplate = messagingTemplate;
     }
 
-//    // 🟣 쪽지(Message) 전송
-//    @MessageMapping("/talk/message") // 클라이언트가 메시지를 "/app/talk/message"으로 보내면 호출됨
-//    @SendTo("/topic/message") // 모든 클라이언트에게 메시지를 "/topic/message" 경로로 전송
-//    public TalkMessage send(TalkMessage message) {
-//        return message; // 실시간 쪽지를 그대로 반환하여 모든 구독자에게 전달
-//    }
 
     // 🔴 채팅 메시지 전송 및 저장
     @MessageMapping("/talk/chat/{chatNo}")

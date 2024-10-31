@@ -133,10 +133,11 @@ CREATE TABLE m_message_recipient (
     recipient_read_date TIMESTAMP,
     recipient_delete_yn VARCHAR(1) NOT NULL DEFAULT 'N',
     recipient_delete_date TIMESTAMP,
+    bookmarked_yn VARCHAR(1) NOT NULL DEFAULT 'N',
     PRIMARY KEY (message_no, recipient_id)
 );
 
--- 10. 쪽지 첨부파일 (발신)
+-- 10. 쪽지 첨부파일
 CREATE TABLE m_message_file (
     message_attachment_id SERIAL PRIMARY KEY,
     message_no INTEGER NOT NULL,
@@ -148,19 +149,6 @@ CREATE TABLE m_message_file (
     message_file_delete_date TIMESTAMP,
     CONSTRAINT FK_M_MESSAGE_TO_M_MESSAGE_FILE_1 FOREIGN KEY (message_no)
     REFERENCES M_MESSAGE (message_no)
-);
-
--- 11. 쪽지 첨부파일 (수신)
-CREATE TABLE m_message_recipient_file (
-    message_no INTEGER NOT NULL,
-    recipient_id VARCHAR(50) NOT NULL,
-    message_attachment_id INTEGER NOT NULL,
-    message_recipient_file_delete_yn VARCHAR(1) NOT NULL DEFAULT 'N',
-    PRIMARY KEY (message_no, recipient_id, message_attachment_id),
-    FOREIGN KEY (message_no, recipient_id)
-        REFERENCES M_MESSAGE_RECIPIENT (message_no, recipient_id),
-    FOREIGN KEY (message_attachment_id)
-        REFERENCES M_MESSAGE_FILE (message_attachment_id)
 );
 
 -- 12. 채팅방

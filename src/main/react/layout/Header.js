@@ -4,7 +4,8 @@ import {FaBell, FaCommentDots, FaEnvelope} from 'react-icons/fa'; // React Icons
 import Messenger from '../components/messenger/Messenger'
 import {MessengerContext} from '../../react/context/MessengerContext';
 import '../../resources/static/css/messenger/Messenger.css';
-import "../../resources/static/css/messenger/ChatList.css";
+import "../../resources/static/css/messenger/Chat.css";
+import "../../resources/static/css/messenger/Note.css";
 
 
 function Header() {

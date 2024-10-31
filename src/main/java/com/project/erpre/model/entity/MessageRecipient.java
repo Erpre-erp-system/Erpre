@@ -31,20 +31,20 @@ public class MessageRecipient {
     @JoinColumn(name = "recipient_id", nullable = false)
     private Employee employee;
 
-    @Column(nullable = false, length = 10)
-    private String recipientReadYn = "n";
+    @Column(nullable = false, length = 1)
+    private String recipientReadYn = "N";
 
     private LocalDateTime recipientReadDate;
 
-    @Column(nullable = false, length = 10)
-    private String recipientDeleteYn = "n";
+    @Column(nullable = false, length = 1)
+    private String recipientDeleteYn = "N";
 
     private LocalDateTime recipientDeleteDate;
 
-    @ToString.Exclude
-    @JsonIgnore
-    @OneToMany(mappedBy = "messageRecipient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MessageRecipientFile> messageRecipientFiles;
+    @Column(nullable = false, length = 1)
+    private String bookmarkedYn = "N";
+
+
 
 }
 

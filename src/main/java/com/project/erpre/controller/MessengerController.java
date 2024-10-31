@@ -1,9 +1,6 @@
 package com.project.erpre.controller;
 
-import com.project.erpre.model.dto.ChatDTO;
-import com.project.erpre.model.dto.ChatMessageDTO;
-import com.project.erpre.model.dto.ChatParticipantDTO;
-import com.project.erpre.model.dto.EmployeeDTO;
+import com.project.erpre.model.dto.*;
 import com.project.erpre.model.entity.ChatParticipant;
 import com.project.erpre.service.EmployeeService;
 import com.project.erpre.service.MessengerService;
@@ -12,11 +9,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.Map;
@@ -38,8 +37,8 @@ public class MessengerController {
 
     /////////////////////////////////////////////////////////////////////// 🟢 공통
 
-    // 1. 메신저 직원 조회 API (조직도)
-    @GetMapping("/employeeList")
+
+    // 메신저 직원 검색 API (쪽지, 채팅) -> 조직도에서 안 쓸거면 데이터, 내용 정리하기 / 조직도에서는 페이지네이션 안 씀
     public ResponseEntity<Page<EmployeeDTO>> getEmployeesWithDept(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -54,10 +53,49 @@ public class MessengerController {
     }
 
 
+    /////////////////////////////////////////////////////////////////////// 🟠 쪽지
 
+
+    // 상태에 따른 쪽지 목록 조회 및 검색 API
+    @GetMapping("/note/list")
+    public ResponseEntity<List<MessageDTO>> getNoteList(
+            @RequestParam(required = false) String searchKeyword,
+            @RequestParam String status
+    ) {
+        try {
+            List<MessageDTO> notes = messengerService.getMessageListByUser(searchKeyword, status);
+            return ResponseEntity.ok(notes);
+        } catch (Exception e) {
+            logger.error("쪽지 목록 조회 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // 쪽지 전송(SSE를 이용한 실시간 알림 구독)
+    @GetMapping(value = "/note/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter subscribe() {
+        SseEmitter emitter = new SseEmitter();
+
+        try {
+            // SseEmitter에 초기 연결 이벤트를 전송
+            emitter.send(SseEmitter.event().name("INIT"));
+
+            // 서비스 계층에서 쪽지 전송 로직을 통해 알림 발생 시 emitter를 사용하여 전송
+            // emitter.send(SseEmitter.event().name("NEW_NOTE").data(newNoteData));
+
+            // 예외 처리 및 타임아웃 설정
+            emitter.onCompletion(() -> logger.info("SSE 연결 완료"));
+            emitter.onTimeout(() -> logger.info("SSE 연결 타임아웃"));
+        } catch (Exception e) {
+            logger.error("SSE 구독 중 오류 발생", e);
+        }
+
+        return emitter;
+    }
 
 
     /////////////////////////////////////////////////////////////////////// 🔴 채팅
+
 
     // 현재 참여하고 있는 채팅 목록 조회 및 검색 API
     @GetMapping("/chat/chatList")
