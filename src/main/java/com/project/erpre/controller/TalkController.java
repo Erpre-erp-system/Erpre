@@ -43,8 +43,12 @@ public class TalkController {
         // 메시지 DB에 저장
         ChatMessageDTO savedMessage = messengerService.saveChatMessage(chatNo, chatMessage, employeeId);
 
+        // 메시지 저장 및 전송 확인
+        System.out.println("메시지 저장 후 전송: 채팅방 번호 " + chatNo + ", 메시지 내용: " + savedMessage);
+
         // 특정 채팅방 구독자들에게만 메시지 전송
         messagingTemplate.convertAndSend("/topic/chat/" + chatNo, savedMessage);
+        System.out.println("메시지 전송 완료: 구독 경로 /topic/chat/" + chatNo);
     }
 
 }

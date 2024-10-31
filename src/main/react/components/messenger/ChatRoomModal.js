@@ -23,7 +23,6 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
     const stompClientRef = useRef(null);
     const chatBodyRef = useRef(null);
 
-
     // 채팅방 데이터 fetch (비동기)
     const fetchChatRoom = async () => {
         setIsLoading(true);
@@ -42,7 +41,6 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
         }
     };
 
-    // 메시지 전송 함수
     const handleSendMessage = () => {
         if (message.trim() && stompClientRef.current && stompClientRef.current.connected) {
             const newMessage = {
@@ -50,14 +48,18 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
                 chatSenderId: user,
                 chatMessageContent: message
             };
-
-            console.log("전송할 메세지", newMessage);
-
             stompClientRef.current.publish({
                 destination: `/app/talk/chat/${chatNo}`,
                 body: JSON.stringify(newMessage)
             });
             setMessage("");
+
+            // 메시지를 전송한 직후에도 스크롤 이동
+            setTimeout(() => {
+                if (chatBodyRef.current) {
+                    chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+                }
+            }, 100);
         }
     };
 
@@ -81,7 +83,16 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
                 stompClient.subscribe(`/topic/chat/${chatNo}`, (message) => {
                     const newMessage = JSON.parse(message.body);
                     setMessages((prevMessages) => [...prevMessages, newMessage]);
+
+
+                    console.log("새로운 메시지 수신:", newMessage);
                 });
+
+                // 로그 추가: 채팅방 구독 확인
+                console.log(`채팅방 /topic/chat/${chatNo} 구독 완료`);
+
+                // 메시지 수신 확인 로그
+                console.log("메시지 수신:", message);
             },
             onStompError: (error) => {
                 console.error("WebSocket 연결 오류:", error);
@@ -104,8 +115,9 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
             });
         }
 
-        fetchChatRoom();
-        connectWebSocket();
+        fetchChatRoom().then(() => {
+            connectWebSocket();
+        });
 
         console.log("ChatRoomModal 렌더링, chatNo:", chatNo);
         console.log("connectWebSocket 함수 호출 시점:", new Date().toISOString());

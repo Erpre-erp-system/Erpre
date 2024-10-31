@@ -15,7 +15,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // 클라이언트가 연결할 수 있는 웹소켓 엔드포인트(접속 지점)를 "/talk"로 설정
         registry.addEndpoint("/talk")
-                .setAllowedOrigins("http://localhost:8787")
+                .setAllowedOrigins("http://localhost:8787", "http://localhost:3000")
                 .addInterceptors(new HttpSessionHandshakeInterceptor())
                 .withSockJS();
     }

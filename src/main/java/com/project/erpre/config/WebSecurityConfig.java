@@ -37,10 +37,11 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Collections.singletonList("http://localhost:8787")); // 웹소켓에서는 allowedOrigins 대신 allowedOriginPatterns 사용
+//        configuration.setAllowedOriginPatterns(Collections.singletonList("http://localhost:8787")); // 웹소켓에서는 allowedOrigins 대신 allowedOriginPatterns 사용
+        configuration.setAllowedOriginPatterns(Collections.singletonList("*")); // 웹소켓에서는 allowedOrigins 대신 allowedOriginPatterns 사용
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 모든 HTTP 메서드 명시적 허용
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type")); // 필요한 헤더 추가
-        configuration.setAllowCredentials(true); // 쿠키 허용
+        configuration.setAllowCredentials(true); // 쿠키 허용 // test 환경에서 false
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
