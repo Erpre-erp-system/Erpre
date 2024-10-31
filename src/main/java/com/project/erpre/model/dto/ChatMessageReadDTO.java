@@ -13,6 +13,5 @@ public class ChatMessageReadDTO {
     private Long chatMessageNo;
     private String chatMessageRecipientId;
     private String chatMessageReadYn;
-    private String chatMessageDeleteYn;
 
 }

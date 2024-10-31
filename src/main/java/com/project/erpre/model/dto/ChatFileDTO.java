@@ -19,6 +19,4 @@ public class ChatFileDTO {
     private String chatFileUrl;
     private BigInteger chatFileSize;
     private String chatFileType;
-    private String chatFileDeleteYn;
-    private LocalDateTime chatFileDeleteDate;
 }

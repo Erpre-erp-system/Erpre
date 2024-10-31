@@ -41,15 +41,4 @@ public class ChatFile {
 
     @Column(name = "chat_file_type", length = 50)
     private String chatFileType;
-
-    @Column(nullable = false, length=10)
-    private String chatFileDeleteYn = "n";
-
-    private LocalDateTime chatFileDeleteDate;
-
-    @ToString.Exclude
-    @JsonIgnore
-    @OneToMany(mappedBy = "chatFile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChatMessageReadFile> chatMessageReadFiles;
-
 }

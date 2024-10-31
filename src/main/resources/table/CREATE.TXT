@@ -190,12 +190,10 @@ CREATE TABLE m_chat_message_read (
     chat_message_no INT NOT NULL REFERENCES m_chat_message (chat_message_no),
     chat_message_recipient_id VARCHAR(50) NOT NULL REFERENCES m_employee (employee_id),
     chat_message_read_yn VARCHAR(1) NOT NULL DEFAULT 'N',
-    chat_message_read_date TIMESTAMP,
-    chat_message_read_delete_yn VARCHAR(1) NOT NULL DEFAULT 'N',
     PRIMARY KEY (chat_message_no, chat_message_recipient_id)
 );
 
--- 16. 채팅 첨부파일 (발신)
+-- 16. 채팅 첨부파일
 CREATE TABLE M_CHAT_FILE (
     chat_attachment_id SERIAL PRIMARY KEY,
     chat_message_no INT NOT NULL,
@@ -203,23 +201,8 @@ CREATE TABLE M_CHAT_FILE (
     chat_file_url VARCHAR(255) NOT NULL,
     chat_file_size BIGINT,
     chat_file_type VARCHAR(50),
-    chat_file_delete_yn VARCHAR(1) NOT NULL DEFAULT 'N',
-    chat_file_delete_date TIMESTAMP,
     CONSTRAINT FK_M_CHAT_MESSAGE_TO_M_CHAT_FILE_1 FOREIGN KEY (chat_message_no)
     REFERENCES M_CHAT_MESSAGE (chat_message_no)
-);
-
--- 17. 채팅 첨부파일 (수신)
-CREATE TABLE M_CHAT_MESSAGE_READ_FILE (
-    chat_message_no INTEGER NOT NULL,
-    chat_message_recipient_id VARCHAR(50) NOT NULL,
-    chat_attachment_id INTEGER NOT NULL,
-    chat_message_read_file_delete_yn VARCHAR(1) NOT NULL DEFAULT 'N',
-    PRIMARY KEY (chat_message_no, chat_message_recipient_id, chat_attachment_id),
-    FOREIGN KEY (chat_message_no, chat_message_recipient_id)
-        REFERENCES M_CHAT_MESSAGE_READ (chat_message_no, chat_message_recipient_id),
-    FOREIGN KEY (chat_attachment_id)
-        REFERENCES M_CHAT_FILE (chat_attachment_id)
 );
 
 

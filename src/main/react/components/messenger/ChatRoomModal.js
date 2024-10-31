@@ -58,42 +58,36 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
                 body: JSON.stringify(newMessage)
             });
             setMessage("");
-
-            // 새 메시지 전송시 스크롤을 최신 위치로 이동
-            setTimeout(() => {
-                if (chatBodyRef.current) {
-                    chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
-                }
-            }, 100);
         }
     };
 
     // WebSocket 연결 설정
     const connectWebSocket = () => {
         console.log("connectWebSocket 함수 호출");
+
+        if (stompClientRef.current?.connected) {
+            console.log("이미 WebSocket에 연결되어 있습니다.");
+            return;
+        }
+
         const socket = new SockJS('/talk');
         const stompClient = new StompClient({
             webSocketFactory: () => socket,
+            reconnectDelay: 10000, // 5초마다 자동 재연결 시도
             onConnect: () => {
                 console.log("WebSocket 연결 성공");
 
-                // 특정 채팅방 구독
-                stompClientRef.current.subscribe(`/topic/chat/${chatNo}`, (message) => {
+                // 채팅방 구독
+                stompClient.subscribe(`/topic/chat/${chatNo}`, (message) => {
                     const newMessage = JSON.parse(message.body);
-
-                    // 현재 chatList에 새 메시지 추가
-                    setChatList((prevChatList) => {
-                        const updatedChatList = prevChatList.map((chat) =>
-                            chat.chatNo === chatNo ? { ...chat, lastMessage: newMessage.chatMessageContent } : chat
-                        );
-                        return updatedChatList;
-                    });
-
                     setMessages((prevMessages) => [...prevMessages, newMessage]);
                 });
             },
             onStompError: (error) => {
                 console.error("WebSocket 연결 오류:", error);
+            },
+            onWebSocketClose: () => {
+                console.error("WebSocket 연결이 닫혔습니다.");
             }
         });
 
@@ -102,18 +96,35 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
     };
 
     useEffect(() => {
+        // 기존 연결 해제
+        if (stompClientRef.current) {
+            stompClientRef.current.deactivate(() => {
+                console.log("이전 WebSocket 연결 해제");
+                stompClientRef.current = null;
+            });
+        }
+
         fetchChatRoom();
         connectWebSocket();
-        fetchChatList();
+
+        console.log("ChatRoomModal 렌더링, chatNo:", chatNo);
+        console.log("connectWebSocket 함수 호출 시점:", new Date().toISOString());
 
         return () => {
             if (stompClientRef.current) {
-                stompClientRef.current.deactivate(() => {
+                stompClientRef.current.deactivate().then(() => {
                     console.log("WebSocket 연결 해제");
+                    stompClientRef.current = null;
                 });
             }
         };
-    }, [chatNo]);
+    }, []);
+
+    useEffect(() => {
+        if (chatBodyRef.current) {
+            chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+        }
+    }, [messages]);
 
     if (isLoading) {
         return <div className="tr_empty">

@@ -29,14 +29,6 @@ public class ChatMessageRead {
     @Column(nullable = false, length = 10)
     private String chatMessageReadYn;
 
-    @Column(nullable = false, length = 10)
-    private String chatMessageDeleteYn;
-
-    @ToString.Exclude // 순환참조방지
-    @JsonIgnore
-    @OneToMany(mappedBy = "chatMessageRead", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChatMessageReadFile> chatMessageReadFiles;
-
     // 기본값 설정
     @PrePersist
     public void setDefaultValues() {

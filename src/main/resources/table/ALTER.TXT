@@ -145,23 +145,19 @@ CHECK (qr_code_status IN ('active', 'inactive', 'expired')); -- qr_code_status C
 
 --  메신저 관련 테이블 외래 키 설정
 ALTER TABLE m_chat_message_read
-ADD CONSTRAINT "FK_CHAT_MESSAGE_READ_MESSAGE_NO"
-FOREIGN KEY ("chat_message_no") REFERENCES m_chat_message ("chat_message_no")
-ON DELETE CASCADE;
-
-ALTER TABLE m_chat_message_read_file
-ADD CONSTRAINT "FK_CHAT_MESSAGE_READ_MESSAGE_NO"
+ADD CONSTRAINT "FK_CHAT_MESSAGE_READ_CHAT_MESSAGE_NO"
 FOREIGN KEY ("chat_message_no") REFERENCES m_chat_message ("chat_message_no")
 ON DELETE CASCADE;
 
 ALTER TABLE m_chat_file
-ADD CONSTRAINT "FK_CHAT_MESSAGE_READ_MESSAGE_NO"
+ADD CONSTRAINT "FK_CHAT_FILE_CHAT_MESSAGE_NO"
 FOREIGN KEY ("chat_message_no") REFERENCES m_chat_message ("chat_message_no")
 ON DELETE CASCADE;
 
 ALTER TABLE m_chat_message
-ADD CONSTRAINT "FK_CHAT_MESSAGE_READ_MESSAGE_NO"
-FOREIGN KEY ("chat_message_no") REFERENCES m_chat ("chat_no")
+ADD CONSTRAINT "FK_CHAT_MESSAGE_CHAT_NO"
+FOREIGN KEY ("chat_no") REFERENCES m_chat ("chat_no")
 ON DELETE CASCADE;
+
 
 

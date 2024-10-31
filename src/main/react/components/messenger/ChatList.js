@@ -129,10 +129,10 @@ import axios from "axios";
         }
         
         // 방 나가기 함수
-        const leaveChatRoom = async (ChatNo) => {
+        const leaveChatRoom = async (chatNo) => {
             try {
                 const response
-                    = await axios.delete(`/api/messengers/chat/delete/${ChatNo}`);
+                    = await axios.delete(`/api/messengers/chat/delete/${chatNo}`);
                 fetchChatList();
             } catch (error) {
                 console.error('채팅방을 나가는 중 오류 발생', error)
