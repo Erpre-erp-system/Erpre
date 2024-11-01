@@ -155,6 +155,47 @@ export const useMessengerHooks = () => {
         localStorage.setItem('isChatModalOpen', false);
     };
 
+
+    // 🔴 목록 조회 fetch data
+    const fetchChatList = useCallback(async (keyword) => {
+        setIsLoading(true);
+        const params = keyword ? { searchKeyword: keyword } : {};
+
+        try {
+            const response = await axios.get('/api/messengers/chat/chatList', { params });
+            const newChatList = response.data;
+
+            // 채팅 목록이 이전과 다를 때만 업데이트
+            if (JSON.stringify(chatList) !== JSON.stringify(newChatList)) {
+                setChatList(newChatList);
+            }
+            setIsLoading(false);
+        } catch (error) {
+            console.error('채팅 목록 조회 실패:', error);
+            if (error.response) {
+                console.error('서버 응답 에러:', error.response.data); // 서버 응답 상세 확인
+            }
+            setIsLoading(false);
+        }
+    }, [chatList]);
+
+
+    // 🔴 검색어에 따른 채팅 목록 API 호출 useEffect
+    const searchChatList = useCallback((keyword) => {
+        setIsLoading(true);
+        const params = keyword ? { searchKeyword: keyword } : {}; // 검색어가 없으면 전체 조회
+
+        axios.get('/api/messengers/chat/chatList', { params })
+            .then((response) => {
+                setChatList(response.data);
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                console.error('채팅 목록 검색 실패:', error);
+                setIsLoading(false);
+            });
+    }, []);
+
     // 🟢  검색 state
     const [messengerSearchText, setMessengerSearchText] = useState('');
     const debouncedSearchText = useDebounce(messengerSearchText, 300);
@@ -197,45 +238,6 @@ export const useMessengerHooks = () => {
         }
     }, [activeView, debouncedSearchText, fetchChatList, searchChatList]);
 
-    // 🔴 목록 조회 fetch data
-    const fetchChatList = useCallback(async (keyword) => {
-        setIsLoading(true);
-        const params = keyword ? { searchKeyword: keyword } : {};
-
-        try {
-            const response = await axios.get('/api/messengers/chat/chatList', { params });
-            const newChatList = response.data;
-
-            // 채팅 목록이 이전과 다를 때만 업데이트
-            if (JSON.stringify(chatList) !== JSON.stringify(newChatList)) {
-                setChatList(newChatList);
-            }
-            setIsLoading(false);
-        } catch (error) {
-            console.error('채팅 목록 조회 실패:', error);
-            if (error.response) {
-                console.error('서버 응답 에러:', error.response.data); // 서버 응답 상세 확인
-            }
-            setIsLoading(false);
-        }
-    }, [chatList]);
-
-
-    // 🔴 검색어에 따른 채팅 목록 API 호출 useEffect
-    const searchChatList = useCallback((keyword) => {
-        setIsLoading(true);
-        const params = keyword ? { searchKeyword: keyword } : {}; // 검색어가 없으면 전체 조회
-
-        axios.get('/api/messengers/chat/chatList', { params })
-            .then((response) => {
-                setChatList(response.data);
-                setIsLoading(false);
-            })
-            .catch((error) => {
-                console.error('채팅 목록 검색 실패:', error);
-                setIsLoading(false);
-            });
-    }, []);
 
     // 🔴 검색어 변경에 따른 채팅 목록 검색 useEffect
     useEffect(() => {

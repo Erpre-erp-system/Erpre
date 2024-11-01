@@ -1,14 +1,11 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Draggable from "react-draggable";
-import {FaPaperclip} from "react-icons/fa";
+import { FaPaperclip } from "react-icons/fa";
 import SockJS from 'sockjs-client';
 import { Client as StompClient } from '@stomp/stompjs';
 
-
-
 const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDate, fetchChatList }) => {
-
     // 로딩 관리
     const [isLoading, setIsLoading] = useState(false);
 
@@ -23,13 +20,16 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
     const stompClientRef = useRef(null);
     const chatBodyRef = useRef(null);
 
+    // 구독 객체를 저장할 ref 생성
+    const subscriptionRef = useRef(null);
+
     // 채팅방 데이터 fetch (비동기)
     const fetchChatRoom = async () => {
         setIsLoading(true);
 
         try {
             const response = await axios.get(`/api/messengers/chat/${chatNo}`);
-            const {employeeId, chatMessages} = response.data;
+            const { employeeId, chatMessages } = response.data;
 
             setUser(employeeId); // 유저 아이디 설정
             setMessages(chatMessages || []); // 초기 메시지 설정
@@ -42,6 +42,9 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
     };
 
     const handleSendMessage = () => {
+
+        console.log("handleSendMessage함수 호출");
+        
         if (message.trim() && stompClientRef.current && stompClientRef.current.connected) {
             const newMessage = {
                 chatNo: chatNo,
@@ -65,8 +68,6 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
 
     // WebSocket 연결 설정
     const connectWebSocket = () => {
-        console.log("connectWebSocket 함수 호출");
-
         if (stompClientRef.current?.connected) {
             console.log("이미 WebSocket에 연결되어 있습니다.");
             return;
@@ -75,24 +76,23 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
         const socket = new SockJS('/talk');
         const stompClient = new StompClient({
             webSocketFactory: () => socket,
-            reconnectDelay: 10000, // 5초마다 자동 재연결 시도
+            reconnectDelay: 10000,
             onConnect: () => {
                 console.log("WebSocket 연결 성공");
 
+                // 기존 구독이 있다면 해제
+                if (subscriptionRef.current) {
+                    subscriptionRef.current.unsubscribe();
+                }
+
                 // 채팅방 구독
-                stompClient.subscribe(`/topic/chat/${chatNo}`, (message) => {
+                subscriptionRef.current = stompClient.subscribe(`/topic/chat/${chatNo}`, (message) => {
                     const newMessage = JSON.parse(message.body);
                     setMessages((prevMessages) => [...prevMessages, newMessage]);
-
-
                     console.log("새로운 메시지 수신:", newMessage);
                 });
 
-                // 로그 추가: 채팅방 구독 확인
                 console.log(`채팅방 /topic/chat/${chatNo} 구독 완료`);
-
-                // 메시지 수신 확인 로그
-                console.log("메시지 수신:", message);
             },
             onStompError: (error) => {
                 console.error("WebSocket 연결 오류:", error);
@@ -109,9 +109,8 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
     useEffect(() => {
         // 기존 연결 해제
         if (stompClientRef.current) {
-            stompClientRef.current.deactivate(() => {
+            stompClientRef.current.deactivate().then(() => {
                 console.log("이전 WebSocket 연결 해제");
-                stompClientRef.current = null;
             });
         }
 
@@ -119,10 +118,12 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
             connectWebSocket();
         });
 
-        console.log("ChatRoomModal 렌더링, chatNo:", chatNo);
-        console.log("connectWebSocket 함수 호출 시점:", new Date().toISOString());
-
         return () => {
+            // 컴포넌트 언마운트 시 구독 및 연결 해제
+            if (subscriptionRef.current) {
+                subscriptionRef.current.unsubscribe();
+                subscriptionRef.current = null;
+            }
             if (stompClientRef.current) {
                 stompClientRef.current.deactivate().then(() => {
                     console.log("WebSocket 연결 해제");
@@ -130,7 +131,7 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
                 });
             }
         };
-    }, []);
+    }, [chatNo]);
 
     useEffect(() => {
         if (chatBodyRef.current) {

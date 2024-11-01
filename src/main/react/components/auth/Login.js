@@ -49,7 +49,8 @@ function Login() {
                 });
 
                 if (employeeResponse.status === 200) {
-                    console.log('직원 조회 성공:', employeeResponse.data);
+                    console.log(
+                        '직원 조회 성공:', employeeResponse.data);
 
                     // 직원 목록을 localStorage에 저장
                     localStorage.setItem('employeeList', JSON.stringify(employeeResponse.data));

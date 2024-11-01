@@ -43,7 +43,9 @@ public class TalkController {
 
         // 특정 채팅방 구독자들에게만 메시지 전송
         messagingTemplate.convertAndSend("/topic/chat/" + chatNo, savedMessage);
-        System.out.println("메시지 전송 완료: 구독 경로 /topic/chat/" + chatNo);
+
+        // 로그 추가: 메시지 전송 완료 확인
+        System.out.println("메시지 전송 완료 - 구독 경로: /topic/chat/" + chatNo + ", 메시지 내용: " + savedMessage);
     }
 
 }

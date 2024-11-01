@@ -68,7 +68,10 @@ module.exports = {
                 use: {
                     loader: 'babel-loader', // Babel 로더 사용
                     options: {
-                        presets: ['@babel/preset-env', '@babel/preset-react'] // Babel 프리셋 설정
+                        // presets: ['@babel/preset-env', '@babel/preset-react'] // Babel 프리셋 설정
+                        presets: [
+                            ['@babel/preset-react', { development: false }]
+                        ]
                     }
                 }
             },
