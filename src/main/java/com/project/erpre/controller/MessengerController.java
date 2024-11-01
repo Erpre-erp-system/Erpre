@@ -39,6 +39,7 @@ public class MessengerController {
 
 
     // 메신저 직원 검색 API (쪽지, 채팅) -> 조직도에서 안 쓸거면 데이터, 내용 정리하기 / 조직도에서는 페이지네이션 안 씀
+    @GetMapping("/employeeList")
     public ResponseEntity<Page<EmployeeDTO>> getEmployeesWithDept(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
