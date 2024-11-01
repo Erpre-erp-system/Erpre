@@ -22,25 +22,9 @@ public interface OrderDispatchRepository extends JpaRepository<Dispatch, Integer
     ---------------------------------------
     */
 
-    // 주문 상태가 'approved'이고, 'ing' 또는 'denied'가 아닌 Dispatch를 페이징하여 조회
+
     // JOIN FETCH - 연관된 엔티티를 한 번에 가져옴
     // countQuery - JPA에서 JOIN FETCH를 사용한 쿼리와 페이징을 함께 사용할 때 발생하는 count 쿼리 생성
-    @Query(value = "SELECT d FROM Dispatch d " +
-            "JOIN FETCH d.orderDetail od " +
-            "JOIN FETCH od.order o " +
-            "JOIN FETCH o.customer c " +
-            "JOIN FETCH od.product p " +
-            "LEFT JOIN FETCH d.warehouse w " +
-            "WHERE o.orderHStatus = 'approved' " +
-            "AND o.orderHStatus NOT IN ('ing', 'denied') " +
-            "AND d.dispatchDeleteYn = 'N'",
-            countQuery = "SELECT COUNT(d) FROM Dispatch d " +
-                    "JOIN d.orderDetail od " +
-                    "JOIN od.order o " +
-                    "WHERE o.orderHStatus = 'approved' " +
-                    "AND o.orderHStatus NOT IN ('ing', 'denied') " +
-                    "AND d.dispatchDeleteYn = 'N'")
-    Page<Dispatch> findByOrderDetail_Order_OrderHStatus(Pageable pageable);
 
     // 상태에 따라 Dispatch를 페이징하여 조회 (주문 상태가 'ing' 또는 'denied'가 아닌 경우)
     @Query(value = "SELECT d FROM Dispatch d " +
@@ -50,13 +34,15 @@ public interface OrderDispatchRepository extends JpaRepository<Dispatch, Integer
             "JOIN FETCH od.product p " +
             "LEFT JOIN FETCH d.warehouse w " +
             "WHERE d.dispatchStatus = :dispatchStatus " +
-            "AND o.orderHStatus NOT IN ('ing', 'denied') " +
+            "AND o.orderHStatus = 'approved' " +
+            //"AND o.orderHStatus NOT IN ('ing', 'denied') " +
             "AND d.dispatchDeleteYn = 'N'",
             countQuery = "SELECT COUNT(d) FROM Dispatch d " +
                     "JOIN d.orderDetail od " +
                     "JOIN od.order o " +
                     "WHERE d.dispatchStatus = :dispatchStatus " +
-                    "AND o.orderHStatus NOT IN ('ing', 'denied') " +
+                    "AND o.orderHStatus = 'approved' " +
+                    //"AND o.orderHStatus NOT IN ('ing', 'denied') " +
                     "AND d.dispatchDeleteYn = 'N'")
     Page<Dispatch> findByDispatchStatus(@Param("dispatchStatus") String dispatchStatus, Pageable pageable);
 

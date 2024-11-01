@@ -20,13 +20,8 @@ const formatDateTime = (dateString) => {
 };
 
 // 출고 상태 매핑 함수
-const mapDispatchStatus = (orderStatus) => {
-  switch (orderStatus) {
-    case '결제완료':
-      return '출고대기';
-    default:
-      return orderStatus;
-  }
+const mapDispatchStatus = (orderHStatus, dispatchStatus) => {
+  return orderHStatus === 'approved' ? 'pending' : dispatchStatus;
 };
 
 //출고지시 모달창
@@ -426,78 +421,85 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
 
     if (!show ) return null; // 모달 표시 여부 체크
 
-    return (
+     return (
             <div className="modal_overlay">
                 <div className="modal_container dispatch">
                     <div className="header">
                         <div>창고 배정</div>
-                        <button className="btn_close" onClick={onClose}><i className="bi bi-x-lg"></i></button> {/* 모달 닫기 버튼 */}
+                        <button className="btn_close" onClick={onClose}>
+                            <i className="bi bi-x-lg"></i>
+                        </button> {/* 모달 닫기 버튼 */}
                     </div>
-                </div>
-                <div className="modal-content">
-                    <div className="detail-form">
-                        <div className="form-group">
-                            <label>창고명<span className='span_red'>*</span></label>
-                             <select
-                                  name="warehouseName"
-                                  value={editableWarehouse.warehouseName || ''}
-                                  onChange={handleWarehouseNameChange}
-                                  className={errors.warehouseName ? 'invalid' : ''}
-                                >
-                                  <option value="">선택</option>
-                                  {warehouses.map((warehouse) => (
-                                      <option key={warehouse.warehouseNo} value={warehouse.warehouseName}>
-                                          {warehouse.warehouseName}
-                                      </option>
-                                  ))}
-                            </select>
-                           {errors.warehouseName && (
-                              <p className="field_error_msg">
-                                <i className="bi bi-exclamation-circle-fill"></i>
-                                {errors.warehouseName}
-                              </p>
-                            )}
-                      </div>
-                        <div className="form-group">
-                            <label>창고 담당자명{isEditMode && (<span className='span_red'>*</span>)}</label>
-                             <select
-                                  name="warehouseManagerName"
-                                  value={editableWarehouse.warehouseManagerName || ''}
-                                  onChange={handleChange}
-                                  className={errors.warehouseManagerName ? 'invalid' : ''}
-                                >
-                                  <option value="">선택</option>
-                                  {warehouseManagers.map((managerName, index) => (
-                                    <option key={index} value={managerName}>{managerName}</option>
-                                  ))}
-                            </select>
-                            {errors.warehouseManagerName && (
-                              <p className="field_error_msg">
-                                <i className="bi bi-exclamation-circle-fill"></i>
-                                {errors.warehouseManagerName}
-                              </p>
-                            )}
-                        </div>
-                        <div className="form-group">
-                            <label>창고 전화번호</label>
-                            <p>{warehouseInfo.warehouseTel || '-'}</p>
-                        </div>
-                        <div className="form-group">
-                            <label>창고 주소</label>
-                            <p>{warehouseInfo.warehouseAddr || '-'}</p>
-                        </div>
 
-                        <div className="modal-actions">
-                          <button className="box blue" type="button" onClick={() => setShowSaveConfirmModal(true)}>저장</button>
+                    <div className="modal-content">
+                        <div className="detail-form">
+                            <div className="form-group">
+                                <label>창고명<span className='span_red'>*</span></label>
+                                <select
+                                    name="warehouseName"
+                                    value={editableWarehouse.warehouseName || ''}
+                                    onChange={handleWarehouseNameChange}
+                                    className={errors.warehouseName ? 'invalid' : ''}
+                                >
+                                    <option value="">선택</option>
+                                    {warehouses.map((warehouse) => (
+                                        <option key={warehouse.warehouseNo} value={warehouse.warehouseName}>
+                                            {warehouse.warehouseName}
+                                        </option>
+                                    ))}
+                                </select>
+                                {errors.warehouseName && (
+                                    <p className="field_error_msg">
+                                        <i className="bi bi-exclamation-circle-fill"></i>
+                                        {errors.warehouseName}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="form-group">
+                                <label>창고 담당자명{isEditMode && (<span className='span_red'>*</span>)}</label>
+                                <select
+                                    name="warehouseManagerName"
+                                    value={editableWarehouse.warehouseManagerName || ''}
+                                    onChange={handleChange}
+                                    className={errors.warehouseManagerName ? 'invalid' : ''}
+                                >
+                                    <option value="">선택</option>
+                                    {warehouseManagers.map((managerName, index) => (
+                                        <option key={index} value={managerName}>{managerName}</option>
+                                    ))}
+                                </select>
+                                {errors.warehouseManagerName && (
+                                    <p className="field_error_msg">
+                                        <i className="bi bi-exclamation-circle-fill"></i>
+                                        {errors.warehouseManagerName}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="form-group">
+                                <label>창고 전화번호</label>
+                                <p>{warehouseInfo.warehouseTel || '-'}</p>
+                            </div>
+
+                            <div className="form-group">
+                                <label>창고 주소</label>
+                                <p>{warehouseInfo.warehouseAddr || '-'}</p>
+                            </div>
+
+                            <div className="modal-actions">
+                                <button className="box blue" type="button" onClick={() => setShowSaveConfirmModal(true)}>저장</button>
+                            </div>
+
+                            {/* 저장 확인 모달 */}
+                            {showSaveConfirmModal && (
+                                <ConfirmationModal
+                                    message="저장하시겠습니까?"
+                                    onConfirm={handleConfirmSave}
+                                    onCancel={() => setShowSaveConfirmModal(false)}
+                                />
+                            )}
                         </div>
-                        {/* 저장 확인 모달 */}
-                        {showSaveConfirmModal && (
-                            <ConfirmationModal
-                                message="저장하시겠습니까?"
-                                onConfirm={handleConfirmSave}
-                                onCancel={() => setShowSaveConfirmModal(false)}
-                            />
-                        )}
                     </div>
                 </div>
             </div>
@@ -568,7 +570,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
 
     // 선택된 출고 데이터 (출고지시 모달에 전달)
     const [selectedDispatchData, setSelectedDispatchData] = useState(null);
-
+    
     // 출고 데이터 가져오기
     useEffect(() => {
         fetchData();
@@ -761,7 +763,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                     if (selectedDispatchNos.includes(dispatch.dispatchNo)) {
                         return {
                             ...dispatch,
-                            dispatchStatus: 'in_progress',
+                            dispatchStatus: 'inProgress',
                             dispatchStartDate: new Date(),
                         };
                     }
@@ -873,34 +875,33 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                             <label htmlFor="complete">출고완료</label>
                         </div>
                     </div>
-                    </div>
-
                     <div className="right"> {/* 출고지시 */}
                         <button className="box color" onClick={handleDispatchInstructionClick}>
                         출고지시
                         </button>
                     </div>
+                </div>
+
+                
                     {/* 테이블 영역 */}
                     <div className="table_wrap">
                         <table>
                             {/* 테이블 헤더 */}
                             <thead>
                                 <tr>
-                                  {
-                                        <th className="checkbox-input">
-                                            <label className="chkbox_label">
-                                                <input
-                                                    type="checkbox"
-                                                    className="chkbox"
-                                                    checked={selectAll}
-                                                    onChange={handleSelectAll}
-                                                />
-                                                <i className="chkbox_icon">
-                                                    <i className="bi bi-check-lg"></i>
-                                                </i>
-                                            </label>
-                                        </th>
-                                    }
+                                    <th className="checkbox-input">
+                                        <label className="chkbox_label">
+                                            <input
+                                                type="checkbox"
+                                                className="chkbox"
+                                                checked={selectAll}
+                                                onChange={handleSelectAll}
+                                            />
+                                            <i className="chkbox_icon">
+                                                <i className="bi bi-check-lg"></i>
+                                            </i>
+                                        </label>
+                                    </th>
                                     <th>번호</th>
                                     <th>
                                         <div className={`dispatch_wrap ${sortColumn === 'customerName' ? 'pending' : ''}`}>
@@ -959,11 +960,10 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                         </div>
                                     </th>
                                     <th></th>
-
                                 </tr>
                             </thead>
+                            
                             {/* 테이블 본문 */}
-                            {/* 로딩 중일 때 로딩 애니메이션 표시 */}
                             <tbody>
                                 {loading ? (
                                     <tr className="tr_empty">
@@ -986,26 +986,24 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                 ) : (
                                     filteredDispatches.slice((page - 1) * itemsPerPage, page * itemsPerPage).map((dispatch, index) => (
                                         <tr key={dispatch.dispatchNo}>
-                                           (
-                                                <td>
-                                                    <label className="chkbox_label">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="chkbox"
-                                                            checked={selectedDispatches[index] || false}
-                                                            onChange={() => handleSelect(index)}
-                                                        />
-                                                        <i className="chkbox_icon">
-                                                            <i className="bi bi-check-lg"></i>
-                                                        </i>
-                                                    </label>
-                                                </td>
-                                            )
+                                            <td>
+                                                <label className="chkbox_label">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="chkbox"
+                                                        checked={selectedDispatches[index] || false}
+                                                        onChange={() => handleSelect(index)}
+                                                    />
+                                                    <i className="chkbox_icon">
+                                                        <i className="bi bi-check-lg"></i>
+                                                    </i>
+                                                </label>
+                                            </td>
                                             <td>{dispatch.dispatchNo}</td>
                                             <td>{dispatch.customerName || '-'}</td>
                                             <td>{dispatch.productNm || '-'}</td>
                                             <td>{formatDateTime(dispatch.orderDDeliveryRequestDate)}</td>
-                                            <td>{dispatch.dispatchStatus === '결제완료' ? '출고대기' : dispatch.dispatchStatus}</td>
+                                            <td>{mapDispatchStatus(dispatch.orderHStatus, dispatch.dispatchStatus)}</td>
                                             <td>{dispatch.dispatchStartDate ? formatDateTime(dispatch.dispatchStartDate) : '-'}</td>
                                             <td>{dispatch.dispatchEndDate ? formatDateTime(dispatch.dispatchEndDate) : '-'}</td>
                                             <td>{dispatch.warehouseName && dispatch.warehouseName.trim() !== '' ? dispatch.warehouseName : '-'}</td>
@@ -1018,10 +1016,8 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                     ))
                                 )}
                             </tbody>
-
-
                         </table>
-                     </div>
+                    </div>
 
                     {/* 페이지네이션 */}
                      <div className="pagination-container">
@@ -1031,6 +1027,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                  <i className="bi bi-trash"></i> 선택 삭제
                              </button>
                          </div>
+                         
                          {/* 가운데: 페이지네이션 */}
                          <div className="pagination">
                              {/* '처음' 버튼 */}

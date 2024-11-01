@@ -8,8 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +39,14 @@ public class OrderService {
     private EmployeeRepository employeeRepository;
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private OrderDispatchService orderDispatchService;
+    @Autowired
+    private OrderDispatchRepository orderDispatchRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager; //flush 사용
 
     // 전체 주문 목록 가져오기
     public List<Order> getAllOrders() {
@@ -164,9 +176,24 @@ public class OrderService {
         orderRepository.deleteById(orderNo);
     }
 
+    @Transactional
     public Order updateOrder(Order order) {
-        return orderRepository.save(order);
+        //주문 저장
+        Order savedOrder = orderRepository.save(order);
+        entityManager.flush(); // 변경 사항 플러시
+        logger.debug("EntityManager.flush() 호출됨");
+
+        // 주문 상태가 'approved'이면 Dispatch 레코드 생성
+        if ("approved".equals(order.getOrderHStatus())) {
+            orderDispatchService.createDispatchForOrder(savedOrder);
+        }
+
+        return savedOrder;
     }
+
+
+
+
     public OrderDetail addOrderDetail(Integer orderNo, OrderDetailDTO orderDetailDTO) {
         // 주문이 존재하는지 확인
         Order existingOrder = orderRepository.findById(orderNo)
@@ -245,5 +272,6 @@ public class OrderService {
     }
 
 
+    }
 
-}
+

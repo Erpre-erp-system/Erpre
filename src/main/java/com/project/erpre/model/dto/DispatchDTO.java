@@ -28,16 +28,18 @@ public class DispatchDTO {
 
     //추가
     private String customerName; // 고객사 이름
-    private String productNm; // 상품명
-    private Timestamp orderDDeliveryRequestDate; // 납품 요청일
-    private String warehouseName; // 창고명
-    private String hqName; // 출고 공급자
-
     private String customerAddr; //납품지 주소
-    private int orderDQty; //총수량
-    private BigDecimal orderDPrice; //출고단가
-    private BigDecimal orderDTotalPrice; //총금액
 
+    private String warehouseName; // 창고명
+
+    private String orderHStatus; // 주문상태
+
+    private String productNm; // 상품명
+
+    private BigDecimal orderDPrice; //출고단가
+    private int orderDQty; //수량
+    private BigDecimal orderDTotalPrice; //총금액
+    private Timestamp orderDDeliveryRequestDate; // 납품 요청일
 
     //추가 - 선택된 출고 번호 목록
     private List<Integer> dispatchNos;

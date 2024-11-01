@@ -36,6 +36,8 @@ const fetchEmployee = async () => {
 };
 
 const updateOrderStatus = async (orderNo) => {
+    logger.info("Order status update request received for orderNo: " + orderNo + ", new status: " + orderDTO.getOrderHStatus());
+
     try {
         const response = await fetch(`/api/order/updateStatus/${orderNo}`, {
             method: 'PATCH',
@@ -43,6 +45,7 @@ const updateOrderStatus = async (orderNo) => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ orderHStatus: 'approved' }),
+
         });
         if (response.ok) {
             console.log("approved success");

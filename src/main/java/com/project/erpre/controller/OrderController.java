@@ -7,6 +7,7 @@ import com.project.erpre.repository.CustomerRepository;
 import com.project.erpre.repository.EmployeeRepository;
 import com.project.erpre.service.OrderService;
 import com.project.erpre.service.ProductService;
+import com.project.erpre.service.OrderDispatchService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.slf4j.Logger;
@@ -14,8 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,6 +46,11 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private OrderDispatchService orderDispatchService; // OrderDispatchService 주입
+
+    @PersistenceContext
+    private EntityManager entityManager; //flush 사용
 
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody OrderDTO orderDTO) {
@@ -157,22 +166,35 @@ public class OrderController {
     }
 
     // 주문 상태 업데이트 엔드포인트
+    @Transactional //동일한 트랜잭션 내에서 처리
     @PatchMapping("/updateStatus/{orderNo}")
     public ResponseEntity<?> updateOrderStatus(@PathVariable Integer orderNo, @RequestBody OrderDTO orderDTO) {
         try {
-            // 주문 엔티티를 조회합니다.
+            // 주문 엔티티 조회
             Order existingOrder = orderService.getOrderById(orderNo);
             if (existingOrder == null) {
                 return new ResponseEntity<>("주문을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
             }
 
-            // 상태를 DTO에서 가져와서 업데이트합니다.
+            // 주문 상태 DTO 업데이트
             existingOrder.setOrderHStatus(orderDTO.getOrderHStatus());
             existingOrder.setOrderHUpdateDate(LocalDateTime.now());
 
-            // 엔티티를 업데이트하고 저장합니다.
+            // 주문 저장
             Order updatedOrder = orderService.updateOrder(existingOrder);
+
+            // 주문 상태를 데이터베이스에 반영
+            entityManager.flush();
+            logger.debug("EntityManager.flush() 호출됨");
+
+            // 주문 상태가 'approved'이면 Dispatch 레코드 생성
+            if ("approved".equals(orderDTO.getOrderHStatus())) {
+                logger.info("Order is approved. Creating dispatch record for order: " + existingOrder.getOrderNo());
+                orderDispatchService.createDispatchForOrder(existingOrder);
+            }
+
             return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
+
         } catch (Exception e) {
             logger.error("주문 상태 업데이트 중 오류 발생: ", e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

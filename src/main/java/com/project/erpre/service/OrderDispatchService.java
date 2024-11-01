@@ -3,6 +3,8 @@ package com.project.erpre.service;
 import com.project.erpre.model.dto.DispatchDTO;
 import com.project.erpre.model.entity.*;
 import com.project.erpre.repository.*;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +20,8 @@ import com.itextpdf.text.pdf.PdfWriter;
 //excel import
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,6 +29,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 
+@Slf4j
 @Service
 public class OrderDispatchService {
 
@@ -43,45 +48,51 @@ public class OrderDispatchService {
     @Autowired
     private QrCodeRepository qrCodeRepository;
 
-    //DispatchDTO -> Dispatch 엔티티로 변환하는 메서드
+    // DispatchDTO -> Dispatch 엔티티로 변환하는 메서드
     private Dispatch convertToDispatchEntity(DispatchDTO dispatchDTO) {
         Dispatch dispatch = new Dispatch();
         dispatch.setDispatchNo(dispatchDTO.getDispatchNo());
         dispatch.setDispatchStatus(dispatchDTO.getDispatchStatus());
         dispatch.setDispatchStartDate(dispatchDTO.getDispatchStartDate());
         dispatch.setDispatchEndDate(dispatchDTO.getDispatchEndDate());
-        //dispatch.setDispatchQrCode(dispatchDTO.getDispatchQrCode());
         dispatch.setDispatchDeleteYn(dispatchDTO.getDispatchDeleteYn());
 
-        // 고객사, 주문, 창고 정보는 엔티티로 변환해서 추가로 설정 필요
+        // 주문 상세 (OrderDetail)과 창고 (Warehouse) 정보 설정
         OrderDetail orderDetail = orderDetailRepository.findById(dispatchDTO.getOrderDNo()).orElse(null);
         Warehouse warehouse = warehouseRepository.findById(dispatchDTO.getWarehouseNo()).orElse(null);
+        QrCode qrCode = qrCodeRepository.findById(UUID.fromString(dispatchDTO.getQrCodeId())).orElse(null);
 
         dispatch.setOrderDetail(orderDetail);
         dispatch.setWarehouse(warehouse);
+        dispatch.setQrCode(qrCode);
 
         return dispatch;
     }
 
-    // Dispatch 엔티티를 DispatchDTO로 변환하는 메서드
+    // Dispatch 엔티티 -> DispatchDTO로 변환하는 메서드
     private DispatchDTO convertToDispatchDTO(Dispatch dispatch) {
         Integer warehouseNo = dispatch.getWarehouse() != null ? dispatch.getWarehouse().getWarehouseNo() : null;
         String warehouseName = dispatch.getWarehouse() != null ? dispatch.getWarehouse().getWarehouseName() : null;
+        String qrCodeId = dispatch.getQrCode() != null ? dispatch.getQrCode().getQrCodeId().toString() : null;
 
+        // OrderDetail과 관련된 정보 추출
         OrderDetail orderDetail = dispatch.getOrderDetail();
         Order order = orderDetail != null ? orderDetail.getOrder() : null;
         Customer customer = order != null ? order.getCustomer() : null;
         Product product = orderDetail != null ? orderDetail.getProduct() : null;
 
         String customerName = customer != null ? customer.getCustomerName() : null;
+        String customerAddr = customer != null ? customer.getCustomerAddr() : null;
         String productNm = product != null ? product.getProductNm() : null;
         Timestamp orderDDeliveryRequestDate = orderDetail != null ? orderDetail.getOrderDDeliveryRequestDate() : null;
 
-        String customerAddr = customer != null ? customer.getCustomerAddr() : null;
-        int orderDQty = orderDetail != null ? orderDetail.getOrderDQty() : 0;
         BigDecimal orderDPrice = orderDetail != null ? orderDetail.getOrderDPrice() : BigDecimal.ZERO;
+        int orderDQty = orderDetail != null ? orderDetail.getOrderDQty() : 0;
         BigDecimal orderDTotalPrice = orderDetail != null ? orderDetail.getOrderDTotalPrice() : BigDecimal.ZERO;
 
+        String orderHStatus = order != null ? order.getOrderHStatus() : null;
+
+        // DispatchDTO 생성
         return DispatchDTO.builder()
                 .dispatchNo(dispatch.getDispatchNo())
                 .dispatchStatus(dispatch.getDispatchStatus())
@@ -90,22 +101,72 @@ public class OrderDispatchService {
                 .dispatchDeleteYn(dispatch.getDispatchDeleteYn())
                 .warehouseNo(warehouseNo)
                 .warehouseName(warehouseName)
-                //.dispatchQrCode(dispatch.getDispatchQrCode())
+                .qrCodeId(qrCodeId)
+                .orderDNo(orderDetail != null ? orderDetail.getOrderNo() : null)
+                .customerNo(customer != null ? customer.getCustomerNo() : null)
                 .customerName(customerName)
-                .productNm(productNm)
-                .orderDDeliveryRequestDate(orderDDeliveryRequestDate)
                 .customerAddr(customerAddr)
-                .orderDQty(orderDQty)
+                .productNm(productNm)
+                .orderHStatus(orderHStatus)
                 .orderDPrice(orderDPrice)
+                .orderDQty(orderDQty)
                 .orderDTotalPrice(orderDTotalPrice)
+                .orderDDeliveryRequestDate(orderDDeliveryRequestDate)
                 .build();
     }
 
+//    // Dispatch 레코드 생성 메서드 - dispatchStatus("pending")
+//    public void createDispatchForOrder(Order order) {
+//        for (OrderDetail orderDetail : order.getOrderDetails()) {
+//            Dispatch dispatch = new Dispatch();
+//            dispatch.setOrderDetail(orderDetail);
+//            dispatch.setDispatchStatus("pending");
+//            dispatch.setDispatchDeleteYn("N");
+//
+//            //dispatch.setDispatchInsertDate(new Timestamp(System.currentTimeMillis()));
+//
+//            // Dispatch 저장
+//            orderDispatchRepository.save(dispatch);
+//        }
+//    }
 
-    // 주문 상태가 '결제완료'만 페이징하여 pending  목록 보여주기
+    // Dispatch 레코드 생성 메서드 - orderHStatus가 'approved'일 때만 dispatchStatus("pending") 설정
+    @Transactional
+            //(propagation = Propagation.REQUIRES_NEW) // 기존에 실행 중인 트랜잭션이 있어도 새로운 트랜잭션을 시작
+    public void createDispatchForOrder(Order order) {
+
+        // OrderDetails 초기화
+        Hibernate.initialize(order.getOrderDetails());
+
+        if ("approved".equals(order.getOrderHStatus())) { // orderHStatus가 'approved'인지 확인
+            for (OrderDetail orderDetail : order.getOrderDetails()) {
+                log.info("Dispatch 생성 중, OrderDetail ID: " + orderDetail.getOrderNo());
+
+                Dispatch dispatch = new Dispatch();
+                dispatch.setOrderDetail(orderDetail);
+                dispatch.setDispatchStatus("pending"); // orderHStatus가 'approved'일 때만 'pending'으로 설정
+                dispatch.setDispatchDeleteYn("N");
+
+                // warehouse 설정 (예시로 기본 창고를 설정하거나 로직에 맞게 설정)
+//                Warehouse defaultWarehouse = warehouseRepository.findDefaultWarehouse();
+//                dispatch.setWarehouse(defaultWarehouse);
+
+                // qrCode 설정 (새로운 QR 코드를 생성하거나 로직에 맞게 설정)
+//                QrCode newQrCode = qrCodeService.generateQrCode(dispatch);
+//                dispatch.setQrCode(newQrCode);
+
+                // Dispatch 저장
+                orderDispatchRepository.save(dispatch);
+            }
+
+        }
+    }
+
+
+    //주문 상태가 '결제완료'만 페이징하여 pending 목록 보여주기
     public Page<DispatchDTO> getPagePending(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Dispatch> dispatchPage = orderDispatchRepository.findByOrderDetail_Order_OrderHStatus(pageable);
+        Page<Dispatch> dispatchPage = orderDispatchRepository.findByDispatchStatus("pending", pageable);
         return dispatchPage.map(this::convertToDispatchDTO);
     }
 
@@ -113,7 +174,7 @@ public class OrderDispatchService {
     //페이징해서 in progress 목록 보여주기
     public Page<DispatchDTO> getPageInProgress(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Dispatch> dispatchPage = orderDispatchRepository.findByDispatchStatus("in_progress", pageable);
+        Page<Dispatch> dispatchPage = orderDispatchRepository.findByDispatchStatus("inProgress", pageable);
         return dispatchPage.map(this::convertToDispatchDTO);
     }
 
@@ -276,6 +337,5 @@ public class OrderDispatchService {
 
         return byteArrayOutputStream.toByteArray();
     }
-
 
 }

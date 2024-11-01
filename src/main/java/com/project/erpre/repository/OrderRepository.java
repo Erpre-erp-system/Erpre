@@ -45,4 +45,5 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("SELECT SUM(o.orderHTotalPrice) FROM Order o WHERE o.orderHStatus = 'approved' AND o.orderHInsertDate BETWEEN :startDate AND :endDate")
     BigDecimal sumTotalSalesForPeriod(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
+
 }
