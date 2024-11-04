@@ -323,7 +323,7 @@ function EmployeeList() {
                                     </button>
                                 )}
                             </div>
-                            <div className="radio_box">
+                            <div className="radio_box left">
                                 <span>상태</span>
                                 <input
                                     type="radio"

@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -48,4 +49,10 @@ public class Salary {
 
     @Column(name = "salary_update_date")
     private LocalDateTime salaryUpdateDate;
+
+    @Column(name = "salary_delete_yn", length = 20, nullable = false, columnDefinition = "VARCHAR(1) DEFAULT 'N'")
+    private String employeeDeleteYn; // 삭제 여부 기본값 'N'
+
+    @Column(name = "salary_delete_date")
+    private Timestamp employeeDeleteDate;
 }

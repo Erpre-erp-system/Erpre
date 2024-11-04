@@ -106,6 +106,14 @@ ALTER TABLE m_attendance
 ADD CONSTRAINT fk_approver_employee
 FOREIGN KEY (approver_id) REFERENCES m_employee(employee_id);
 
+-- 근태, 급여 테이블에 논리적삭제 칼럼 추가
+ALTER TABLE m_attendance
+ADD COLUMN attendance_delete_yn varchar(1) not null default 'N',
+ADD COLUMN attendance_delete_date timestamp null
+
+ALTER TABLE m_salary
+ADD COLUMN attendance_delete_yn varchar(1) not null default 'N',
+ADD COLUMN attendance_delete_date timestamp null
 
 -- 출고 테이블 외래키 설정
 ALTER TABLE m_dispatch

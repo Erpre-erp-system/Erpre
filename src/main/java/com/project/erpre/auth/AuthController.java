@@ -2,6 +2,7 @@ package com.project.erpre.auth;
 
 import com.project.erpre.model.entity.Employee;
 import com.project.erpre.repository.EmployeeRepository;
+import com.project.erpre.service.AttendanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,9 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private AttendanceService attendanceService; // 근태쓰려구 주입
 
     @PostMapping("/api/login")
     @ResponseBody
@@ -64,6 +68,9 @@ public class AuthController {
             session.setAttribute("employeeId", employee.getEmployeeId());
             session.setAttribute("employee", employee);
 
+            // 로그인 성공 시 출근 기록 추가
+            attendanceService.recordCheckIn(employee); // 출근 시간 기록
+
             // HTTP-only 쿠키 설정 (세션 ID를 쿠키에 설정)
             Cookie sessionCookie = new Cookie("SESSION", session.getId());
             sessionCookie.setHttpOnly(true); // JavaScript에서 쿠키에 접근하지 못하도록 설정
@@ -94,6 +101,30 @@ public class AuthController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "로그인 처리 중 오류가 발생했습니다."));
+        }
+    }
+
+    @PostMapping("/api/logout")
+    @ResponseBody
+    public ResponseEntity<?> logout(HttpSession session) {
+        try {
+            String employeeId = (String) session.getAttribute("employeeId");
+
+            if (employeeId != null) {
+                Employee employee = employeeRepository.findByEmployeeId(employeeId)
+                        .orElseThrow(() -> new RuntimeException("해당 ID를 찾을 수 없습니다"));
+
+                attendanceService.recordCheckOut(employee);
+            }
+
+            session.invalidate();
+            return ResponseEntity.ok(Collections.singletonMap("message", "로그아웃 성공"));
+        } catch (Exception e) {
+            session.invalidate(); // 세션 무효화
+            System.err.println("로그아웃 중 예외 발생: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "로그아웃 처리 중 오류가 발생했습니다."));
         }
     }
 }

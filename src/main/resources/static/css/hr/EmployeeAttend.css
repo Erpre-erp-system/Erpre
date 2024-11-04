@@ -51,7 +51,7 @@
 
 .menu_employee .table_wrap table th:nth-child(2),
 .menu_employee .table_wrap table td:nth-child(2) {
-    width: 5%; /* 번호 */
+    width: 8%; /* 번호 */
 }
 
 .menu_employee .table_wrap table th:nth-child(3),
@@ -81,7 +81,7 @@
 
 .menu_employee .table_wrap table th:nth-child(8),
 .menu_employee .table_wrap table td:nth-child(8) {
-    width: 10%; /* 승인 상태 */
+    width: 7%; /* 승인 상태 */
 }
 
 .menu_employee .table_wrap table th:nth-child(9),

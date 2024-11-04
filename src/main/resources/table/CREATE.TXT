@@ -307,7 +307,7 @@ CREATE TABLE m_salary (
     performance_incentive_rate decimal(5, 2) DEFAULT 0.00, -- 실적 기반 인센티브 비율 (영업 실적에 따른 인센티브)
     total_salary         integer NOT NULL,        -- 총 급여 (기본금 + (기본금*실적인센) + (기본금*직급인센) + 보너스)
     salary_date          date NOT NULL,           -- 급여 지급일(매달10일로 할 예정)
-    salary_status        varchar(20) NOT NULL DEFAULT 'Pending',  -- 급여 상태 (Pending , Paid)
+    salary_status        varchar(20) NOT NULL DEFAULT '결재 중',  -- 급여 상태 (Pending , Paid)
     salary_insert_date   timestamp NOT NULL DEFAULT current_timestamp, -- 등록 일시
     salary_update_date   timestamp NULL           -- 수정 일시
 );
@@ -322,7 +322,7 @@ CREATE TABLE m_attendance (
     total_hours_worked   decimal(5, 2) DEFAULT 0.00,  -- 근무 시간 (출퇴근 시간 차이)
     overtime_hours       decimal(5, 2) DEFAULT 0.00,  -- 초과 근무 시간
     attendance_status    varchar(20) NOT NULL,    -- 근태 상태 (출근, 결근, 휴가, 출장 등)
-    approval_status      varchar(20) NOT NULL DEFAULT 'Pending',  -- 승인 상태 (Pending, Approved, Rejected)
+    approval_status      varchar(20) NOT NULL DEFAULT '결재 중',  -- 승인 상태 (Pending, Approved, Rejected)
     approver_id          varchar(50) NULL,        -- 승인자 ID (결재를 처리하는 상사)
     approval_date        timestamp NULL,          -- 승인 또는 반려된 날짜
     reason               text NULL,               -- 결재 사유 (휴가, 출장 등 신청 사유)

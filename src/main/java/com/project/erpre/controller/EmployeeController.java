@@ -3,6 +3,7 @@ package com.project.erpre.controller;
 import com.project.erpre.model.entity.Employee;
 import com.project.erpre.model.dto.EmployeeDTO;
 import com.project.erpre.repository.EmployeeRepository;
+import com.project.erpre.service.AttendanceService;
 import com.project.erpre.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,12 +26,23 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
+    @Autowired
+    private AttendanceService attendanceService; // 근태떄문에 주입
+
     // 로그아웃 엔드포인트
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session) {
-        session.invalidate(); // 세션 무효화
-        return ResponseEntity.ok().build(); // 성공적으로 로그아웃
-    }
+//    @PostMapping("/logout")
+//    public ResponseEntity<?> logout(HttpSession session) {
+//        String employeeId = (String) session.getAttribute("employeeId");
+//
+//        if (employeeId != null) {
+//            Employee employee = employeeRepository.findByEmployeeId(employeeId)
+//                    .orElseThrow(() -> new RuntimeException("해당 ID를 찾을 수 없습니다"));
+//            attendanceService.recordCheckOut(employee); // 퇴근 시간 기록
+//        }
+//
+//        session.invalidate(); // 세션 무효화
+//        return ResponseEntity.ok().build(); // 성공적으로 로그아웃
+//    }
 
     // 전체 직원 목록 조회
 //    @GetMapping("/employeeList")

@@ -6,6 +6,8 @@ import { BrowserRouter } from "react-router-dom";
 import '../../../resources/static/css/hr/EmployeeList.css';
 import { formatDate } from '../../util/dateUtils';
 import { useDebounce } from '../common/useDebounce';
+import axios from 'axios';
+import { format } from 'date-fns';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -18,49 +20,56 @@ function EmployeeAttend() {
     const [selectedAttendances, setSelectedAttendances] = useState([]);
     const [searchAttendance, setSearchAttendance] = useState('');
     const debouncedSearchAttendance = useDebounce(searchAttendance, 300);
+    const [currentView, setCurrentView] = useState('activeAttendances');
 
     // 날짜 선택 상태 관리 (초기값: 오늘 날짜)
-    const [deliveryDate, setDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
     // 날짜 변경 핸들러
     const handleDateChange = (e) => {
-        setDeliveryDate(e.target.value); // 선택된 날짜를 YYYY-MM-DD 형식으로 설정
+        setSelectedDate(e.target.value);
     };
 
     useEffect(() => {
-        // 모의 데이터 생성
-        const mockData = [
-            {
-                attendanceId: 1,
-                employee: { employeeName: "홍길동" },
-                attendanceDate: new Date(),
-                checkInTime: new Date(),
-                checkOutTime: null,
-                totalHoursWorked: 8.0,
-                overtimeHours: 2.0,
-                attendanceStatus: "출근",
-                approvalStatus: "대기",
-                reason: null,
-            },
-            {
-                attendanceId: 2,
-                employee: { employeeName: "김영희" },
-                attendanceDate: new Date(),
-                checkInTime: new Date(),
-                checkOutTime: new Date(),
-                totalHoursWorked: 8.0,
-                overtimeHours: 0.0,
-                attendanceStatus: "퇴근",
-                approvalStatus: "승인",
-                reason: "출장",
-            }
-        ];
+        fetchAttendances(page, currentView);
+    }, [page, currentView, selectedDate]);
 
-        setAttendanceData(mockData);
-        setFilteredData(mockData);
-        setTotalPages(Math.ceil(mockData.length / ITEMS_PER_PAGE));
-        setSelectedAttendances(new Array(mockData.length).fill(false));
-    }, []);
+    const fetchAttendances = (page, view) => {
+        // 페이지 번호를 0부터 시작하도록 조정
+        const adjustedPage = page - 1;
+        const url = `/api/${view}?page=${adjustedPage}&size=${ITEMS_PER_PAGE}&date=${selectedDate}`; // selectedDate를 쿼리 파라미터에 추가
+        axios.get(url)
+            .then(response => {
+                console.log("API 응답 데이터:", response.data); // 응답 데이터 확인
+                setAttendanceData(response.data.content);
+                setFilteredData(response.data.content);
+                setTotalPages(response.data.totalPages);
+                setSelectedAttendances(new Array(response.data.content.length).fill(false));
+            })
+            .catch(error => console.error('근태 데이터 조회 에러:', error));
+    };
+
+    // 근무 시간 계산 함수 추가
+    function calculateWorkingHours(checkInTime, checkOutTime) {
+        if (!checkInTime || !checkOutTime) return 0;
+
+        const checkIn = new Date(checkInTime);
+        const checkOut = new Date(checkOutTime);
+
+        let totalHours = (checkOut - checkIn) / (1000 * 60 * 60);
+
+        if (checkIn.getHours() < 13) {
+            totalHours -= 1; // 점심시간 1시간 제외
+        }
+
+        return Math.max(totalHours, 0).toFixed(1);
+    }
+
+    // 연장 근무 시간 계산 함수 추가
+    function calculateOvertime(totalHours) {
+        const overtime = totalHours - 8;
+        return overtime > 0 ? overtime.toFixed(1) : 0;
+    }
 
     useEffect(() => {
         if (debouncedSearchAttendance === '') {
@@ -101,9 +110,14 @@ function EmployeeAttend() {
             return;
         }
 
-        const updatedData = attendanceData.filter(attendance => !selectedIds.includes(attendance.attendanceId));
-        setAttendanceData(updatedData);
-        setSelectedAttendances(new Array(updatedData.length).fill(false));
+        axios.put('/api/deleteAttendances', selectedIds)
+            .then(() => {
+                // 삭제 후, 현재 페이지와 보기 설정에 맞게 데이터를 다시 로드합니다.
+                fetchAttendances(page, currentView);
+                // 선택된 항목 배열을 초기화합니다.
+                setSelectedAttendances(new Array(attendanceData.length).fill(false));
+            })
+            .catch(error => console.error('삭제 중 에러 발생:', error));
     };
 
     const PageChange = (newPage) => {
@@ -111,6 +125,13 @@ function EmployeeAttend() {
             setPage(newPage);
         }
     };
+
+    const handleFilterChange = (type) => {
+        setCurrentView(type);
+        setPage(1);
+        fetchAttendances(1, type);
+    };
+
 
     return (
         <Layout currentMenu="employeeAttend">
@@ -133,25 +154,37 @@ function EmployeeAttend() {
                                     onChange={(e) => setSearchAttendance(e.target.value)}
                                 />
                                 {searchAttendance && (
-                                    <button
-                                        className="btn-del"
-                                        onClick={() => setSearchAttendance('')}
-                                    >
+                                    <button className="btn-del" onClick={() => setSearchAttendance('')}>
                                         <i className="bi bi-x"></i>
                                     </button>
                                 )}
                             </div>
                             <div>
-                                <label htmlFor="deliveryDate">근태조회일</label>
+                                <label htmlFor="selectedDate">근태조회일</label>
                                 <input
                                     type="date"
-                                    id="deliveryDate"
-                                    value={deliveryDate}
+                                    id="selectedDate"
+                                    value={selectedDate}
                                     onChange={handleDateChange}
-                                    max={new Date().toISOString().split('T')[0]} // 오늘 포함 이전 날짜 선택 가능
+                                    max={new Date().toISOString().split('T')[0]}
                                 />
-                                <p>선택된 날짜: {deliveryDate || '날짜를 선택하세요'}</p>
+
                             </div>
+                        </div>
+                        <div className="radio_box">
+                            <span>상태</span>
+                            <input type="radio" id="all" name="filterType" value="allAttendances"
+                                   checked={currentView === 'allAttendances'}
+                                   onChange={() => handleFilterChange('allAttendances')} />
+                            <label htmlFor="all">전체</label>
+                            <input type="radio" id="active" name="filterType" value="activeAttendances"
+                                   checked={currentView === 'activeAttendances'}
+                                   onChange={() => handleFilterChange('activeAttendances')} />
+                            <label htmlFor="active">정상</label>
+                            <input type="radio" id="deleted" name="filterType" value="deletedAttendances"
+                                   checked={currentView === 'deletedAttendances'}
+                                   onChange={() => handleFilterChange('deletedAttendances')} />
+                            <label htmlFor="deleted">삭제</label>
                         </div>
                     </div>
 
@@ -171,15 +204,15 @@ function EmployeeAttend() {
                                             </i>
                                         </label>
                                     </th>
-                                    <th>번호</th>
                                     <th>직원명</th>
                                     <th>근무일자</th>
                                     <th>출근 시간</th>
                                     <th>퇴근 시간</th>
                                     <th>근무 시간</th>
-                                    <th>연장 근무</th>
+                                    <th>초과 근무</th>
                                     <th>근무 상태</th>
                                     <th>승인 상태</th>
+                                    <th>삭제 일시</th>
                                     <th>비고</th>
                                 </tr>
                             </thead>
@@ -194,33 +227,48 @@ function EmployeeAttend() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredData.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE).map((attendance, index) => (
-                                        <tr key={attendance.attendanceId}>
-                                            <td>
-                                                <label className="chkbox_label">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="chkbox"
-                                                        checked={selectedAttendances[index] || false}
-                                                        onChange={() => handleSelect(index)}
-                                                    />
-                                                    <i className="chkbox_icon">
-                                                        <i className="bi bi-check-lg"></i>
-                                                    </i>
-                                                </label>
-                                            </td>
-                                            <td>{(page - 1) * ITEMS_PER_PAGE + index + 1}</td>
-                                            <td>{attendance.employee.employeeName}</td>
-                                            <td>{formatDate(attendance.attendanceDate)}</td>
-                                            <td>{attendance.checkInTime ? formatDate(attendance.checkInTime, 'HH:mm') : '-'}</td>
-                                            <td>{attendance.checkOutTime ? formatDate(attendance.checkOutTime, 'HH:mm') : '-'}</td>
-                                            <td>{attendance.totalHoursWorked} 시간</td>
-                                            <td>{attendance.overtimeHours} 시간</td>
-                                            <td>{attendance.attendanceStatus}</td>
-                                            <td>{attendance.approvalStatus}</td>
-                                            <td>{attendance.reason || '-'}</td>
-                                        </tr>
-                                    ))
+                                    filteredData.map((attendance, index) => {
+                                        // 근태조회일을 근무일자로 사용하고, 월-일 형식으로 표시
+                                        const workDate = selectedDate ? format(new Date(selectedDate), 'MM-dd') : '-';
+                                        // 출근시간 포맷: 시와 분만 표시
+                                        const checkInTimeFormatted = attendance.checkInTime ? format(new Date(attendance.checkInTime), 'HH:mm') : '-';
+                                        // 퇴근시간 포맷: 시와 분만 표시
+                                        const checkOutTimeFormatted = attendance.checkOutTime ? format(new Date(attendance.checkOutTime), 'HH:mm') : '-';
+                                        // 삭제일시 포맷: 년-월-일만 표시
+                                        const deleteDateFormatted = attendance.attendanceDeleteDate ? format(new Date(attendance.attendanceDeleteDate), 'yyyy-MM-dd') : '-';
+
+                                        // 근무 시간과 초과 근무 시간 계산
+                                        const totalHours = calculateWorkingHours(attendance.checkInTime, attendance.checkOutTime);
+                                        const overtimeHours = calculateOvertime(totalHours);
+
+                                        return (
+                                            <tr key={attendance.attendanceId}>
+                                                <td>
+                                                    <label className="chkbox_label">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="chkbox"
+                                                            checked={selectedAttendances[index] || false}
+                                                            onChange={() => handleSelect(index)}
+                                                        />
+                                                        <i className="chkbox_icon">
+                                                            <i className="bi bi-check-lg"></i>
+                                                        </i>
+                                                    </label>
+                                                </td>
+                                                <td>{attendance.employee.employeeName}</td>
+                                                <td>{workDate}</td> {/* 근무일자 */}
+                                                <td>{checkInTimeFormatted}</td> {/* 출근시간 */}
+                                                <td>{checkOutTimeFormatted}</td> {/* 퇴근시간 */}
+                                                <td>{totalHours} 시간</td> {/* 근무 시간 */}
+                                                <td>{overtimeHours} 시간</td> {/* 초과 근무 */}
+                                                <td>{attendance.attendanceStatus}</td>
+                                                <td>{attendance.approvalStatus}</td>
+                                                <td>{deleteDateFormatted}</td> {/* 삭제일시 */}
+                                                <td>{attendance.reason || '-'}</td>
+                                            </tr>
+                                        );
+                                    })
                                 )}
                             </tbody>
                         </table>
@@ -265,7 +313,6 @@ function EmployeeAttend() {
                                     <i className="bi bi-chevron-right"></i>
                                 </button>
                             )}
-
                             {page < totalPages && (
                                 <button className="box icon last" onClick={() => PageChange(totalPages)}>
                                     <i className="bi bi-chevron-double-right"></i>

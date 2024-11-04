@@ -56,17 +56,21 @@ function Sidebar({ currentMenu }) {
 
     const handleLogout = async () => {
         try {
-            const response = await fetch('/api/logout', {
-                method: 'POST',
-                credentials: 'include',
-            });
-            if (response.ok) {
-                window.location.href = '/login';
+            const response = await axios.post('/api/logout', {}, { withCredentials: true });
+            if (response.status === 200) {
+                console.log('로그아웃 성공:', response.data.message);
+                // 필요하면 클라이언트 상태 초기화
+                localStorage.clear();
+                window.location.href = '/login'; // 로그아웃 후 로그인 페이지로 이동
             } else {
-                console.error('로그아웃 실패');
+                console.error('로그아웃 실패:', response.data.message);
+                // 오류 메시지 표시
+                alert('로그아웃에 실패했습니다.');
             }
         } catch (error) {
-            console.error('로그아웃 에러 발생:', error);
+            console.error('로그아웃 중 오류 발생:', error);
+            // 오류 메시지 표시
+            alert('로그아웃 중 오류가 발생했습니다.');
         }
     };
 
