@@ -1,21 +1,16 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import { useDebounce } from "../common/useDebounce";
 import Pagination from "../common/Pagination";
 import axios from "axios";
 import {TiDelete} from "react-icons/ti";
+import useSearch from "./useSearch";
 
 const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
 
-    // 🔴 로딩 state
-    const [isLoading, setLoading] = useState(false);
-
     // 🔴 직원 state
     const [selectedEmployees, setSelectedEmployees] = useState([]); // 선택된 직원
-    const [employeeSearchResults, setEmployeeSearchResults] = useState([]); // 직원 검색 결과
-
-    // 🔴 직원 검색 state
-    const [employeeSearchText, setEmployeeSearchText] = useState(''); // 직원 검색 텍스트
-    const debouncedEmployeeSearchText = useDebounce(employeeSearchText, 300); // 딜레이 적용
+    const [employeeSearchText, setEmployeeSearchText] = useState('');
+    const debouncedEmployeeSearchText = useDebounce(employeeSearchText, 300);
 
     // 🔴 페이지네이션 state
     const [totalPages, setTotalPages] = useState(0); // 총 페이지 수
@@ -23,47 +18,22 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
     const [itemsPerPage, setItemsPerPage] = useState(10); // 페이지 당 직원 수
     const [totalItems, setTotalItems] = useState(0); // 총 직원 수
 
-    // 🔴 직원 목록 조회
-    const fetchData = useCallback(() => {
-        setLoading(true);
-        axios
-            .get('/api/messengers/employeeList', {
-                params: {
-                    page: currentPage || null,
-                    size: itemsPerPage || null,
-                    searchKeyword: employeeSearchText || null,
-                },
-            })
-            .then((response) => {
-                const employee = (response.data.content || []).map(employee => ({
-                    ...employee,
-                    employeeName: employee.employeeName || '-',
-                    employeeId: employee.employeeId || '-',
-                    departmentName: employee.departmentName || '-',
-                    jobName: employee.jobName || '-',
-                }));
+    // 🔴 useSearch 훅 사용
+    const initialParams = useMemo(() => ({
+        page: currentPage,
+        size: itemsPerPage
+    }), [currentPage, itemsPerPage]);
+    const endpoint = "/api/messengers/employeeList";
+    const { data: employeeData = [], searchLoading } = useSearch(endpoint, debouncedEmployeeSearchText, '', initialParams);
 
-                console.log("받아온 직원 데이터:", employee)
-
-                setEmployeeSearchResults(employee);
-                setTotalItems(response.data.totalElements || 0);
-                setTotalPages(response.data.totalPages || 0);
-            })
-            .catch((error) => {
-                console.error("직원 데이터를 가져오는 중 오류 발생:", error);
-                setEmployeeSearchResults([]);
-                setTotalItems(0);
-                setTotalPages(0);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, [currentPage, itemsPerPage, debouncedEmployeeSearchText]);
-
-    // 🔴 검색어 또는 페이지가 변경될 때 데이터 호출
+    // 🔴 검색 결과 총 페이지 및 직원 수 업데이트
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        console.log("불러온 직원 데이터:", employeeData);
+        if (employeeData.content) {
+            setTotalItems(employeeData.totalElements || 0);
+            setTotalPages(employeeData.totalPages || 0);
+        }
+    }, [employeeData]);
 
     // 🔴 페이지 변경 처리 함수
     const handlePageChange = (pageNumber) => {
@@ -96,7 +66,7 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
     // 🔴 직원 전체 선택/해제
     const handleSelectAll = (event) => {
         if (event.target.checked) {
-            const allEmployeesOnPage = employeeSearchResults.map(employee => ({
+            const allEmployeesOnPage = employeeData.content?.map(employee => ({
                 employeeId: employee.employeeId,
                 employeeName: employee.employeeName,
                 departmentName: employee.departmentName,
@@ -112,7 +82,7 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
                 return newSelected;
             });
         } else {
-            const allEmployeeIdsOnPage = employeeSearchResults.map(employee => employee.employeeId);
+            const allEmployeeIdsOnPage = employeeData.map(employee => employee.employeeId);
             setSelectedEmployees(prevSelected =>
                 prevSelected.filter(selected => !allEmployeeIdsOnPage.includes(selected.employeeId))
             );
@@ -120,7 +90,7 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
     };
 
     // 🔴 전체 선택 체크박스 상태를 업데이트
-    const isAllSelected = employeeSearchResults.length > 0 && employeeSearchResults.every(employee =>
+    const isAllSelected = employeeData.length > 0 && employeeData.every(employee =>
         selectedEmployees.some(selected => selected.employeeId === employee.employeeId)
     );
 
@@ -130,7 +100,7 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
         if (allSelectCheckbox) {
             allSelectCheckbox.checked = isAllSelected;
         }
-    }, [isAllSelected, employeeSearchResults, selectedEmployees]);
+    }, [isAllSelected, employeeData, selectedEmployees]);
 
     // 🔴 직원 개별 선택/해제
     const handleSelectEmployee = (employeeId, employeeName, departmentName, jobName) => {
@@ -233,7 +203,7 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
                         </tr>
                         </thead>
                         <tbody>
-                        {isLoading ? (
+                        {searchLoading ? (
                             <tr className="tr_empty">
                                 <td colSpan="4">
                                     <div className="loading">
@@ -243,9 +213,9 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
                                     </div>
                                 </td>
                             </tr>
-                        ) : employeeSearchResults.length > 0 ? (
+                        ) : employeeData.content?.length > 0 ? (
                             /* 검색된 직원 목록을 출력 */
-                            employeeSearchResults.map((employee) => (
+                            employeeData.content.map((employee) => (
                                 <tr key={employee.employeeId} onClick={() => handleSelectEmployee(employee.employeeId, employee.employeeName, employee.departmentName, employee.jobName)}>
                                     {/* 체크박스 */}
                                     <td>
@@ -306,7 +276,7 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
                     totalPages={totalPages}
                     itemsPerPage={itemsPerPage}
                     totalItems={totalItems}
-                    isLoading={isLoading}
+                    searchLoading={searchLoading}
                     handlePage={handlePageChange}
                     handleItemsPerPageChange={handleItemsPerPageChange}
                     showFilters={false}

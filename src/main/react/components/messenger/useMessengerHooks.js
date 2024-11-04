@@ -5,6 +5,7 @@ import {MdMeetingRoom, MdWork} from "react-icons/md";
 import {PiOfficeChairFill} from "react-icons/pi";
 import axios from "axios";
 import { useDebounce } from "../common/useDebounce";
+import useSearch from "./useSearch";
 
 export const useMessengerHooks = () => {
 
@@ -121,6 +122,9 @@ export const useMessengerHooks = () => {
         }
     }, [user]);
 
+    // 🟠 쪽지 목록 state
+    const [noteList, setNoteList] = useState([]);
+
     // 🟠 쪽지 분류 state
     const [noteStatus, setNoteStatus] = useState('received');
     const options = [
@@ -134,7 +138,7 @@ export const useMessengerHooks = () => {
         setNoteStatus(option.value);
         setIsNoteDropdownOpen(false);
     };
-    // 🔴 채팅 목록 저장 state
+    // 🔴 채팅 목록 state
     const [chatList, setChatList] = useState([]);
 
     // 🔴 개별 채팅 모달
@@ -162,8 +166,11 @@ export const useMessengerHooks = () => {
         const params = keyword ? { searchKeyword: keyword } : {};
 
         try {
-            const response = await axios.get('/api/messengers/chat/chatList', { params });
+            const response = await axios.get('/api/messengers/chat/list', { params });
             const newChatList = response.data;
+
+            console.log("불러온 채팅 데이터", response.data);
+            console.log("불러온 채팅 데이터", newChatList);
 
             // 채팅 목록이 이전과 다를 때만 업데이트
             if (JSON.stringify(chatList) !== JSON.stringify(newChatList)) {
@@ -177,24 +184,24 @@ export const useMessengerHooks = () => {
             }
             setIsLoading(false);
         }
-    }, [chatList]);
+    }, [activeView, chatList]);
 
 
-    // 🔴 검색어에 따른 채팅 목록 API 호출 useEffect
-    const searchChatList = useCallback((keyword) => {
-        setIsLoading(true);
-        const params = keyword ? { searchKeyword: keyword } : {}; // 검색어가 없으면 전체 조회
-
-        axios.get('/api/messengers/chat/chatList', { params })
-            .then((response) => {
-                setChatList(response.data);
-                setIsLoading(false);
-            })
-            .catch((error) => {
-                console.error('채팅 목록 검색 실패:', error);
-                setIsLoading(false);
-            });
-    }, []);
+    // // 🔴 검색어에 따른 채팅 목록 API 호출 useEffect
+    // const searchChatList = useCallback((keyword) => {
+    //     setIsLoading(true);
+    //     const params = keyword ? { searchKeyword: keyword } : {}; // 검색어가 없으면 전체 조회
+    //
+    //     axios.get('/api/messengers/chat/list', { params })
+    //         .then((response) => {
+    //             setChatList(response.data);
+    //             setIsLoading(false);
+    //         })
+    //         .catch((error) => {
+    //             console.error('채팅 목록 검색 실패:', error);
+    //             setIsLoading(false);
+    //         });
+    // }, []);
 
     // 🟢  검색 state
     const [messengerSearchText, setMessengerSearchText] = useState('');
@@ -207,6 +214,62 @@ export const useMessengerHooks = () => {
     const handleSearchDel = () => {
         setMessengerSearchText('')
     }
+
+    // ⭐ 동적 뷰에 따른 endpoint 설정
+    const getEndpoint = (activeView) => {
+        switch(activeView) {
+            case 'home':
+                return '';
+            case 'note':
+                return '/api/messengers/note/list';
+            case 'chat':
+                return '/api/messengers/chat/list';
+            default:
+                return '';
+        }
+    }
+    const endpoint = getEndpoint(activeView);
+
+    // ⭐ 동적 뷰에 따른 status 설정
+    const [listStatus, setListStatus] = useState('');
+    useEffect(() => {
+        if (activeView === 'home') {
+            // 직급, 부서별로 정렬, 상태 전달
+        } else if (activeView === 'note') {
+            setListStatus(noteStatus);
+        }
+    }, [activeView, noteStatus]);
+
+    // 🟢 useSearch 훅 사용하여 데이터 가져오기
+    const { data = [], searchLoading  } = useSearch(endpoint, debouncedSearchText, listStatus, {});
+
+    // ⭐ 동적 뷰에 따라 상태 업데이트
+    useEffect(() => {
+        if (activeView === 'home') {
+            // 조직도 데이터 저장
+        }
+        if (activeView === 'note') {
+            setNoteList(data);
+        }
+        if (activeView === 'chat') {
+            setChatList(data);
+        }
+    }, [data, activeView]);
+
+    // 🟠 쪽지 데이터를 불러오는 함수
+    const fetchNoteList = async () => {
+        try {
+            const response = await axios.get('/api/messengers/note/list', {
+                params: {
+                    searchKeyword: messengerSearchText || '',
+                    status: noteStatus
+                }
+            });
+            setNoteList(response.data);
+        } catch (error) {
+            console.error("쪽지 데이터를 불러오는 중 오류 발생:", error);
+        }
+    };
 
     // 🟢 날짜 변환 함수
     const formatDate = (dateString) => {
@@ -227,24 +290,24 @@ export const useMessengerHooks = () => {
         return `${year}-${month}-${day} ${hours}:${minutes}`;
     };
 
-    // 🔴 activeView에 따른 채팅 목록 API 호출 useEffect
-    useEffect(() => {
-        if (activeView === 'chatList') {
-            if (debouncedSearchText) {
-                searchChatList(debouncedSearchText);
-            } else {
-                fetchChatList();
-            }
-        }
-    }, [activeView, debouncedSearchText, fetchChatList, searchChatList]);
+    // // 🔴 동적 뷰에 따른 채팅 목록 API 호출 useEffect
+    // useEffect(() => {
+    //     if (activeView === 'chat') {
+    //         if (debouncedSearchText) {
+    //             searchChatList(debouncedSearchText);
+    //         } else {
+    //             fetchChatList();
+    //         }
+    //     }
+    // }, [activeView, debouncedSearchText, fetchChatList, searchChatList]);
 
 
-    // 🔴 검색어 변경에 따른 채팅 목록 검색 useEffect
-    useEffect(() => {
-        if (activeView === 'chatList') {
-            searchChatList(debouncedSearchText);
-        }
-    }, [activeView, debouncedSearchText, searchChatList]);
+    // // 🔴 검색어 변경에 따른 채팅 목록 검색 useEffect
+    // useEffect(() => {R
+    //     if (activeView === 'chat') {
+    //         searchChatList(debouncedSearchText);
+    //     }
+    // }, [activeView, debouncedSearchText, searchChatList]);
 
 
     /////////////////////////////////////////////////////////////////////////
@@ -267,6 +330,7 @@ export const useMessengerHooks = () => {
         handleStatusMessageChange,
 
         // 🟠 쪽지
+        noteList,
         isNoteDropdownOpen,
         setIsNoteDropdownOpen,
         noteStatus,

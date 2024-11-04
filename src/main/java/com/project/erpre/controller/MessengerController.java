@@ -99,7 +99,7 @@ public class MessengerController {
 
 
     // 현재 참여하고 있는 채팅 목록 조회 및 검색 API
-    @GetMapping("/chat/chatList")
+    @GetMapping("/chat/list")
     public List<ChatDTO> getChatListByUser(@RequestParam(required = false) String searchKeyword) {
         return messengerService.getChatListByUser(searchKeyword);
     }

@@ -14,7 +14,7 @@ import Note from "./Note";
 import {IoChevronDown, IoClose} from "react-icons/io5";
 
 
-// ⭐ 뷰 컴포넌트: Home, InfoView, Note, Chat
+// ⭐ 뷰 컴포넌트: Home, Info, Note, Chat
 const Home = ({treeData, expandedKeys, handleCheck}) => (
     <div className="messenger-content">
         <Tree
@@ -27,7 +27,7 @@ const Home = ({treeData, expandedKeys, handleCheck}) => (
     </div>
 );
 
-const InfoView = () => (
+const Info = () => (
     <div>
         <h3>유저정보 화면</h3>
         {/* 유저정보 UI*/}
@@ -55,10 +55,10 @@ function Messenger({isOpen, toggleMessenger }) {
         handleStatusMessageChange,
 
         // 🟠 쪽지
+        noteList,
         isNoteDropdownOpen,
         setIsNoteDropdownOpen,
         noteStatus,
-        setNoteStatus,
         options,
         handleNoteStatus,
 
@@ -288,7 +288,7 @@ function Messenger({isOpen, toggleMessenger }) {
                         <button className="btn1" onClick={() => setActiveView('home')}><SlOrganization/></button>
                         <button className="btn2" onClick={() => setActiveView('info')}><FaInfoCircle/></button>
                         <button className="btn4" onClick={() => setActiveView('note')}><BsEnvelope/></button>
-                        <button className="btn3" onClick={() => setActiveView('chatList')}><FaComments/></button>
+                        <button className="btn3" onClick={() => setActiveView('chat')}><FaComments/></button>
                     </div>
                     {/* 사이드바 하단*/}
                     <div className="button bottom"></div>
@@ -322,7 +322,7 @@ function Messenger({isOpen, toggleMessenger }) {
                                 </div>
                             ) : null}
 
-                            {activeView === 'chatList' && '채팅'}
+                            {activeView === 'chat' && '채팅'}
                         </h3>
                             <IoClose className="messenger-close" title="닫기" onClick={toggleMessenger}/>
                         </div>
@@ -334,7 +334,7 @@ function Messenger({isOpen, toggleMessenger }) {
                                     <label className="label_floating">
                                         {activeView === 'home' && '이름, 부서명' ||
                                             activeView === 'note' && '이름, 내용' ||
-                                            activeView === 'chatList' && '참여자, 채팅방 이름, 메세지 내용'}
+                                            activeView === 'chat' && '참여자, 채팅방 이름, 메세지 내용'}
                                     </label>
                                     <i className="bi bi-search"></i>
                                     <input
@@ -409,8 +409,8 @@ function Messenger({isOpen, toggleMessenger }) {
                                 expandedKeys={expandedKeys}
                                 handleCheck={handleCheck}
                             />}
-                        {activeView === 'info' && <InfoView/>}
-                        {activeView === 'chatList' &&
+                        {activeView === 'info' && <Info/>}
+                        {activeView === 'chat' &&
                             <Chat
                                 chatList={chatList}
                                 setChatList={setChatList}
@@ -421,10 +421,11 @@ function Messenger({isOpen, toggleMessenger }) {
                                 openChatModal={openChatModal}
                                 closeChatModal={closeChatModal}
                             />}
-                        {activeView === 'note' && <Note
-                            noteStatus={noteStatus}
-                            formatDate={formatDate}
-                        />}
+                        {activeView === 'note' &&
+                            <Note
+                                noteList={noteList}
+                                formatDate={formatDate}
+                            />}
                     </>
                 )}
             </div>
