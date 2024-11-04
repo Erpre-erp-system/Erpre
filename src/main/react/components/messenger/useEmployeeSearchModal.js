@@ -5,11 +5,11 @@ import axios from "axios";
 import {TiDelete} from "react-icons/ti";
 import useSearch from "./useSearch";
 
-const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
+const UseEmployeeSearchModal = ({ closeEmployeeSearchModal, fetchChatList, createUrl }) => {
 
     // 🔴 직원 state
     const [selectedEmployees, setSelectedEmployees] = useState([]); // 선택된 직원
-    const [employeeSearchText, setEmployeeSearchText] = useState('');
+    const [employeeSearchText, setEmployeeSearchText] = useState(''); // 직원 검색 텍스트
     const debouncedEmployeeSearchText = useDebounce(employeeSearchText, 300);
 
     // 🔴 페이지네이션 state
@@ -59,7 +59,7 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
     // 🔴 모달 배경 클릭 시 창 닫기
     const handleBackgroundClick = (e) => {
         if (e.target.className === 'modal_overlay') {
-            closeNewChatModal();
+            closeEmployeeSearchModal();
         }
     };
 
@@ -128,21 +128,21 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
         );
     };
 
-    // 🔴 채팅방 생성 함수
-    const createChatRoom = async () => {
-
+    // 🔴 채팅방 또는 쪽지 생성 함수
+    const createHandler = async () => {
         try {
             const employeeIds = selectedEmployees.map(employee => employee.employeeId);
+            const response = await axios.post(createUrl, employeeIds);
+            console.log('생성 성공:', response.data);
 
-            const response = await axios.post('/api/messengers/chat/create', employeeIds);
+            if (fetchChatList) {
+                fetchChatList();
+            }
 
-            console.log('채팅방 생성 성공', response.data)
-
-            fetchChatList();
-            closeNewChatModal();
+            closeEmployeeSearchModal();
 
         } catch (error) {
-            console.error("채팅방 생성 중 오류 발생:", error);
+            console.error("생성 중 오류 발생:", error);
         }
     };
 
@@ -151,7 +151,7 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
             <div className="modal_container search search_employee">
                 <div className="header">
                     <div>직원 검색</div>
-                    <button className="btn_close" onClick={closeNewChatModal}><i className="bi bi-x-lg"></i></button>
+                    <button className="btn_close" onClick={closeEmployeeSearchModal}><i className="bi bi-x-lg"></i></button>
                 </div>
                 <div className="search_wrap">
                     <div className={`search_box ${employeeSearchText ? 'has_text' : ''}`}>
@@ -177,7 +177,7 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
                     <div className="create-wrap">
                         <button
                             className="btn-create"
-                            onClick={createChatRoom}
+                            onClick={createHandler}
                         >
                             시작
                         </button>
@@ -286,4 +286,4 @@ const NewChatModal = ({ closeNewChatModal, fetchChatList }) => {
     );
 }
 
-export default NewChatModal;
+export default UseEmployeeSearchModal;

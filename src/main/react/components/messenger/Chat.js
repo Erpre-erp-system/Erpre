@@ -1,12 +1,12 @@
 import React, {useState} from 'react';
 import { FaUserCircle } from 'react-icons/fa';
 import ChatRoomModal from './ChatRoomModal'
-import NewChatModal from "./NewChatModal";
+import UseEmployeeSearchModal from "./useEmployeeSearchModal";
 import {LuMessageSquarePlus} from "react-icons/lu";
 import {useChatHooks} from "./useChatHooks";
 
 
-const Chat = ({ chatList, setChatList, formatDate, isChatModalOpen, selectedChat, openChatModal, closeChatModal, fetchChatList }) => {
+const Chat = ({ chatList, setChatList, formatDate, isEmployeeSearchOpen, selectedChat, openChatModal, closeChatModal, fetchChatList }) => {
 
     const {
 
@@ -19,9 +19,9 @@ const Chat = ({ chatList, setChatList, formatDate, isChatModalOpen, selectedChat
     } = useChatHooks(chatList,fetchChatList);
 
     // 새 채팅 모달 열기/닫기 핸들러
-    const [isNewChatModalOpen, setNewChatModalOpen] = useState(false);
-    const openNewChatModal = () => setNewChatModalOpen(true);
-    const closeNewChatModal = () => setNewChatModalOpen(false);
+    const [isEmployeeSearchModalOpen, setEmployeeSearchModalOpen] = useState(false);
+    const openEmployeeSearchModal = () => setEmployeeSearchModalOpen(true);
+    const closeEmployeeSearchModal = () => setEmployeeSearchModalOpen(false);
 
 
     return (
@@ -29,7 +29,7 @@ const Chat = ({ chatList, setChatList, formatDate, isChatModalOpen, selectedChat
 
         {/* 헤더 */}
         <div className="chat-list-header">
-            <button className="new-chat-button" onClick={openNewChatModal} aria-label="새로운 채팅">
+            <button className="new-chat-button" onClick={openEmployeeSearchModal} aria-label="새로운 채팅">
                 <LuMessageSquarePlus />
             </button>
         </div>
@@ -90,12 +90,13 @@ const Chat = ({ chatList, setChatList, formatDate, isChatModalOpen, selectedChat
         )}
 
         {/* 새 채팅 추가 모달 */}
-        {isNewChatModalOpen && (
+        {isEmployeeSearchOpen && (
             <div className="new-chat-modal" onClick={(e) => e.target === e.currentTarget && closeNewChatModal()}>
                 <div className="new-chat-modal-content">
-                    <NewChatModal
-                        closeNewChatModal={closeNewChatModal}
+                    <UseEmployeeSearchModal
+                        closeEmployeeSearchModal={closeEmployeeSearchModal}
                         fetchChatList={fetchChatList}
+                        createUrl="/api/messengers/chat/create"
                     />
                 </div>
             </div>

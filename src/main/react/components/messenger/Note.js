@@ -4,14 +4,9 @@ import {BsEnvelopePlusFill} from "react-icons/bs";
 import {FaStar} from "react-icons/fa";
 import axios from "axios";
 
-const Note = ({ noteList = [], formatDate }) => {
+const Note = ({ isNewNoteModalOpen, openNewNoteModal, closeNewNoteModal, noteList = [], formatDate }) => {
 
     // 북마크 체크 함수
-
-    // 🟠 새 쪽지 모달창 관리
-    const [isNewNoteModalOpen, setNewNoteModalOpen] = useState(false);
-    const openNewNoteModal = () => setNewNoteModalOpen(true);
-    const closeNewNoteModal = () => setNewNoteModalOpen(false);
 
     return (
         <div className="note-list-container">
@@ -25,8 +20,8 @@ const Note = ({ noteList = [], formatDate }) => {
 
             {/* 본문 */}
             <div className="note-list">
-                {noteList.map(note => (
-                    <div className="note-item" key={note.messageNo}>
+                {noteList.map(((note, index) => (
+                    <div className="note-item" key={index}>
                         <div className="note-star">
                             {note.bookmarkedYn === 'Y' ? <FaStar className="star-icon active"/> :
                                 <FaStar className="star-icon"/>}
@@ -37,15 +32,15 @@ const Note = ({ noteList = [], formatDate }) => {
                         </div>
                         <div className="note-date">{formatDate(note.messageSendDate)}</div>
                     </div>
-                ))}
+                )))}
             </div>
 
             {/* 새 쪽지 추가 모달 */}
             {isNewNoteModalOpen && (
-                <div className="new-note-modal" onClick={(e) => e.target === e.currentTarget && closeNewNoteModal()}>
+                <div onClick={(e) => e.target === e.currentTarget && closeNewNoteModal()}>
                     <div className="new-note-modal-content">
                         <NewNoteModal
-                            closeNewChatModal={closeNewNoteModal}
+                            closeNewNoteModal={closeNewNoteModal}
                         />
                     </div>
                 </div>

@@ -31,7 +31,7 @@ const useSearch = (endpoint, searchKeyword = '', status = '', initialParams = {}
 
     useEffect(() => {
         fetchData();
-    }, [endpoint, searchKeyword, status]);
+    }, [endpoint, searchKeyword, status, initialParams.page, initialParams.size]);
 
     return {
         data,

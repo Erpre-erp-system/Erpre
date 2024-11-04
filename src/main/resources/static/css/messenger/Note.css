@@ -172,3 +172,106 @@
     align-self: flex-start;
     padding-top: 4px;
 }
+
+/* 새로운 쪽지 */
+.new-note-modal {
+    color: #333;
+    position: fixed;
+    top: 20%;
+    left: 35%;
+    z-index: 1000;
+    width: 600px;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.note-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.note-modal-body {
+    margin-top: 15px;
+}
+
+.recipient-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.recipient-section label {
+    flex: 0 0 62px;
+    font-weight: bold;
+}
+
+.recipient-section input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    margin-left: 10px;
+}
+
+.note-employee-search {
+    cursor: pointer;
+}
+
+.options {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.options input[type="date"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.message-textarea {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 52px;
+}
+
+.note-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.send-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.cancel-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #888;
+}

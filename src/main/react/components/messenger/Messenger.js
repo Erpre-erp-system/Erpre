@@ -55,6 +55,9 @@ function Messenger({isOpen, toggleMessenger }) {
         handleStatusMessageChange,
 
         // 🟠 쪽지
+        isNewNoteModalOpen,
+        openNewNoteModal,
+        closeNewNoteModal,
         noteList,
         isNoteDropdownOpen,
         setIsNoteDropdownOpen,
@@ -425,6 +428,9 @@ function Messenger({isOpen, toggleMessenger }) {
                             <Note
                                 noteList={noteList}
                                 formatDate={formatDate}
+                                isNewNoteModalOpen={isNewNoteModalOpen}
+                                openNewNoteModal={openNewNoteModal}
+                                closeNewNoteModal={closeNewNoteModal}
                             />}
                     </>
                 )}

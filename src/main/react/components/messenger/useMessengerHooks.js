@@ -122,6 +122,21 @@ export const useMessengerHooks = () => {
         }
     }, [user]);
 
+    // 🟠 새 쪽지 모달 상태 관리
+    const [isNewNoteModalOpen, setNewNoteModalOpen] = useState(() => localStorage.getItem('isNewNoteModalOpen') === 'true');
+
+    // 🟠 새 쪽지 모달 열기
+    const openNewNoteModal = () => {
+        setNewNoteModalOpen(true);
+        localStorage.setItem('isNewNoteModalOpen', true);
+    };
+
+    // 🟠 새 쪽지 모달 닫기
+    const closeNewNoteModal = () => {
+        setNewNoteModalOpen(false);
+        localStorage.setItem('isNewNoteModalOpen', false);
+    };
+
     // 🟠 쪽지 목록 state
     const [noteList, setNoteList] = useState([]);
 
@@ -185,23 +200,6 @@ export const useMessengerHooks = () => {
             setIsLoading(false);
         }
     }, [activeView, chatList]);
-
-
-    // // 🔴 검색어에 따른 채팅 목록 API 호출 useEffect
-    // const searchChatList = useCallback((keyword) => {
-    //     setIsLoading(true);
-    //     const params = keyword ? { searchKeyword: keyword } : {}; // 검색어가 없으면 전체 조회
-    //
-    //     axios.get('/api/messengers/chat/list', { params })
-    //         .then((response) => {
-    //             setChatList(response.data);
-    //             setIsLoading(false);
-    //         })
-    //         .catch((error) => {
-    //             console.error('채팅 목록 검색 실패:', error);
-    //             setIsLoading(false);
-    //         });
-    // }, []);
 
     // 🟢  검색 state
     const [messengerSearchText, setMessengerSearchText] = useState('');
@@ -290,25 +288,6 @@ export const useMessengerHooks = () => {
         return `${year}-${month}-${day} ${hours}:${minutes}`;
     };
 
-    // // 🔴 동적 뷰에 따른 채팅 목록 API 호출 useEffect
-    // useEffect(() => {
-    //     if (activeView === 'chat') {
-    //         if (debouncedSearchText) {
-    //             searchChatList(debouncedSearchText);
-    //         } else {
-    //             fetchChatList();
-    //         }
-    //     }
-    // }, [activeView, debouncedSearchText, fetchChatList, searchChatList]);
-
-
-    // // 🔴 검색어 변경에 따른 채팅 목록 검색 useEffect
-    // useEffect(() => {R
-    //     if (activeView === 'chat') {
-    //         searchChatList(debouncedSearchText);
-    //     }
-    // }, [activeView, debouncedSearchText, searchChatList]);
-
 
     /////////////////////////////////////////////////////////////////////////
     return {
@@ -330,6 +309,9 @@ export const useMessengerHooks = () => {
         handleStatusMessageChange,
 
         // 🟠 쪽지
+        isNewNoteModalOpen,
+        openNewNoteModal,
+        closeNewNoteModal,
         noteList,
         isNoteDropdownOpen,
         setIsNoteDropdownOpen,
