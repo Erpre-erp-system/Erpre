@@ -72,7 +72,7 @@ public class MessengerController {
         }
     }
 
-    // 새 쪽지 생성 API (파일url, 유형
+    // 새 쪽지 생성 API (파일url, 유형 등 추가)
     @PostMapping("/note/create")
     public ResponseEntity<MessageDTO> createNote(
             @RequestBody MessageDTO.NoteRequestDTO noteRequestDTO) {
@@ -89,9 +89,11 @@ public class MessengerController {
     // 실시간 알림 전송
     @PostMapping("/note/send")
     public ResponseEntity<?> sendNote(
-            @RequestParam List<String> receiverIds,
+            @RequestParam(required = false) List<String> receiverIds,
             @RequestParam String messageContent
     ) {
+        System.out.println("수신자아이디:" + receiverIds + ", 수신내용:" + messageContent);
+
         messengerService.sendNote(receiverIds, messageContent);
         return ResponseEntity.ok("쪽지가 전송되었습니다");
     }
@@ -105,8 +107,8 @@ public class MessengerController {
             // SseEmitter에 초기 연결 이벤트를 전송
             emitter.send(SseEmitter.event().name("INIT"));
 
-            // 서비스 계층에서 쪽지 전송 로직을 통해 알림 발생 시 emitter를 사용하여 전송
-            // emitter.send(SseEmitter.event().name("NEW_NOTE").data(newNoteData));
+//             서비스 계층에서 쪽지 전송 로직을 통해 알림 발생 시 emitter를 사용하여 전송
+//             emitter.send(SseEmitter.event().name("NEW_NOTE").data(newNoteData));
 
             // 예외 처리 및 타임아웃 설정
             emitter.onCompletion(() -> logger.info("SSE 연결 완료"));

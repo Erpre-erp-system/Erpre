@@ -66,19 +66,22 @@ const NewNoteModal = ({closeNewNoteModal}) => {
 
     const handleSendNote = async () => {
         try {
-            const receiverIds = recipients.map(r => r.employeeId);
-            if (receiverIds.length === 0) {
+            const receiverIds = sendToMe ? [] : recipients.map(r => r.employeeId);
+
+            if (!sendToMe && receiverIds.length === 0) {
                 console.error('받는 사람이 선택되지 않았습니다.');
                 return;
             }
 
-            console.log("최종 수신자", recipients);
+            if (sendToMe) {
+                receiverIds.push(window.localStorage.getItem('employeeId'));
+            }
 
             // 1. 노트 생성 API 호출
             const response = await axios.post('/api/messengers/note/create', {
-                receiverIds: recipients.map(r => r.employeeId),
+                messageReceiverIds: recipients.map(r => r.employeeId),
                 messageContent: messageContent,
-                scheduledDate: scheduledSend ? scheduledDate : null,
+                messageSendDate: scheduledSend ? scheduledDate : null,
             });
             const newNote = response.data;
             console.log('전송된 쪽지:', newNote);
@@ -86,7 +89,7 @@ const NewNoteModal = ({closeNewNoteModal}) => {
             // 2. 실시간 전송 API 호출
             await axios.post('/api/messengers/note/send', {
                 receiverIds: recipients.map(r => r.employeeId),
-                messageContent: messageContent,
+                messageContent: newNote.messageContent,
             });
             closeNewNoteModal();
 
@@ -94,6 +97,8 @@ const NewNoteModal = ({closeNewNoteModal}) => {
             console.error('쪽지 전송 오류:', error);
         }
     };
+
+
 
     return (
         <>

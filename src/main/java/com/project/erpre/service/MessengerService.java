@@ -100,7 +100,7 @@ public class MessengerService {
 
         // 수신자 목록이 null 이거나 비어 있는지 확인
         if (receiverIds == null || receiverIds.isEmpty()) {
-            throw new IllegalArgumentException("수신자 목록이 비어 있습니다. 적어도 한 명 이상의 수신자가 필요합니다.");
+            receiverIds.add(employeeId);
         }
 
         // 1. 메시지 생성 및 발신자 설정
@@ -138,10 +138,15 @@ public class MessengerService {
         return messageDTO;
     }
 
-
-
-    // 실시간 알림 전송
+    // 실시간 쪽지 전송
     public void sendNote(List<String> receiverIds, String messageContent) {
+        
+        // 나에게 보내기
+        String employeeId = getEmployeeIdFromAuthentication();
+        if (receiverIds == null || receiverIds.isEmpty()) {
+            receiverIds.add(employeeId);
+        }
+        
         for (String receiverId : receiverIds) {
             SseEmitter emitter = emitters.get(receiverId);
             if (emitter != null) {

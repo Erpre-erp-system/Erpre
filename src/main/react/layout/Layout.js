@@ -1,5 +1,5 @@
 // src/main/react/layout/Layout.js
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import '../../resources/static/css/common/Layout.css';
@@ -9,6 +9,7 @@ import {useLocation} from 'react-router-dom';
 import EmailSidebar from './EmailSidebar';
 import {UserProvider} from '../context/UserContext';
 import {MessengerProvider} from '../context/MessengerContext';
+import ReceivedNoteModal from "../components/messenger/ReceivedNoteModal";
 
 
 
@@ -20,6 +21,29 @@ function Layout({currentMenu, children}) {
     // } // 프로젝트 마무리할때 로딩넣기
 
     const location = useLocation();
+
+    const [newNote, setNewNote] = useState(null);
+
+    useEffect(() => {
+        const eventSource = new EventSource('/api/messengers/note/subscribe');
+
+        eventSource.addEventListener("NEW_NOTE", (event) => {
+            const note = JSON.parse(event.data);
+            setNewNote(note);
+        });
+
+        eventSource.onerror = (error) => {
+            console.error('SSE 연결 오류:', error);
+            eventSource.close();
+        };
+
+        return () => {
+            eventSource.close();
+        };
+    }, []);
+
+    const handleCloseAlert = () => setNewNote(null);
+
 
     return (
         <div className="container">
@@ -39,6 +63,12 @@ function Layout({currentMenu, children}) {
                         {children}
                         <Toast/> {/* Toast 메세지 */}
                         <ConfirmCustom/> {/* confirm 모달 */}
+                        {newNote && (
+                            <ReceivedNoteModal
+                                note={newNote}
+                                onClose={handleCloseAlert}
+                            />
+                        )}
                     </div>
                 </MessengerProvider>
             </UserProvider>
