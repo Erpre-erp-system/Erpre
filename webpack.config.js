@@ -12,6 +12,13 @@ const messenger = './components/messenger/';
 
 module.exports = {
     context: path.resolve(__dirname, 'src/main/react'), // 기본 디렉토리 설정
+    //npm run watch 자동 리빌드
+      watch: true,
+      watchOptions: {
+        ignored: /node_modules/,
+        aggregateTimeout: 300,
+        poll: 1000, // 변경 사항을 감지할 주기 (밀리초)
+      },
     entry: {
         login: './components/auth/Login.js', // 로그인
         main: './components/main/Main.js', // 메인 대시보드

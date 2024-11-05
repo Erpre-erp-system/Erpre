@@ -60,14 +60,19 @@ public class OrderDispatchController {
         return ResponseEntity.ok("Dispatches deleted successfully");
     }
 
+    // 창고 배정 엔드포인트 추가
+    @PostMapping("/assignWarehouse")
+    public ResponseEntity<?> assignWarehouse(@RequestBody Map<String, Object> requestData) {
+        orderDispatchService.assignWarehouse(requestData);
+        return ResponseEntity.ok("창고 배정이 완료되었습니다.");
+    }
+
     // 출고 지시
     @PostMapping("/release")
     public ResponseEntity<?> releaseDispatches(@RequestBody Map<String, Object> requestData) {
         orderDispatchService.releaseDispatches(requestData);
         return ResponseEntity.ok("출고 지시가 완료되었습니다.");
     }
-
-    //로그인한 직원 확인
 
     // pdf다운로드
     @GetMapping("/export/pdf/{dispatchNo}")

@@ -115,20 +115,6 @@ public class OrderDispatchService {
                 .build();
     }
 
-//    // Dispatch 레코드 생성 메서드 - dispatchStatus("pending")
-//    public void createDispatchForOrder(Order order) {
-//        for (OrderDetail orderDetail : order.getOrderDetails()) {
-//            Dispatch dispatch = new Dispatch();
-//            dispatch.setOrderDetail(orderDetail);
-//            dispatch.setDispatchStatus("pending");
-//            dispatch.setDispatchDeleteYn("N");
-//
-//            //dispatch.setDispatchInsertDate(new Timestamp(System.currentTimeMillis()));
-//
-//            // Dispatch 저장
-//            orderDispatchRepository.save(dispatch);
-//        }
-//    }
 
     // Dispatch 레코드 생성 메서드 - orderHStatus가 'approved'일 때만 dispatchStatus("pending") 설정
     @Transactional
@@ -197,7 +183,50 @@ public class OrderDispatchService {
         }
     }
 
-    //출고지시
+
+    // 창고배정
+    public void assignWarehouse(Map<String, Object> requestData) {
+        // 요청 데이터에서 필요한 정보 추출
+        List<Integer> dispatchNos = extractDispatchNos(requestData.get("dispatchNos"));
+        String warehouseName = (String) requestData.get("warehouseName");
+        String warehouseManagerName = (String) requestData.get("warehouseManagerName");
+
+        // 입력값 검증
+//        if (dispatchNos == null || dispatchNos.isEmpty()) {
+//            throw new IllegalArgumentException("dispatchNos는 필수입니다.");
+//        }
+//        if (warehouseName == null || warehouseName.trim().isEmpty()) {
+//            throw new IllegalArgumentException("warehouseName은 필수입니다.");
+//        }
+
+        // 창고 정보 조회
+        Warehouse warehouse = warehouseRepository.findByWarehouseName(warehouseName);
+        if (warehouse == null) {
+            throw new IllegalArgumentException("해당 창고를 찾을 수 없습니다: " + warehouseName);
+        }
+
+        // 필요 시 창고 담당자 업데이트
+        if (warehouseManagerName != null && !warehouseManagerName.trim().isEmpty()) {
+            warehouse.setWarehouseManagerName(warehouseManagerName);
+            warehouseRepository.save(warehouse);
+        }
+
+        // 각 dispatchNo에 대해 창고 정보 업데이트
+        for (Integer dispatchNo : dispatchNos) {
+            Optional<Dispatch> dispatchOpt = orderDispatchRepository.findById(dispatchNo);
+            if (dispatchOpt.isPresent()) {
+                Dispatch dispatch = dispatchOpt.get();
+                dispatch.setWarehouse(warehouse);
+                orderDispatchRepository.save(dispatch);
+            } else {
+                // 존재하지 않는 dispatchNo에 대한 처리
+                // 필요에 따라 로그 작성 또는 예외 처리
+            }
+        }
+    }
+
+
+    // 출고지시
     public void releaseDispatches(Map<String, Object> requestData) {
         // dispatchNos 추출
         List<Integer> dispatchNos = extractDispatchNos(requestData.get("dispatchNos"));

@@ -52,7 +52,7 @@ function DispatchInstructionModal ({ show, onClose, onSave, assignedWarehouse, d
           setForm({
               customerName: dispatchData.customerName,
               customerAddr: dispatchData.customerAddr,
-              warehouseName: assignedWarehouse || dispatchData.warehouseName || '',
+              warehouseName: dispatchData.warehouseName || '',
               warehouseManagerName: dispatchData.warehouseManagerName || '',
               orderDDeliveryRequestDate: formatDateTime(dispatchData.orderDDeliveryRequestDate),
               productNm: dispatchData.productNm,
@@ -62,7 +62,7 @@ function DispatchInstructionModal ({ show, onClose, onSave, assignedWarehouse, d
               qrCodeData: dispatchData.qrCodeData,
           });
         }
-      }, [show, dispatchData, assignedWarehouse]);
+      }, [show, dispatchData]);
 
 
     //창고배정에서 선택한 창고명으로 저장
@@ -88,21 +88,27 @@ function DispatchInstructionModal ({ show, onClose, onSave, assignedWarehouse, d
         onClose(); // 모달 닫기
     };
 
+    //////////////////////////////////////////////////////////////////////////////다운로드
     // 다운로드 옵션 표시 여부 상태 (pdf,excel)
     const [showDownloadOptions, setShowDownloadOptions] = useState(false);
+    // const dropdownRef = useRef(null);
+
+    // 모달 바깥 클릭 시 드롭다운 닫기
+    // useEffect(() => {
+    //     const handleClickOutside = (event) => {
+    //         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    //             setShowDownloadOptions(false);
+    //         }
+    //     };
+    //     document.addEventListener('mousedown', handleClickOutside);
+    //     return () => {
+    //         document.removeEventListener('mousedown', handleClickOutside);
+    //     };
+    // }, []);
 
     // 다운로드 버튼 클릭 핸들러 (pdf,excel)
     const handleDownloadClick = () => {
-        setShowDownloadOptions(!showDownloadOptions);
-    };
-
-   // QR 코드 생성 핸들러
-    const handleQrCode = () => {
-        const qrData = `dispatchNo:${dispatchData.dispatchNo}`;
-        setForm(prevForm => ({
-            ...prevForm,
-            qrCodeData: qrData
-        }));
+        setShowDownloadOptions(prev => !prev);
     };
 
    // PDF 다운로드 핸들러
@@ -123,6 +129,8 @@ function DispatchInstructionModal ({ show, onClose, onSave, assignedWarehouse, d
         .catch((error) => {
             console.error('Error downloading PDF:', error);
         });
+
+        setShowDownloadOptions(false); // 옵션 선택 후 닫기
     };
 
     // Excel 다운로드 핸들러
@@ -143,6 +151,27 @@ function DispatchInstructionModal ({ show, onClose, onSave, assignedWarehouse, d
         .catch((error) => {
             console.error('Error downloading Excel:', error);
         });
+
+        setShowDownloadOptions(false); // 옵션 선택 후 닫기
+    };
+
+    ////////////////////////////////////////////////////////////////////////////////QR코드
+    // QR코드 모달 표시 상태
+    const [showQrModal, setShowQrModal] = useState(false);
+
+    // QR 코드 생성 핸들러
+    const handleQrCode = () => {
+        const qrData = `dispatchNo:${dispatchData.dispatchNo}`;
+        setForm(prevForm => ({
+            ...prevForm,
+            qrCodeData: qrData
+        }));
+        setShowQrModal(true); // QR코드 모달 표시
+    };
+
+    // QR코드 모달 닫기 핸들러
+    const handleCloseQrModal = () => {
+        setShowQrModal(false);
     };
 
 
@@ -154,144 +183,142 @@ function DispatchInstructionModal ({ show, onClose, onSave, assignedWarehouse, d
 
                 <button className="btn_close" onClick={onClose}><i className="bi bi-x-lg"></i></button>
 
+                <div className="dispatch-wrap">
                 {/* 출고증 제목 */}
-                <div className="dispatch-note">
-                    <h2>출고증</h2>
-                </div>
-
-                {/* 고객사 정보 */}
-                <div className="customer-info">
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th>고객사 이름</th>
-                                <td>{form.customerName}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* 공급자 정보 */}
-                <div className="supplier-info">
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th>공급자 상호</th>
-                                <td>이케아</td>
-                            </tr>
-                            <tr>
-                                <th>공급자 주소</th>
-                                <td>이케아</td>
-                            </tr>
-                            <tr>
-                                <th>공급자 대표성명</th>
-                                <td>박인욱</td>
-                            </tr>
-                            <tr>
-                                <th>공급자 전화번호</th>
-                                <td>02-111-5555</td>
-                            </tr>
-                            <tr>
-                                <th>공급자 사업자 등록번호</th>
-                                <td>123-456-7890</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* 출하관련 정보 */}
-                <div className="dispatch-info">
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th>납품지 주소</th>
-                                <td>{form.customerAddr}</td>
-                            </tr>
-                            <tr>
-                                <th>납품 요청일</th>
-                                <td>{form.orderDDeliveryRequestDate}</td>
-                            </tr>
-                            <tr>
-                                <th>출하창고</th>
-                                <td>{form.warehouseName}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* 상품관련 정보 */}
-                <div className="product-info">
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th>품목명</th>
-                                <td>{form.productNm}</td>
-                            </tr>
-                            <tr>
-                                <th>수량(단위포함)</th>
-                                <td>{form.orderDQty}</td>
-                            </tr>
-                            <tr>
-                                <th>출고단가</th>
-                                <td>{form.orderDPrice}</td>
-                            </tr>
-                            <tr>
-                                <th>총금액</th>
-                                <td>{form.orderDTotalPrice}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* 수량 및 인수 */}
-                <div className="quantity-acceptance">
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th>총 수량</th>
-                                <td>{form.totalOrderDQty}</td>
-                            </tr>
-                            <tr>
-                                <th>인수</th>
-                                <td>인</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-            {/* QR코드 및 다운로드 버튼 */}
-            <div className="qr-and-download">
-                <button onClick={handleQrCode}>QR 코드 생성</button>
-                {form.qrCodeData && (
-                    <div className="qr-code-container">
-                        <label>QR코드</label>
-                        <QRCodeCanvas value={form.qrCodeData} />
+                    <div className="dispatch-note">
+                        <h2>출고증</h2>
                     </div>
-                )}
-                <div className="download-section">
-                    <button className="dropbtn" onClick={handleDownloadClick}>다운로드</button>
-                    {showDownloadOptions && (
-                        <div className="dropdown-content">
-                            <button onClick={handlePdfDownload}>PDF</button>
-                            <button onClick={handleExcelDownload}>Excel</button>
+
+                    <div className="customer-supplier">
+
+                        {/* 고객사 정보 */}
+                        <div className="customer-info">
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <th>고객사 이름</th>
+                                    <td>{form.customerName}</td>
+                                </tr>
+                                <tr>
+                                    <td colSpan="2" className="qr-modal-content">
+                                        <QRCodeCanvas value={form.qrCodeData} />
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
-                    )}
+
+                        {/* 공급자 정보 */}
+                        <div className="supplier-info">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th>공급자 상호</th>
+                                        <td>이케아</td>
+                                    </tr>
+                                    <tr>
+                                        <th>공급자 주소</th>
+                                        <td>이케아</td>
+                                    </tr>
+                                    <tr>
+                                        <th>공급자 대표성명</th>
+                                        <td>박인욱</td>
+                                    </tr>
+                                    <tr>
+                                        <th>공급자 전화번호</th>
+                                        <td>02-111-5555</td>
+                                    </tr>
+                                    <tr>
+                                        <th>공급자 사업자 등록번호</th>
+                                        <td>123-456-7890</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                        {/* 출하관련 정보 */}
+                        <div className="dispatch-info">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th>납품지 주소</th>
+                                        <td>{form.customerAddr}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>납품 요청일</th>
+                                        <td>{form.orderDDeliveryRequestDate}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>출하창고</th>
+                                        <td>{form.warehouseName}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* 상품관련 정보 */}
+                        <div className="product-info">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>품목명</th>
+                                        <th>수량</th>
+                                        <th>출고단가</th>
+                                        <th>총금액</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{form.productNm}</td>
+                                        <td>{form.orderDQty}EA</td>
+                                        <td>{Number(form.orderDPrice).toLocaleString()}</td>
+                                        <td>{Number(form.orderDTotalPrice).toLocaleString()}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* 수량 및 인수 */}
+                        <div className="acceptance">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th>인수</th>
+                                        <td>인</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                 </div>
-            </div>
 
-            {/* 출고 버튼 */}
-            <div className="modal-actions">
-                <button type="submit" className="box blue" onClick={handleSubmit}>출고</button>
-            </div>
+                <div className="download-actions"> 
+                    {/* 다운로드 버튼 */}
+                    <div className={`download-section ${showDownloadOptions ? 'show' : ''}`} >
+                        <button className="dropbtn" onClick={handleDownloadClick}>다운로드</button>
+                        {showDownloadOptions && (
+                            <div className="dropdown-content">
+                                <button className="pdfDownload" onClick={handlePdfDownload}>PDF</button>
+                                <button className="excelDownload" onClick={handleExcelDownload}>Excel</button>
+                            </div>
+                        )}
+                    </div>
 
-            {/* 출고지시 확인 모달 */}
-            {showConfirmModal && (
-            <ConfirmationModal
-                message="출고 지시 하시겠습니까?"
-                onConfirm={handleConfirmSave}
-                onCancel={() => setShowConfirmModal(false)}
-                />
-            )}
+                    {/* 출고 버튼 */}
+                    <div className="modal-actions">
+                        <button className="box blue" type="button" 
+                        onClick={() => setShowSaveConfirmModal(true)}>출고</button>
+                    </div>
+                </div>
+
+                {/* 저장 확인 모달 */}
+                {/* {showConfirmModal && (
+                <ConfirmationModal
+                    message="출고 지시 하시겠습니까?"
+                    onConfirm={handleConfirmSave}
+                    onCancel={() => setShowConfirmModal(false)}
+                    />
+                )} */}
 
              </div>
         </div>
@@ -415,8 +442,10 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
 
     // 저장 동작 수행
     onSave(editableWarehouse); // 상위 컴포넌트로 저장된 데이터 전달
+    window.showToast("출고 지시가 완료되었습니다.");
     onClose(); // 상세 모달 닫기
     setShowSaveConfirmModal(false); // 저장 확인 모달 닫기
+
 };
 
     if (!show ) return null; // 모달 표시 여부 체크
@@ -547,7 +576,6 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
     // 페이지
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
-    const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 번호
     const itemsPerPage = 10; // 페이지당 아이템 수
 
     // 선택된 출고 정보 체크 상태
@@ -570,7 +598,8 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
 
     // 선택된 출고 데이터 (출고지시 모달에 전달)
     const [selectedDispatchData, setSelectedDispatchData] = useState(null);
-    
+
+
     // 출고 데이터 가져오기
     useEffect(() => {
         fetchData();
@@ -603,34 +632,45 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
 
     // 필터링된 dispatches 생성
     const filteredDispatches = useMemo(() => {
-        let filtered = dispatches;
+       let filtered = dispatches.filter(dispatch => {
+           const isIncludedByFilterType =
+               dispatch.dispatchStatus === filterType && dispatch.dispatchDeleteYn === 'N';
 
-        // 검색어 필터링
-        if (searchTerm) {
-            filtered = filtered.filter(dispatch => {
-                if (searchField === 'customer') {
-                    return dispatch.customerName && dispatch.customerName.includes(searchTerm);
-                } else if (searchField === 'productName') {
-                    return dispatch.productNm && dispatch.productNm.includes(searchTerm);
-                } else if (searchField === 'warehouse') {
-                    return dispatch.warehouseName && dispatch.warehouseName.includes(searchTerm);
-                } else {
-                    return true;
-                }
-            });
+        // 검색어 필터 적용
+        const searchText = searchTerm.toLowerCase();
+        const isIncludedBySearch =
+            (dispatch.customerName ? dispatch.customerName.toLowerCase() : '').includes(searchText) ||
+            (dispatch.productNm ? dispatch.productNm.toLowerCase() : '').includes(searchText);
+
+    // 모든 조건이 만족하는 경우에만 포함
+    return isIncludedByFilterType && isIncludedBySearch;
+    });
+
+    // 정렬 로직 적용
+    filtered.sort((a, b) => {
+        let aValue = a[sortColumn] ? a[sortColumn].toString() : '';
+        let bValue = b[sortColumn] ? b[sortColumn].toString() : '';
+
+        // 숫자 컬럼 처리
+        if (sortColumn === 'dispatchNo') {
+            aValue = Number(aValue);
+            bValue = Number(bValue);
+            return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+        } else {
+            return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
         }
+    });
 
-        // 정렬
-        if (sortColumn) {
-            filtered = filtered.slice().sort((a, b) => {
-                if (a[sortColumn] < b[sortColumn]) return sortOrder === 'asc' ? -1 : 1;
-                if (a[sortColumn] > b[sortColumn]) return sortOrder === 'asc' ? 1 : -1;
-                return 0;
-            });
-        }
+    return filtered;
+    }, [dispatches, filterType, searchTerm, sortColumn, sortOrder]);
 
-        return filtered;
-    }, [dispatches, searchTerm, searchField, sortColumn, sortOrder]);
+    // 출고 정렬 함수
+    const sortDispatches = (column) => {
+        const order = sortColumn === column && sortOrder === 'asc' ? 'desc' : 'asc';
+        setSortColumn(column);
+        setSortOrder(order);
+    };
+    
 
     // 필터 타입 변경 핸들러 (출고 상태 필터)
     const handleFilterTypeChange = (e) => {
@@ -646,16 +686,6 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
     // 검색어 변경 핸들러
     const handleSearchTermChange = (e) => {
         setSearchTerm(e.target.value);
-    };
-
-    // 정렬 함수
-    const sortDispatches = (column) => {
-        let newOrder = 'asc';
-        if (sortColumn === column && sortOrder === 'asc') {
-            newOrder = 'desc';
-        }
-        setSortColumn(column);
-        setSortOrder(newOrder);
     };
 
     // 전체 선택 체크박스 핸들러
@@ -685,7 +715,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
         }
 
         // 선택된 출고 건들에 창고 배정이 되어 있는지 확인
-        const selectedDispatchesHaveWarehouse = selectedDispatchIndices.every(index => {
+       const selectedDispatchesHaveWarehouse = selectedDispatchIndices.every(index => {
             const dispatch = filteredDispatches[index];
             return dispatch.warehouseName && dispatch.warehouseName.trim() !== '';
         });
@@ -695,10 +725,9 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
             return;
         }
 
-        setSelectedDispatchData(filteredDispatches[selectedDispatchIndices[0]]);
-        setDispatchInstructionModal(true);
+        setSelectedDispatchData(filteredDispatches[selectedDispatchIndices[0]]); //모달이 열릴 때, 선택된 출고 데이터가 출고지시 모달에 표시
+        setDispatchInstructionModal(true); //출고지시 모달 on
     };
-
 
     // 창고배정 버튼 클릭 핸들러
     const handleWarehouseAssignmentClick = () => {
@@ -708,8 +737,8 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
     // 창고 배정 후 dispatches 상태 업데이트
     const handleWarehouseAssignmentSave = (warehouseData) => {
         const selectedDispatchNos = filteredDispatches
-            .filter((_, index) => selectedDispatches[index])
-            .map(dispatch => dispatch.dispatchNo);
+            .map((dispatch, index) => selectedDispatches[index] ? dispatch.dispatchNo : null)
+            .filter(no => no !== null);
 
         if (selectedDispatchNos.length === 0) {
             window.showToast("창고 배정할 출고 항목을 선택해주세요.", 'error');
@@ -724,6 +753,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
         })
         .then(response => {
             window.showToast("창고 배정이 완료되었습니다.");
+
             // 프론트엔드 상태 업데이트
             const updatedDispatches = dispatches.map((dispatch) => {
                 if (selectedDispatchNos.includes(dispatch.dispatchNo)) {
@@ -744,6 +774,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
     };
 
 
+
     // 출고지시 모달에서 저장된 데이터 받기
     const handleDispatchInstructionSave = (formData) => {
         const selectedDispatchNos = filteredDispatches
@@ -755,7 +786,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
             ...formData
         })
             .then(response => {
-                window.showToast("출고 지시가 완료되었습니다.");
+                
                 setDispatchInstructionModal(false);
 
                 // 상태 업데이트
@@ -778,7 +809,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
 
 
     // Pagination
-    const handlePageChange = (newPage) => {
+    const PageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
             setPage(newPage);
         }
@@ -826,7 +857,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                         <select className="box" onChange={handleSearchFieldChange} value={searchField}>
                             value={filterType}
                             <option value="customer">고객사</option>
-                            <option value="productName">상품명</option>
+                            <option value="productNm">상품명</option>
                             <option value="warehouse">출고창고명</option>
 
                         </select>
@@ -906,39 +937,35 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                     <th>
                                         <div className={`dispatch_wrap ${sortColumn === 'customerName' ? 'pending' : ''}`}>
                                             <span>고객사</span>
-                                            <button className="btn_order" onClick={() => sortCustomer('customerName')}>
+                                            <button className="btn_order" onClick={() => sortDispatches('customerName')}>
                                                 <i className={`bi ${sortColumn === 'customerName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
                                             </button>
+                                        
                                         </div>
                                     </th>
                                     <th>
-                                        <div className={`dispatch_wrap ${sortColumn === 'productName' ? 'pending' : ''}`}>
+                                        <div className={`dispatch_wrap ${sortColumn === 'productNm' ? 'pending' : ''}`}>
                                             <span>상품명</span>
-                                            <button className="btn_order" onClick={() => sortProduct('productName')}>
-                                                <i className={`bi ${sortColumn === 'productName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            <button className="btn_order" onClick={() => sortDispatches('productNm')}>
+                                                <i className={`bi ${sortColumn === 'productNm' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
                                             </button>
                                         </div>
                                     </th>
                                     <th>
                                         <div className={`dispatch_wrap ${sortColumn === 'deliveryRequestDate' ? 'pending' : ''}`}>
                                             <span>납품 요청일</span>
-                                            <button className="btn_order" onClick={() => sortDeliveryRequestDate('deliveryRequestDate')}>
+                                            <button className="btn_order" onClick={() => sortDispatches('deliveryRequestDate')}>
                                                 <i className={`bi ${sortColumn === 'deliveryRequestDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
                                             </button>
                                         </div>
                                     </th>
                                     <th>
-                                        <div className={`dispatch_wrap ${sortColumn === 'dispatchStatus' ? 'pending' : ''}`}>
-                                            <span>출고상태</span>
-                                            <button className="btn_order" onClick={() => sortDispatchStatus('dispatchStatus')}>
-                                                <i className={`bi ${sortColumn === 'dispatchStatus' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
-                                            </button>
-                                        </div>
+                                        <span>출고상태</span>
                                     </th>
                                     <th>
                                         <div className={`dispatch_wrap ${sortColumn === 'dispatchStartDate' ? 'pending' : ''}`}>
                                             <span>출고 시작일시</span>
-                                            <button className="btn_order" onClick={() => sortDispatchStartDate('dispatchStartDate')}>
+                                            <button className="btn_order" onClick={() => sortDispatches('dispatchStartDate')}>
                                                 <i className={`bi ${sortColumn === 'dispatchStartDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
                                             </button>
                                         </div>
@@ -946,7 +973,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                     <th>
                                         <div className={`dispatch_wrap ${sortColumn === 'dispatchEndDate' ? 'pending' : ''}`}>
                                             <span>출고 완료일시</span>
-                                            <button className="btn_order" onClick={() => sortDispatchEndDate('dispatchEndDate')}>
+                                            <button className="btn_order" onClick={() => sortDispatches('dispatchEndDate')}>
                                                 <i className={`bi ${sortColumn === 'dispatchEndDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
                                             </button>
                                         </div>
@@ -954,7 +981,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                     <th>
                                         <div className={`dispatch_wrap ${sortColumn === 'warehouseName' ? 'pending' : ''}`}>
                                             <span>출고 창고명</span>
-                                            <button className="btn_order" onClick={() => sortWarehouseName('warehouseName')}>
+                                            <button className="btn_order" onClick={() => sortDispatches('warehouseName')}>
                                                 <i className={`bi ${sortColumn === 'warehouseName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
                                             </button>
                                         </div>
@@ -1019,7 +1046,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                         </table>
                     </div>
 
-                    {/* 페이지네이션 */}
+                    {/* 페이지네이션 영역*/}
                      <div className="pagination-container">
                          <div className="pagination-sub left">
                              {/* 선택 삭제 버튼 */}
@@ -1028,50 +1055,44 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                              </button>
                          </div>
                          
-                         {/* 가운데: 페이지네이션 */}
+                         {/* 페이지네이션 */}
                          <div className="pagination">
-                             {/* '처음' 버튼 */}
-                             {page > 1 && (
-                                 <button className="box icon first" onClick={() => setPage(1)}>
-                                     <i className="bi bi-chevron-double-left"></i>
-                                 </button>
-                             )}
-
-                             {/* '이전' 버튼 */}
-                             {page > 1 && (
-                                 <button className="box icon left" onClick={() => setPage(page - 1)}>
-                                     <i className="bi bi-chevron-left"></i>
-                                 </button>
-                             )}
-
-                             {/* 페이지 번호 블록 */}
-                             {Array.from({ length: totalPages }, (_, index) => {
-                                 const pageNumber = index + 1;
-                                 return (
-                                     <button
-                                         key={pageNumber}
-                                         onClick={() => setPage(pageNumber)}
-                                         className={page === pageNumber ? 'box active' : 'box'}
-                                     >
-                                         {pageNumber}
-                                     </button>
-                                 );
-                             })}
-
-                             {/* '다음' 버튼 */}
-                             {page < totalPages && (
-                                 <button className="box icon right" onClick={() => setPage(page + 1)}>
-                                     <i className="bi bi-chevron-right"></i>
-                                 </button>
-                             )}
-
-                             {/* '끝' 버튼 */}
-                             {page < totalPages && (
-                                 <button className="box icon last" onClick={() => setPage(totalPages)}>
-                                     <i className="bi bi-chevron-double-right"></i>
-                                 </button>
-                             )}
-                         </div>
+                            {page > 1 && (
+                                <>
+                                    <button className="box icon first" onClick={() => PageChange(1)}>
+                                        <i className="bi bi-chevron-double-left"></i>
+                                    </button>
+                                    <button className="box icon left" onClick={() => PageChange(page - 1)}>
+                                        <i className="bi bi-chevron-left"></i>
+                                    </button>
+                                </>
+                            )}
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, index) => {
+                                const startPage = Math.floor((page - 1) / 5) * 5 + 1;
+                                const currentPage = startPage + index;
+                                return (
+                                    currentPage <= totalPages && (
+                                        <button
+                                            key={currentPage}
+                                            onClick={() => PageChange(currentPage)}
+                                            className={currentPage === page ? 'box active' : 'box'}
+                                        >
+                                            {currentPage}
+                                        </button>
+                                    )
+                                );
+                            })}
+                            {page < totalPages && (
+                                <>
+                                    <button className="box icon right" onClick={() => PageChange(page + 1)}>
+                                        <i className="bi bi-chevron-right"></i>
+                                    </button>
+                                    <button className="box icon last" onClick={() => PageChange(totalPages)}>
+                                        <i className="bi bi-chevron-double-right"></i>
+                                    </button>
+                                </>
+                            )}
+                        </div>
                          <div className="pagination-sub right"></div>
                      </div>
                  </div>
