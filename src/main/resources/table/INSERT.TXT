@@ -1,38 +1,38 @@
 -- 1. 부서 (m_department 테이블에 데이터를 먼저 삽입)
 INSERT INTO m_department (department_id, department_name, department_location, department_tel)
 VALUES 
-(1, 'HR Department', 'Seoul HQ', '02-1234-5678'),
-(2, 'IT Department', 'Busan Branch', '051-8765-4321'),
-(3, 'Sales Department', 'Incheon Office', '032-7654-3210');
+(1, '본부', '서울 본사', '02-1234-5678'),
+(2, 'IT부서', '부산 지사', '051-8765-4321'),
+(3, '영업부서', '인천 사무소', '032-7654-3210');
 
 --추가
-INSERT INTO m_department (department_id, department_name, department_location, department_tel)
-VALUES
+--INSERT INTO m_department (department_id, department_name, department_location, department_tel)
+--VALUES
 --(1, '대표이사비서실', '서울 본사', '02-1234-1111'),
 --(2, '임원비서실', '서울 본사', '02-1234-2222'),
 --(3, '인사부', '서울 본사', '02-1234-3333'),
-(4, '영업부', '부산 지사', '051-5678-4444'),
-(5, 'IT부서', '서울 본사', '02-1234-5555'),
-(6, '법무부서', '서울 본사', '02-1234-6666'),
-(7, '마케팅부', '서울 본사', '02-1234-7777'),
-(8, '회계부서', '서울 본사', '02-1234-8888'),
-(9, '출고부', '경기 물류센터', '031-9876-9999');
+--(4, '영업부', '부산 지사', '051-5678-4444'),
+--(5, 'IT부서', '서울 본사', '02-1234-5555'),
+--(6, '법무부서', '서울 본사', '02-1234-6666'),
+--(7, '마케팅부', '서울 본사', '02-1234-7777'),
+--(8, '회계부서', '서울 본사', '02-1234-8888'),
+--(9, '출고부', '경기 물류센터', '031-9876-9999');
 
 -- 2. 직급 (m_job 테이블에 데이터 삽입)
 INSERT INTO m_job (job_id, job_name, min_years_of_service, min_salary, grade_incentive_rate, job_role)
 VALUES 
-(1, 'Admin', 5, 50000000, 10.00, 'Admin'),
-(2, 'Assistant Manager', 3, 30000000, 5.00, 'Assistant Manager'),
-(3, 'Staff', 0, 25000000, 2.00, 'Staff');
+(1, '관리자', 5, 50000000, 10.00, 'Admin'),
+(2, '대리', 3, 30000000, 5.00, 'Assistant Manager'),
+(3, '사원', 0, 25000000, 2.00, 'Staff');
 
 --추가
 --(1, '대표이사', 20, 150000000, 10.00, 'Admin'),
 --(2, '임원', 15, 120000000, 7.50, 'Executive'),
 --(3, '부장', 10, 100000000, 5.00, 'Director'),
 --(4, '팀장', 7, 80000000, 3.50, 'Manager'),
-(5, '대리', 5, 60000000, 2.00, 'Assistant Manager'),
-(6, '계장', 3, 50000000, 1.50, 'Senior Staff'),
-(7, '사원', 0, 40000000, 1.00, 'Staff');
+--(5, '대리', 5, 60000000, 2.00, 'Assistant Manager'),
+--(6, '계장', 3, 50000000, 1.50, 'Senior Staff'),
+--(7, '사원', 0, 40000000, 1.00, 'Staff');
 
 -- 3. 직원 (부서와 직급 데이터가 있는 상태에서 m_employee 테이블에 삽입)
 INSERT INTO m_employee (employee_id, employee_pw, employee_name, employee_email, employee_tel, department_id, job_id)
@@ -49,28 +49,28 @@ VALUES
 (3, 'Tech Innovators', '031-7654-3210', 'Michael Kim', '345-67-89012', 'Incheon, Korea', '032-7654-3210', 'David Manager', 'david.manager@tech.com', '010-2233-4455', 'KR', 'Partner', 'Y', '2021-10-15', '2023-10-01');
 
 --추가
-INSERT INTO m_customer (customer_no, customer_name, customer_tel, customer_representative_name, customer_business_reg_no, customer_addr, customer_fax_no, customer_manager_name, customer_manager_email, customer_manager_tel, customer_country_code, customer_type, customer_e_tax_invoice_yn, customer_transaction_start_date, customer_transaction_end_date)
-VALUES
-(4, '대한상사', '02-3456-7890', '김대표', '456-78-90123', '서울특별시 강남구 테헤란로 123', '02-3456-7891', '이매니저', 'manager@daehan.co.kr', '010-1111-2222', 'KR', '공급업체', 'Y', '2023-03-01', NULL),
-(5, '세종무역', '051-1234-5678', '박대표', '567-89-01234', '부산광역시 해운대구 센텀중앙로 45', '051-1234-5679', '정매니저', 'manager@sejong.com', '010-3333-4444', 'KR', '고객사', 'N', '2022-08-15', NULL),
-(6, '이노텍', '032-8765-4321', '최대표', '678-90-12345', '인천광역시 남동구 인주대로 23', '032-8765-4322', '한매니저', 'manager@innotech.kr', '010-5555-6666', 'KR', '협력사', 'Y', '2021-12-01', '2023-12-31'),
-(7, '동양전자', '053-5432-1098', '이대표', '789-01-23456', '대구광역시 동구 팔공로 56', '053-5432-1099', '김매니저', 'manager@dongyang.co.kr', '010-7777-8888', 'KR', '고객사', 'Y', '2021-09-20', NULL),
-(8, '현대기술', '062-4321-0987', '차대표', '890-12-34567', '광주광역시 북구 첨단과학로 78', '062-4321-0988', '정매니저', 'manager@hyundaitech.co.kr', '010-9999-0000', 'KR', '공급업체', 'N', '2020-11-30', NULL),
-(9, '삼성유통', '044-3210-9876', '강대표', '901-23-45678', '세종특별자치시 나성북로 101', '044-3210-9877', '박매니저', 'manager@samsung.co.kr', '010-2222-3333', 'KR', '고객사', 'Y', '2023-02-01', NULL),
-(10, 'LG상사', '031-2109-8765', '문대표', '012-34-56789', '경기도 성남시 분당구 서현로 9', '031-2109-8766', '이매니저', 'manager@lgtrading.co.kr', '010-4444-5555', 'KR', '협력사', 'N', '2022-10-15', NULL),
-(11, '한화산업', '042-1098-7654', '류대표', '123-45-67891', '대전광역시 유성구 대덕대로 222', '042-1098-7655', '송매니저', 'manager@hanwha.co.kr', '010-6666-7777', 'KR', '공급업체', 'Y', '2021-08-01', NULL),
-(12, '포스코인터내셔널', '054-9876-5432', '황대표', '234-56-78912', '경상북도 포항시 남구 포스코대로 1', '054-9876-5433', '최매니저', 'manager@posco.com', '010-8888-9999', 'KR', '고객사', 'N', '2021-05-10', '2023-04-01'),
-(13, '카카오엔터프라이즈', '02-1234-5678', '김대표', '345-67-89013', '서울특별시 강남구 역삼로 14', '02-1234-5679', '윤매니저', 'manager@kakaoenterprise.com', '010-1234-5678', 'KR', '협력사', 'Y', '2022-06-01', NULL),
-(14, '네이버비즈니스', '031-9876-5432', '유대표', '456-78-90124', '경기도 성남시 분당구 정자일로 70', '031-9876-5433', '오매니저', 'manager@naver.com', '010-8765-4321', 'KR', '공급업체', 'N', '2021-07-10', NULL),
-(15, 'SK이노베이션', '02-8765-4321', '최대표', '567-89-01235', '서울특별시 종로구 새문안로 38', '02-8765-4322', '한매니저', 'manager@skinnovation.com', '010-7654-3210', 'KR', '고객사', 'Y', '2022-03-15', NULL),
-(16, 'CJ대한통운', '032-5432-1098', '조대표', '678-90-12346', '인천광역시 중구 서해대로 55', '032-5432-1099', '배매니저', 'manager@cjlogistics.com', '010-8765-4321', 'KR', '협력사', 'N', '2023-01-01', NULL),
-(17, 'GS건설', '02-1098-7654', '전대표', '789-01-23457', '서울특별시 서초구 반포대로 22', '02-1098-7655', '최매니저', 'manager@gsconstruction.com', '010-3210-4321', 'KR', '공급업체', 'Y', '2021-04-01', NULL),
-(18, '두산산업', '051-7654-3210', '허대표', '890-12-34568', '부산광역시 사상구 사상로 30', '051-7654-3211', '정매니저', 'manager@doosan.com', '010-5555-6666', 'KR', '고객사', 'N', '2020-10-10', NULL),
-(19, '롯데물산', '053-8765-4321', '구대표', '901-23-45679', '대구광역시 중구 동성로 12', '053-8765-4322', '박매니저', 'manager@lotte.com', '010-4321-5432', 'KR', '협력사', 'Y', '2022-02-01', NULL),
-(20, '신세계인터내셔널', '064-1234-5678', '양대표', '012-34-56790', '제주특별자치도 제주시 연북로 50', '064-1234-5679', '홍매니저', 'manager@shinsegae.com', '010-6543-2109', 'KR', '공급업체', 'N', '2021-11-05', NULL),
-(21, '아이템코리아', '032-2345-6789', '배대표', '345-67-89014', '경기도 부천시 부천로 101', '032-2345-6790', '송매니저', 'manager@itemkorea.com', '010-3456-7890', 'KR', '고객사', 'Y', '2022-07-01', NULL),
-(22, '하이트진로', '02-6543-2109', '조대표', '456-78-90125', '서울특별시 서초구 사평대로 78', '02-6543-2110', '전매니저', 'manager@hitejinro.com', '010-2345-6789', 'KR', '협력사', 'N', '2020-09-15', NULL),
-(23, '대한항공', '02-8765-2109', '나대표', '567-89-01236', '서울특별시 강서구 하늘길 77', '02-8765-2110', '이매니저', 'manager@koreanair.com', '010-4321-2109', 'KR', '공급업체', 'Y', '2021-06-01', NULL);
+--INSERT INTO m_customer (customer_no, customer_name, customer_tel, customer_representative_name, customer_business_reg_no, customer_addr, customer_fax_no, customer_manager_name, customer_manager_email, customer_manager_tel, customer_country_code, customer_type, customer_e_tax_invoice_yn, customer_transaction_start_date, customer_transaction_end_date)
+--VALUES
+--(4, '대한상사', '02-3456-7890', '김대표', '456-78-90123', '서울특별시 강남구 테헤란로 123', '02-3456-7891', '이매니저', 'manager@daehan.co.kr', '010-1111-2222', 'KR', '공급업체', 'Y', '2023-03-01', NULL),
+--(5, '세종무역', '051-1234-5678', '박대표', '567-89-01234', '부산광역시 해운대구 센텀중앙로 45', '051-1234-5679', '정매니저', 'manager@sejong.com', '010-3333-4444', 'KR', '고객사', 'N', '2022-08-15', NULL),
+--(6, '이노텍', '032-8765-4321', '최대표', '678-90-12345', '인천광역시 남동구 인주대로 23', '032-8765-4322', '한매니저', 'manager@innotech.kr', '010-5555-6666', 'KR', '협력사', 'Y', '2021-12-01', '2023-12-31'),
+--(7, '동양전자', '053-5432-1098', '이대표', '789-01-23456', '대구광역시 동구 팔공로 56', '053-5432-1099', '김매니저', 'manager@dongyang.co.kr', '010-7777-8888', 'KR', '고객사', 'Y', '2021-09-20', NULL),
+--(8, '현대기술', '062-4321-0987', '차대표', '890-12-34567', '광주광역시 북구 첨단과학로 78', '062-4321-0988', '정매니저', 'manager@hyundaitech.co.kr', '010-9999-0000', 'KR', '공급업체', 'N', '2020-11-30', NULL),
+--(9, '삼성유통', '044-3210-9876', '강대표', '901-23-45678', '세종특별자치시 나성북로 101', '044-3210-9877', '박매니저', 'manager@samsung.co.kr', '010-2222-3333', 'KR', '고객사', 'Y', '2023-02-01', NULL),
+--(10, 'LG상사', '031-2109-8765', '문대표', '012-34-56789', '경기도 성남시 분당구 서현로 9', '031-2109-8766', '이매니저', 'manager@lgtrading.co.kr', '010-4444-5555', 'KR', '협력사', 'N', '2022-10-15', NULL),
+--(11, '한화산업', '042-1098-7654', '류대표', '123-45-67891', '대전광역시 유성구 대덕대로 222', '042-1098-7655', '송매니저', 'manager@hanwha.co.kr', '010-6666-7777', 'KR', '공급업체', 'Y', '2021-08-01', NULL),
+--(12, '포스코인터내셔널', '054-9876-5432', '황대표', '234-56-78912', '경상북도 포항시 남구 포스코대로 1', '054-9876-5433', '최매니저', 'manager@posco.com', '010-8888-9999', 'KR', '고객사', 'N', '2021-05-10', '2023-04-01'),
+--(13, '카카오엔터프라이즈', '02-1234-5678', '김대표', '345-67-89013', '서울특별시 강남구 역삼로 14', '02-1234-5679', '윤매니저', 'manager@kakaoenterprise.com', '010-1234-5678', 'KR', '협력사', 'Y', '2022-06-01', NULL),
+--(14, '네이버비즈니스', '031-9876-5432', '유대표', '456-78-90124', '경기도 성남시 분당구 정자일로 70', '031-9876-5433', '오매니저', 'manager@naver.com', '010-8765-4321', 'KR', '공급업체', 'N', '2021-07-10', NULL),
+--(15, 'SK이노베이션', '02-8765-4321', '최대표', '567-89-01235', '서울특별시 종로구 새문안로 38', '02-8765-4322', '한매니저', 'manager@skinnovation.com', '010-7654-3210', 'KR', '고객사', 'Y', '2022-03-15', NULL),
+--(16, 'CJ대한통운', '032-5432-1098', '조대표', '678-90-12346', '인천광역시 중구 서해대로 55', '032-5432-1099', '배매니저', 'manager@cjlogistics.com', '010-8765-4321', 'KR', '협력사', 'N', '2023-01-01', NULL),
+--(17, 'GS건설', '02-1098-7654', '전대표', '789-01-23457', '서울특별시 서초구 반포대로 22', '02-1098-7655', '최매니저', 'manager@gsconstruction.com', '010-3210-4321', 'KR', '공급업체', 'Y', '2021-04-01', NULL),
+--(18, '두산산업', '051-7654-3210', '허대표', '890-12-34568', '부산광역시 사상구 사상로 30', '051-7654-3211', '정매니저', 'manager@doosan.com', '010-5555-6666', 'KR', '고객사', 'N', '2020-10-10', NULL),
+--(19, '롯데물산', '053-8765-4321', '구대표', '901-23-45679', '대구광역시 중구 동성로 12', '053-8765-4322', '박매니저', 'manager@lotte.com', '010-4321-5432', 'KR', '협력사', 'Y', '2022-02-01', NULL),
+--(20, '신세계인터내셔널', '064-1234-5678', '양대표', '012-34-56790', '제주특별자치도 제주시 연북로 50', '064-1234-5679', '홍매니저', 'manager@shinsegae.com', '010-6543-2109', 'KR', '공급업체', 'N', '2021-11-05', NULL),
+--(21, '아이템코리아', '032-2345-6789', '배대표', '345-67-89014', '경기도 부천시 부천로 101', '032-2345-6790', '송매니저', 'manager@itemkorea.com', '010-3456-7890', 'KR', '고객사', 'Y', '2022-07-01', NULL),
+--(22, '하이트진로', '02-6543-2109', '조대표', '456-78-90125', '서울특별시 서초구 사평대로 78', '02-6543-2110', '전매니저', 'manager@hitejinro.com', '010-2345-6789', 'KR', '협력사', 'N', '2020-09-15', NULL),
+--(23, '대한항공', '02-8765-2109', '나대표', '567-89-01236', '서울특별시 강서구 하늘길 77', '02-8765-2110', '이매니저', 'manager@koreanair.com', '010-4321-2109', 'KR', '공급업체', 'Y', '2021-06-01', NULL);
 
 -- 5. 상품 카테고리 (m_category 테이블에 데이터 삽입)
 INSERT INTO m_category (category_no, category_level, parent_category_no, category_nm)
@@ -114,15 +114,15 @@ VALUES
 (2, 'Busan Warehouse', '051-7654-3210', '456 Busan Street, Korea', 'Warehouse Manager B'),
 (3, 'Incheon Warehouse', '032-7654-3210', '789 Incheon Street, Korea', 'Warehouse Manager C');
 --추가
-INSERT INTO m_warehouse (warehouse_no, warehouse_name, warehouse_tel, warehouse_addr, warehouse_manager_name)
-VALUES
-(4, '대구 창고', '053-8765-4321', '대구광역시 중구 동성로 101', '창고 관리자 D'),
-(5, '대전 창고', '042-9876-5432', '대전광역시 유성구 대덕대로 202', '창고 관리자 E'),
-(6, '광주 창고', '062-1234-5678', '광주광역시 북구 첨단과학로 303', '창고 관리자 F'),
-(7, '울산 창고', '052-2345-6789', '울산광역시 남구 번영로 404', '창고 관리자 G'),
-(8, '경기 창고', '031-3456-7890', '경기도 수원시 팔달구 정조로 505', '창고 관리자 H'),
-(9, '충청 창고', '043-4567-8901', '충청북도 청주시 상당구 상당로 606', '창고 관리자 I'),
-(10, '제주 창고', '064-5678-9012', '제주특별자치도 제주시 연북로 707', '창고 관리자 J');
+--INSERT INTO m_warehouse (warehouse_no, warehouse_name, warehouse_tel, warehouse_addr, warehouse_manager_name)
+--VALUES
+--(4, '대구 창고', '053-8765-4321', '대구광역시 중구 동성로 101', '창고 관리자 D'),
+--(5, '대전 창고', '042-9876-5432', '대전광역시 유성구 대덕대로 202', '창고 관리자 E'),
+--(6, '광주 창고', '062-1234-5678', '광주광역시 북구 첨단과학로 303', '창고 관리자 F'),
+--(7, '울산 창고', '052-2345-6789', '울산광역시 남구 번영로 404', '창고 관리자 G'),
+--(8, '경기 창고', '031-3456-7890', '경기도 수원시 팔달구 정조로 505', '창고 관리자 H'),
+--(9, '충청 창고', '043-4567-8901', '충청북도 청주시 상당구 상당로 606', '창고 관리자 I'),
+--(10, '제주 창고', '064-5678-9012', '제주특별자치도 제주시 연북로 707', '창고 관리자 J');
 
 
 -- 11. QR 코드 (m_qr_code 테이블에 데이터 삽입)
@@ -136,7 +136,7 @@ VALUES
 INSERT INTO m_dispatch (dispatch_status, warehouse_no, qr_code_id, order_d_no)
 VALUES 
 ('pending', 1, (SELECT qr_code_id FROM m_qr_code WHERE qr_code_data = 'QR123456'), 1),
-('in progress', 2, (SELECT qr_code_id FROM m_qr_code WHERE qr_code_data = 'QR789012'), 2),
+('pending', 2, (SELECT qr_code_id FROM m_qr_code WHERE qr_code_data = 'QR789012'), 2),
 ('complete', 3, (SELECT qr_code_id FROM m_qr_code WHERE qr_code_data = 'QR345678'), 3);
 
 -- 13. 급여 (m_salary 테이블에 데이터 삽입)
@@ -147,11 +147,11 @@ VALUES
 ('E003', 3000000, 200000, 2.00, 3100000, '2023-10-10');
 
 -- 14. 근태 (m_attendance 테이블에 데이터 삽입)
-INSERT INTO m_attendance (employee_id, attendance_date, check_in_time, check_out_time, total_hours_worked, overtime_hours, attendance_status)
+INSERT INTO m_attendance (employee_id, attendance_date, check_in_time, check_out_time, total_hours_worked, overtime_hours, attendance_status, attendance_insert_date, attendance_delete_yn)
 VALUES 
-('E001', '2023-10-20', '2023-10-20 09:00', '2023-10-20 18:00', 9.00, 1.00, '출근'),
-('E002', '2023-10-20', '2023-10-20 09:30', '2023-10-20 18:30', 8.50, 0.50, '출근'),
-('E003', '2023-10-20', '2023-10-20 10:00', '2023-10-20 17:30', 7.50, 0.00, '출근');
+('E001', '2023-10-20', '2023-10-20 09:00', '2023-10-20 18:00', 9.00, 1.00, '출근', '2023-10-20 09:00', 'N'),
+('E002', '2023-10-20', '2023-10-20 09:30', '2023-10-20 18:30', 8.50, 0.50, '출근', '2023-10-20 09:00', 'N'),
+('E003', '2023-10-20', '2023-10-20 10:00', '2023-10-20 17:30', 7.50, 0.00, '출근', '2023-10-20 09:00', 'N');
 
 -- 15. 쪽지 (발신)
 INSERT INTO m_message (message_sender_id, message_content)
@@ -175,11 +175,11 @@ VALUES
 (3, 'attachment.docx', '/files/attachment.docx', 51200, 'docx');
 
 -- 18. 채팅방 (m_chat 테이블에 데이터 삽입)
-INSERT INTO m_chat (chat_create_id, chat_title)
-VALUES 
-('E001', 'Project Discussion'),
-('E002', 'Team Meeting'),
-('E003', 'Client Feedback');
+--INSERT INTO m_chat (chat_create_id, chat_title)
+--VALUES
+--('E001', 'Project Discussion'),
+--('E002', 'Team Meeting'),
+--('E003', 'Client Feedback');
 
 -- 19. 채팅방 참여자 (m_chat_participant 테이블에 데이터 삽입)
 INSERT INTO m_chat_participant (chat_no, participant_id)
@@ -210,7 +210,7 @@ VALUES
 (3, 'feedback.docx', '/files/chat/feedback.docx', 51200, 'docx');
 
 -- 23. 채팅 첨부파일 (수신)
-INSERT INTO M_CHAT_MESSAGE_READ_FILE (chat_message_no, chat_message_recipient_id, chat_attachment_id)
+INSERT INTO M_CHAT_MESSAGE_READ (chat_message_no, chat_message_recipient_id, chat_attachment_id)
 VALUES 
 (1, 'E002', 1),
 (2, 'E001', 2),
@@ -245,7 +245,7 @@ VALUES
 (3, 'approved_report.pdf', '/files/email/approved_report.pdf', 204800, 'pdf');
 
 -- 28. 쪽지 첨부파일 (수신)
-INSERT INTO m_message_rectpient_file (message_no, recipient_id, message_attachment_id)
+INSERT INTO m_message_rectpient (message_no, recipient_id, message_attachment_id)
 VALUES 
 (1, 'E002', 1),
 (2, 'E001', 2),

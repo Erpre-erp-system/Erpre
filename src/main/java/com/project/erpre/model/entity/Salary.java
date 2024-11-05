@@ -32,27 +32,27 @@ public class Salary {
     @Column(name = "bonus", nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private Integer bonus;
 
-    @Column(name = "performance_incentive_rate", precision = 5, scale = 2, nullable = false, columnDefinition = "DECIMAL(5,2) DEFAULT 0.00")
-    private BigDecimal performanceIncentiveRate;
+    @Column(name = "performance_incentive_rate", precision = 5, scale = 2, nullable = false, columnDefinition = "DECIMAL(5,2) DEFAULT 10.00")
+    private BigDecimal performanceIncentiveRate = new BigDecimal("10.00");
 
     @Column(name = "total_salary", nullable = false)
     private Integer totalSalary;
 
     @Column(name = "salary_date", nullable = false)
-    private LocalDate salaryDate;
+    private LocalDateTime salaryDate;
 
     @Column(name = "salary_status", length = 20, nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'Pending'")
     private String salaryStatus;
 
     @Column(name = "salary_insert_date", nullable = false, updatable = false)
-    private LocalDateTime salaryInsertDate;
+    private Timestamp salaryInsertDate;
 
     @Column(name = "salary_update_date")
-    private LocalDateTime salaryUpdateDate;
+    private Timestamp salaryUpdateDate;
 
     @Column(name = "salary_delete_yn", length = 20, nullable = false, columnDefinition = "VARCHAR(1) DEFAULT 'N'")
-    private String employeeDeleteYn; // 삭제 여부 기본값 'N'
+    private String salaryDeleteYn; // 삭제 여부 기본값 'N'
 
     @Column(name = "salary_delete_date")
-    private Timestamp employeeDeleteDate;
+    private LocalDateTime salaryDeleteDate;
 }
