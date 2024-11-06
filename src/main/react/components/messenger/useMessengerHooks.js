@@ -313,6 +313,7 @@ export const useMessengerHooks = () => {
         openNewNoteModal,
         closeNewNoteModal,
         noteList,
+        setNoteList,
         isNoteDropdownOpen,
         setIsNoteDropdownOpen,
         noteStatus,

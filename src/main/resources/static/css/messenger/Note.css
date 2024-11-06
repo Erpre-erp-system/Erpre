@@ -125,22 +125,11 @@
     justify-content: space-between;
 }
 
-.note-item:hover {
-    background-color: #f9f9f9;
-}
+.note-item:hover { background-color: #f9f9f9; }
 
-.note-star {
-    margin-right: 10px;
-}
-
-.star-icon {
-    color: #ccc;
-    font-size: 16px;
-}
-
-.star-icon.active {
-    color: #FFD700;
-}
+.note-star { margin-right: 12px; }
+.star-icon { color: #ccc; font-size: 19px;}
+.star-icon.active { color: #FFD700; }
 
 .note-info {
     flex: 1;
@@ -163,6 +152,8 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+
+.note-content p { margin: 0 !important; }
 
 .note-date {
     font-size: 12px;
@@ -364,18 +355,17 @@
 }
 
 /* 받은 쪽지 */
-.received-note-modal {
-    color: #333;
-    position: fixed;
-    top: 20%;
-    left: 35%;
-    z-index: 1000;
+.received-note-modal { color: #333; position: fixed; top: 20%; left: 35%; z-index: 1000;
     width: 600px;
     padding: 20px;
     background-color: white;
     border: 1px solid #ccc;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 8px;
+}
+
+.received-note-modal.react-draggable.react-draggable-dragged {
+    transform: translate(20px, -11px);
 }
 
 .note-modal-header {
@@ -396,9 +386,7 @@
     color: #888;
 }
 
-.note-modal-body {
-    margin-top: 15px;
-}
+.note-modal-body { margin-top: 15px; }
 
 .recipient-section {
     display: flex;

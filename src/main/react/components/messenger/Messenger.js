@@ -59,6 +59,7 @@ function Messenger({isOpen, toggleMessenger }) {
         openNewNoteModal,
         closeNewNoteModal,
         noteList,
+        setNoteList,
         isNoteDropdownOpen,
         setIsNoteDropdownOpen,
         noteStatus,
@@ -427,6 +428,7 @@ function Messenger({isOpen, toggleMessenger }) {
                         {activeView === 'note' &&
                             <Note
                                 noteList={noteList}
+                                setNoteList={setNoteList}
                                 formatDate={formatDate}
                                 isNewNoteModalOpen={isNewNoteModalOpen}
                                 openNewNoteModal={openNewNoteModal}

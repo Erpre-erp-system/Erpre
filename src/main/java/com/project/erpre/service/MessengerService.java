@@ -46,7 +46,7 @@ public class MessengerService {
     private final ChatMessageReadRepository chatMessageReadRepository;
     private final ChatFileRepository chatFileRepository;
     private final MessageRepository messageRepository;
-    private final MessageRecipientRepository messageRecipentRepository;
+    private final MessageRecipientRepository messageRecipientRepository;
 
     @Autowired
     public MessengerService(ChatRepository chatRepository, ChatParticipantRepository chatParticipantRepository, EmployeeRepository employeeRepository, ChatMessageRepository chatMessageRepository, ChatMessageReadRepository chatMessageReadRepository, ChatFileRepository chatFileRepository, MessageRepository messageRepository, MessageRecipientRepository messageRecipentRepository) {
@@ -57,7 +57,7 @@ public class MessengerService {
         this.chatMessageReadRepository = chatMessageReadRepository;
         this.chatFileRepository = chatFileRepository;
         this.messageRepository = messageRepository;
-        this.messageRecipentRepository = messageRecipentRepository;
+        this.messageRecipientRepository = messageRecipentRepository;
     }
 
     /////////////////////////////////////////////////////////////////////// 🟢 공통
@@ -82,9 +82,32 @@ public class MessengerService {
 
 
     // 상태에 따른 쪽지 목록 조회 및 검색
-    public List<MessageDTO> getMessageListByUser(String searchKeyword, String status) {
+    public List<MessageDTO> getNoteListByUser(String searchKeyword, String status) {
         String employeeId = getEmployeeIdFromAuthentication();
-        return messageRepository.getMessageListByUser(employeeId, searchKeyword, status);
+        return messageRepository.getNoteListByUser(employeeId, searchKeyword, status);
+    }
+
+    // 쪽지 상세 정보 조회 및 읽음 여부 업데이트
+    @Transactional
+    public MessageDTO getNoteByNo(Long messageNo) {
+        String employeeId = getEmployeeIdFromAuthentication();
+        return messageRepository.getNoteByNo(messageNo, employeeId);
+    }
+
+    // 쪽지 북마크 상태 업데이트
+    public void updateBookmark(Long messageNo) {
+        String employeeId = getEmployeeIdFromAuthentication();
+
+        // 사용자 아이디와 메시지 넘버로 수신자 테이블에서 행 조회하고 해당 북마크 여부를 'Y'로 업데이트 후 저장하기
+        MessageRecipientId recipientId = new MessageRecipientId();
+        recipientId.setMessageNo(messageNo);
+        recipientId.setRecipientId(employeeId);
+
+        MessageRecipient recipient = messageRecipientRepository.findById(recipientId)
+                .orElseThrow(() -> new NoSuchElementException("해당 쪽지를 찾을 수 없습니다."));
+
+        recipient.setBookmarkedYn("Y");
+        messageRecipientRepository.save(recipient);
     }
 
     // 새 쪽지 생성
@@ -126,7 +149,7 @@ public class MessengerService {
             messageRecipient.setMessage(message);
             messageRecipient.setEmployee(recipientEmployee);
 
-            messageRecipentRepository.save(messageRecipient);
+            messageRecipientRepository.save(messageRecipient);
         }
 
         // 3. 발신자 ID 포함하여 MessageDTO 생성 후 반환 (수신자 정보는 포함하지 않음)
@@ -181,6 +204,8 @@ public class MessengerService {
 
         return emitter;
     }
+
+
 
 
     /////////////////////////////////////////////////////////////////////// 🔴 채팅

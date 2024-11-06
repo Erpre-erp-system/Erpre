@@ -64,12 +64,19 @@ public class MessengerController {
             @RequestParam String status
     ) {
         try {
-            List<MessageDTO> notes = messengerService.getMessageListByUser(searchKeyword, status);
+            List<MessageDTO> notes = messengerService.getNoteListByUser(searchKeyword, status);
             return ResponseEntity.ok(notes);
         } catch (Exception e) {
             logger.error("쪽지 목록 조회 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    // 쪽지 상세 정보 조회 및 읽음 여부 업데이트 API
+    @PutMapping("/note/{messageNo}")
+    public ResponseEntity<MessageDTO> getNoteByNo(@PathVariable Long messageNo) {
+        MessageDTO messageDetail = messengerService.getNoteByNo(messageNo);
+        return ResponseEntity.ok(messageDetail);
     }
 
     // 새 쪽지 생성 API (파일url, 유형 등 추가)
@@ -84,6 +91,13 @@ public class MessengerController {
         );
 
         return ResponseEntity.ok(createdNote);
+    }
+
+    // 쪽지 북마크 상태 업데이트
+    @PutMapping("/note/{messageNo}/bookmark")
+    public ResponseEntity<Void> updateBookmark(@PathVariable Long messageNo) {
+        messengerService.updateBookmark(messageNo);
+        return ResponseEntity.ok().build();
     }
 
     // 실시간 알림 전송

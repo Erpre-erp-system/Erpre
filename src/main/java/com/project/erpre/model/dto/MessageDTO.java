@@ -3,6 +3,7 @@ package com.project.erpre.model.dto;
 import com.project.erpre.model.entity.Message;
 import lombok.*;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class MessageDTO {
     private LocalDateTime messageDeleteDate;
     private String messageRecallYn;
     private String recipientId;
+    private List<String> recipientNames;
     private String recipientReadYn;
     private LocalDateTime recipientReadDate;
     private String recipientDeleteYn;
@@ -29,6 +31,10 @@ public class MessageDTO {
     private LocalDateTime messageRecallDate;
     private Integer messageAttachmentId;
     private List<String> messageReceiverIds;
+    private String messageFileName;
+    private String messageFileUrl;
+    private BigInteger messageFileSize;
+    private String messageFileType;
 
     // 상태에 따른 쪽지 목록 조회 및 검색 생성자
     public MessageDTO(Long messageNo, String messageSenderId, String employeeName, String messageContent,
@@ -59,6 +65,25 @@ public class MessageDTO {
         this.messageDeleteYn = message.getMessageDeleteYn();
         this.messageRecallYn = message.getMessageRecallYn();
     }
+
+    // 쪽지 개별 조회 생성자
+    public MessageDTO(String senderName, String messageContent, LocalDateTime messageSendDate,
+                      String messageRecallYn, LocalDateTime messageRecallDate, String recipientReadYn,
+                      LocalDateTime recipientReadDate, String messageFileName, String messageFileUrl,
+                      BigInteger messageFileSize, String messageFileType) {
+        this.employeeName = senderName;
+        this.messageContent = messageContent;
+        this.messageSendDate = messageSendDate;
+        this.messageRecallYn = messageRecallYn;
+        this.messageRecallDate = messageRecallDate;
+        this.recipientReadYn = recipientReadYn;
+        this.recipientReadDate = recipientReadDate;
+        this.messageFileName = messageFileName;
+        this.messageFileUrl = messageFileUrl;
+        this.messageFileSize = messageFileSize;
+        this.messageFileType = messageFileType;
+    }
+
 
     // 새 쪽지 저장 DTO
     @Data
