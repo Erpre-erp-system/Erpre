@@ -17,7 +17,10 @@ import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -101,5 +104,29 @@ public class SalaryService {
             salary.setSalaryDeleteDate(LocalDateTime.now());
         }
         salaryRepository.saveAll(salaries);
+    }
+
+    // 직전 년도 실적계싼
+    public void applyPerformanceIncentives() {
+        int previousYear = Calendar.getInstance().get(Calendar.YEAR) - 1; // 직전 연도 계산
+
+        List<Object[]> topPerformers = salaryRepository.findTop5EmployeesByOrderAmount(previousYear);
+
+        Map<Integer, Integer> incentiveRates = new HashMap<>();
+        incentiveRates.put(0, 10); // 1위
+        incentiveRates.put(1, 8);  // 2위
+        incentiveRates.put(2, 6);  // 3위
+        incentiveRates.put(3, 4);  // 4위
+        incentiveRates.put(4, 2);  // 5위
+
+        for (int i = 0; i < topPerformers.size(); i++) {
+            Object[] row = topPerformers.get(i);
+            String employeeId = (String) row[0];
+            int incentiveRate = incentiveRates.getOrDefault(i, 0);
+
+            Salary salary = salaryRepository.findByEmployeeEmployeeId(employeeId);
+            salary.setPerformanceIncentiveRate(BigDecimal.valueOf(incentiveRate));
+            salaryRepository.save(salary); // DB에 인센티브 비율 업데이트
+        }
     }
 }
