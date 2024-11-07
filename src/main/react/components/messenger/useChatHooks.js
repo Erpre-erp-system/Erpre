@@ -36,11 +36,11 @@ export const useChatHooks = ( chatList,fetchChatList ) => {
         let adjustedY = y;
 
         if (x + menuWidth > windowWidth) {
-            adjustedX = windowWidth - menuWidth - 10; // 우측 벗어남 방지
+            adjustedX = windowWidth - menuWidth - 10;
         }
 
         if (y + menuHeight > windowHeight) {
-            adjustedY = windowHeight - menuHeight - 10; // 아래쪽 벗어남 방지
+            adjustedY = windowHeight - menuHeight - 10;
         }
 
         setMenuPosition({ x: adjustedX, y: adjustedY });

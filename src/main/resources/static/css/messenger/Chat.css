@@ -432,14 +432,12 @@
     list-style-type: none;
     display: flex;
     flex-direction: column;
-    height: 70px;
 }
 
 .context-menu ul li {
-    flex: 1;
+    padding: 8px 12px !important;
     display: flex;
     align-items: center;
-    padding: 0;
     cursor: pointer;
 }
 

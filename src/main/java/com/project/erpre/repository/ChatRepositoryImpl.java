@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ChatRepositoryImpl implements ChatRepositoryCustom {
 
@@ -95,7 +96,7 @@ public class ChatRepositoryImpl implements ChatRepositoryCustom {
         QChatParticipant subChatParticipant = new QChatParticipant("subChatParticipant");
         QChatMessageRead subChatMessageRead = new QChatMessageRead("subChatMessageRead");
 
-        return queryFactory
+        List<ChatMessageDTO> chatMessages = queryFactory
                 .select(Projections.constructor(ChatMessageDTO.class,
                         chatMessage.chatMessageNo,
                         chatMessage.employee.employeeId, // 발신자의 ID (보낸 메세지 띄울 때 프론트단에서 비교할 것)
@@ -139,6 +140,10 @@ public class ChatRepositoryImpl implements ChatRepositoryCustom {
                 )
                 .orderBy(chatMessage.chatSendDate.asc())
                 .fetch();
+
+        return chatMessages.stream()
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     // 2 - 1. 검색 조건 관리

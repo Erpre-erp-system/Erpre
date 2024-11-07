@@ -27,9 +27,12 @@ public class TalkController {
         this.messagingTemplate = messagingTemplate;
     }
 
+//    // 🟠 쪽지 메세시 전송 및 저장
+//    @MessageMapping("/talk/note/{noteNo}")
+
 
     // 🔴 채팅 메시지 전송 및 저장
-    @MessageMapping("/talk/chat/{chatNo}")
+    @MessageMapping("/chat/{chatNo}")
     public void sendTalk(@DestinationVariable Long chatNo, ChatMessageDTO chatMessage, Principal principal) {
 
         String employeeId = principal.getName();

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const useSearch = (endpoint, searchKeyword = '', status = '', initialParams = {})=> {
+const useSearch = (endpoint, searchKeyword = '', noteStatus = '', initialParams = {})=> {
 
     const [data, setData] = useState([]);
     const [searchLoading, setSearchLoading] = useState(false);
@@ -17,7 +17,7 @@ const useSearch = (endpoint, searchKeyword = '', status = '', initialParams = {}
             const response = await axios.get(endpoint, {
                 params: {
                     searchKeyword: searchKeyword || '',
-                    status: status || '',
+                    noteStatus: noteStatus || '',
                     ...initialParams,
                 },
             });
@@ -31,7 +31,7 @@ const useSearch = (endpoint, searchKeyword = '', status = '', initialParams = {}
 
     useEffect(() => {
         fetchData();
-    }, [endpoint, searchKeyword, status, initialParams.page, initialParams.size]);
+    }, [endpoint, searchKeyword, noteStatus, initialParams.page, initialParams.size]);
 
     return {
         data,

@@ -9,11 +9,13 @@ import org.hibernate.StaleStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.persistence.EntityManager;
@@ -82,9 +84,10 @@ public class MessengerService {
 
 
     // 상태에 따른 쪽지 목록 조회 및 검색
-    public List<MessageDTO> getNoteListByUser(String searchKeyword, String status) {
+    public List<MessageDTO> getNoteListByUser(String searchKeyword, String noteStatus) {
+        logger.error("쪽지 목록 서비스 층에서 조회 중 로그 오류 발생");
         String employeeId = getEmployeeIdFromAuthentication();
-        return messageRepository.getNoteListByUser(employeeId, searchKeyword, status);
+        return messageRepository.getNoteListByUser(employeeId, searchKeyword, noteStatus);
     }
 
     // 쪽지 상세 정보 조회 및 읽음 여부 업데이트
@@ -108,6 +111,33 @@ public class MessengerService {
 
         recipient.setBookmarkedYn("Y");
         messageRecipientRepository.save(recipient);
+    }
+
+    // 쪽지 회수 (수신자의 읽음 상태가 모두 N인 경우)
+    @Transactional
+    public void recallNote(Long messageNo) {
+
+        Message message = messageRepository.findById(messageNo)
+                .orElseThrow(() -> new NoSuchElementException("해당 메시지를 찾을 수 없습니다: " + messageNo));
+
+        // 1. 수신자 목록 조회
+        List<MessageRecipient> recipients = messageRecipientRepository.findByMessageRecipientIdMessageNo(messageNo);
+
+        // 2. 수신자들 중 읽음 상태가 'Y'인 경우 회수 불가 처리
+        boolean anyRead = recipients.stream().anyMatch(recipient -> "Y".equals(recipient.getRecipientReadYn()));
+        if (anyRead) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수신자가 이미 쪽지를 읽었기 때문에 회수할 수 없습니다.");
+        }
+
+        // 3. 수신자들에 대해 수신 상태를 '회수됨'으로 표시 (삭제 상태로 업데이트)
+        for (MessageRecipient recipient : recipients) {
+            recipient.setRecipientDeleteYn("Y");
+            messageRecipientRepository.save(recipient);
+        }
+
+        // 4. 발신자에 대해서도 메시지 회수 상태를 'Y'로 설정
+        message.setMessageRecallYn("Y");
+        messageRepository.save(message);
     }
 
     // 새 쪽지 생성
@@ -155,21 +185,100 @@ public class MessengerService {
         // 3. 발신자 ID 포함하여 MessageDTO 생성 후 반환 (수신자 정보는 포함하지 않음)
         MessageDTO messageDTO = new MessageDTO(message);
         messageDTO.setMessageSenderId(employeeId);
-        
+
         // 4. 파일 및 사진 저장 로직
 
         return messageDTO;
     }
 
+    // 쪽지 전체 삭제 (상태별)
+    @Transactional
+    public void deleteAllNotes(String noteStatus) {
+        String employeeId = getEmployeeIdFromAuthentication();
+
+        switch (noteStatus) {
+            case "sent":
+                // 본인이 보낸 모든 쪽지 삭제 여부를 'Y'로 업데이트
+                messageRepository.updateMessageDeleteYnByEmployeeId(employeeId, "Y");
+                break;
+
+            case "received":
+                // 수신한 모든 쪽지 삭제 여부를 'Y'로 업데이트
+                messageRecipientRepository.updateRecipientDeleteYnByRecipientId(employeeId, "Y");
+                break;
+
+            case "new":
+                // 읽지 않은 모든 쪽지 삭제 여부를 'Y'로 업데이트
+                messageRecipientRepository.updateRecipientDeleteYnByRecipientIdAndRecipientReadYn(employeeId, "N", "Y");
+                break;
+
+            case "bookmarked":
+                // 북마크된 모든 쪽지 삭제 여부를 'Y'로 업데이트
+                messageRecipientRepository.updateRecipientDeleteYnByRecipientIdAndBookmarkedYn(employeeId, "Y", "Y");
+                break;
+
+            default:
+                throw new IllegalArgumentException("현재 쪽지 상태를 알 수 없습니다: " + noteStatus);
+        }
+
+        // Message 테이블의 쪽지를 완전 삭제하기 위한 조건 확인 및 삭제
+        List<Message> messagesToCheck = messageRepository.findAllByMessageDeleteYn("Y");
+        for (Message message : messagesToCheck) {
+            boolean allRecipientsDeleted = messageRecipientRepository
+                    .countByMessageMessageNoAndRecipientDeleteYn(message.getMessageNo(), "N") == 0;
+
+            if (allRecipientsDeleted) {
+                messageRepository.deleteById(message.getMessageNo());
+            }
+        }
+    }
+
+    // 쪽지 개별 삭제
+    @Transactional
+    public void deleteNoteById(Long messageNo) {
+        String employeeId = getEmployeeIdFromAuthentication();
+
+        // 현재 사용자가 발신자인 경우
+        boolean isSender = messageRepository.existsByMessageNoAndEmployeeEmployeeIdAndMessageDeleteYn(messageNo, employeeId, "N");
+        if (isSender) {
+            // 발신자가 메시지를 삭제하는 경우, 삭제 여부를 'Y'로 업데이트
+            messageRepository.updateMessageDeleteYnByMessageNo(messageNo, "Y");
+        } else {
+            // 현재 사용자가 수신자인 경우
+            MessageRecipientId recipientId = new MessageRecipientId();
+            recipientId.setMessageNo(messageNo);
+            recipientId.setRecipientId(employeeId);
+
+            MessageRecipient recipient = messageRecipientRepository.findById(recipientId)
+                    .orElseThrow(() -> new NoSuchElementException("해당 쪽지를 찾을 수 없습니다: " + messageNo));
+
+            // 수신자가 받은 메시지를 삭제하는 경우, 삭제 여부를 'Y'로 업데이트
+            recipient.setRecipientDeleteYn("Y");
+            messageRecipientRepository.save(recipient);
+        }
+
+        // 발신자와 수신자 모두 삭제 상태인 경우 메시지를 완전히 삭제
+        boolean allRecipientsDeleted = messageRecipientRepository
+                .countByMessageMessageNoAndRecipientDeleteYn(messageNo, "N") == 0;
+
+        Message message = messageRepository.findById(messageNo)
+                .orElseThrow(() -> new NoSuchElementException("해당 메시지를 찾을 수 없습니다: " + messageNo));
+
+        if ("Y".equals(message.getMessageDeleteYn()) && allRecipientsDeleted) {
+            messageRepository.deleteById(messageNo);
+            logger.info("모든 수신자와 발신자가 삭제 상태이므로 Message 테이블에서 완전 삭제되었습니다: {}", messageNo);
+        }
+    }
+
     // 실시간 쪽지 전송
     public void sendNote(List<String> receiverIds, String messageContent) {
-        
+
         // 나에게 보내기
         String employeeId = getEmployeeIdFromAuthentication();
         if (receiverIds == null || receiverIds.isEmpty()) {
             receiverIds.add(employeeId);
         }
-        
+
         for (String receiverId : receiverIds) {
             SseEmitter emitter = emitters.get(receiverId);
             if (emitter != null) {
@@ -191,7 +300,7 @@ public class MessengerService {
         String senderId = getEmployeeIdFromAuthentication();
         SseEmitter emitter = new SseEmitter();
         emitters.put(senderId, emitter);
-        
+
         // 연결 종료 및 타임아웃 처리
         emitter.onCompletion(() -> emitters.remove(senderId));
         emitter.onTimeout(() -> emitters.remove(senderId));
@@ -206,13 +315,11 @@ public class MessengerService {
     }
 
 
-
-
     /////////////////////////////////////////////////////////////////////// 🔴 채팅
 
 
     // 현재 참여하고 있는 채팅 목록 조회 및 검색
-    public List<ChatDTO> getChatListByUser(String searchKeyword){
+    public List<ChatDTO> getChatListByUser(String searchKeyword) {
         String employeeId = getEmployeeIdFromAuthentication();
         return chatRepository.getChatListByUser(employeeId, searchKeyword);
     }

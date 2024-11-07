@@ -150,7 +150,7 @@ export const useMessengerHooks = () => {
     ];
     const [isNoteDropdownOpen, setIsNoteDropdownOpen] = useState(false);
     const handleNoteStatus = (option) => {
-        setNoteStatus(option.value);
+        setNoteStatus(option.value || 'received');
         setIsNoteDropdownOpen(false);
     };
     // 🔴 채팅 목록 state
@@ -212,6 +212,27 @@ export const useMessengerHooks = () => {
     const handleSearchDel = () => {
         setMessengerSearchText('')
     }
+
+    // 🟠 쪽지 데이터를 불러오는 useEffect
+    useEffect(() => {
+        const fetchNotes = async () => {
+            try {
+                const response = await axios.get(`/api/messengers/note/list`, {
+                    params: {
+                        noteStatus: noteStatus || 'received',
+                        searchKeyword: messengerSearchText || ''
+                    }
+                });
+                setNoteList(response.data);
+                console.log("조회한 쪽지 리스트(response.data):", response.data);
+                console.log("조회한 쪽지 리스트(noteList):", noteList);
+            } catch (error) {
+                console.error("쪽지 목록을 불러오는 중 오류 발생:", error);
+            }
+        };
+
+        fetchNotes(); // 컴포넌트가 렌더링되거나 noteStatus가 변경될 때 데이터를 다시 가져옴
+    }, [noteStatus, messengerSearchText]);
 
     // ⭐ 동적 뷰에 따른 endpoint 설정
     const getEndpoint = (activeView) => {

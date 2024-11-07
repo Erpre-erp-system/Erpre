@@ -61,11 +61,14 @@ public class MessengerController {
     @GetMapping("/note/list")
     public ResponseEntity<List<MessageDTO>> getNoteList(
             @RequestParam(required = false) String searchKeyword,
-            @RequestParam String status
+            @RequestParam String noteStatus
     ) {
+        logger.info("getNoteList API 호출됨 - searchKeyword: {}, status: {}", searchKeyword, noteStatus);
         try {
-            List<MessageDTO> notes = messengerService.getNoteListByUser(searchKeyword, status);
+            List<MessageDTO> notes = messengerService.getNoteListByUser(searchKeyword, noteStatus);
             return ResponseEntity.ok(notes);
+
+
         } catch (Exception e) {
             logger.error("쪽지 목록 조회 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -89,15 +92,37 @@ public class MessengerController {
                 noteRequestDTO.getMessageSendDate(),
                 noteRequestDTO.getMessageReceiverIds()
         );
-
         return ResponseEntity.ok(createdNote);
     }
 
-    // 쪽지 북마크 상태 업데이트
+    // 쪽지 북마크 상태 변경 API
     @PutMapping("/note/{messageNo}/bookmark")
     public ResponseEntity<Void> updateBookmark(@PathVariable Long messageNo) {
         messengerService.updateBookmark(messageNo);
         return ResponseEntity.ok().build();
+    }
+
+    // 쪽지 회수 API
+    @PutMapping("/note/recall/{messageNo}")
+    public ResponseEntity<Void> recallNote(@PathVariable Long messageNo) {
+        messengerService.recallNote(messageNo);
+        return ResponseEntity.noContent().build();
+    }
+
+    // (상태/전체/개별) 쪽지 삭제 API
+    @PutMapping("/note/delete")
+    public ResponseEntity<Void> deleteNote(
+            @RequestParam(value = "messageNo", required = false) Long messageNo,
+            @RequestParam(value = "noteStatus", required = false) String noteStatus
+    ) {
+        if (messageNo != null) {
+            messengerService.deleteNoteById(messageNo); // 개별 삭제
+        } else if (noteStatus != null) {
+            messengerService.deleteAllNotes(noteStatus); // 상태에 따른 전체 삭제
+        } else {
+            return ResponseEntity.badRequest().build(); // 올바르지 않은 요청
+        }
+        return ResponseEntity.noContent().build();
     }
 
     // 실시간 알림 전송

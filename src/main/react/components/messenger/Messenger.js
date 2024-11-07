@@ -427,6 +427,7 @@ function Messenger({isOpen, toggleMessenger }) {
                             />}
                         {activeView === 'note' &&
                             <Note
+                                noteStatus={noteStatus}
                                 noteList={noteList}
                                 setNoteList={setNoteList}
                                 formatDate={formatDate}

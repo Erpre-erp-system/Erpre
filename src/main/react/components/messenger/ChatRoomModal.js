@@ -51,10 +51,14 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
                 chatSenderId: user,
                 chatMessageContent: message
             };
+            
+            // 메시지 전송
             stompClientRef.current.publish({
-                destination: `/app/talk/chat/${chatNo}`,
+                destination: `/app/chat/${chatNo}`,
                 body: JSON.stringify(newMessage)
             });
+
+            // 메시지 초기화
             setMessage("");
 
             // 메시지를 전송한 직후에도 스크롤 이동
@@ -88,8 +92,8 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
                 // 채팅방 구독
                 subscriptionRef.current = stompClient.subscribe(`/topic/chat/${chatNo}`, (message) => {
                     const newMessage = JSON.parse(message.body);
-                    setMessages((prevMessages) => [...prevMessages, newMessage]);
                     console.log("새로운 메시지 수신:", newMessage);
+                    setMessages((prevMessages) => [...prevMessages, newMessage]);
                 });
 
                 console.log(`채팅방 /topic/chat/${chatNo} 구독 완료`);

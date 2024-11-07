@@ -24,26 +24,38 @@ public class MessageRepositoryImpl implements MessageRepositoryCustom {
 
     // 1. 상태에 따른 쪽지 목록 조회 및 검색 (sent, new, received, bookmarked)
     @Override
-    public List<MessageDTO> getNoteListByUser(String employeeId, String searchKeyword, String status) {
+    public List<MessageDTO> getNoteListByUser(String employeeId, String searchKeyword, String noteStatus) {
         QMessage message = QMessage.message;
         QMessageRecipient messageRecipient = QMessageRecipient.messageRecipient;
         QMessageFile messageFile = QMessageFile.messageFile;
 
         BooleanBuilder condition = new BooleanBuilder();
 
-        // 상태에 따른 조건 추가
-        switch (status) {
-            case "sent":
-                condition.and(message.employee.employeeId.eq(employeeId)).and(message.messageDeleteYn.eq("N"));
+        switch (noteStatus) {
+            case "sent": // 보낸 쪽지
+                condition.and(message.employee.employeeId.eq(employeeId))
+                        .and(message.messageDeleteYn.eq("N"))
+                        .and(message.messageRecallYn.eq("N"))
+                        .and(messageRecipient.recipientDeleteYn.eq("N"));
                 break;
-            case "received":
-                condition.and(messageRecipient.messageRecipientId.recipientId.eq(employeeId)).and(messageRecipient.recipientDeleteYn.eq("N"));
+            case "received": // 받은 쪽지
+                condition.and(messageRecipient.messageRecipientId.recipientId.eq(employeeId))
+                        .and(messageRecipient.recipientDeleteYn.eq("N"))
+                        .and(message.messageRecallYn.eq("N"))
+                        .and(message.messageDeleteYn.eq("N"));
                 break;
-            case "new":
-                condition.and(messageRecipient.messageRecipientId.recipientId.eq(employeeId)).and(messageRecipient.recipientReadYn.eq("N")).and(messageRecipient.recipientDeleteYn.eq("N"));
+            case "new": // 읽지 않은 쪽지
+                condition.and(messageRecipient.messageRecipientId.recipientId.eq(employeeId))
+                        .and(messageRecipient.recipientReadYn.eq("N"))
+                        .and(messageRecipient.recipientDeleteYn.eq("N"))
+                        .and(message.messageRecallYn.eq("N"))
+                        .and(message.messageDeleteYn.eq("N"));
                 break;
-            case "bookmarked":
-                condition.and(messageRecipient.bookmarkedYn.eq("Y"));
+            case "bookmarked": // 보관된 쪽지
+                condition.and(messageRecipient.bookmarkedYn.eq("Y"))
+                        .and(message.messageRecallYn.eq("N"))
+                        .and(messageRecipient.recipientDeleteYn.eq("N"))
+                        .and(message.messageDeleteYn.eq("N"));
                 break;
         }
 

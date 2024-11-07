@@ -35,11 +35,10 @@ const ReceivedNoteModal = ({ note, onClose }) => {
                                 <span>수신자 없음</span> // 수신자가 없을 때 표시할 내용 (선택사항)
                             )}
                         </div>
-
                     </div>
+
                     <div className="message-content-section">
-                        <label>내용:</label>
-                        <div dangerouslySetInnerHTML={{__html: cleanHTML}} />
+                        <div className="message-content" dangerouslySetInnerHTML={{__html: cleanHTML}} />
                     </div>
                     <div className="note-footer">
                         <button onClick={onClose} className="close-button-footer">닫기</button>

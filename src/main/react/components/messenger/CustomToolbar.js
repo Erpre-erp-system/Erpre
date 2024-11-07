@@ -27,7 +27,6 @@ export const CustomToolbar = () => (
       <select className="ql-background"/>
     </span>
         <span className="ql-formats">
-      <button className="ql-image"/>
       <button className="ql-file"><FiPaperclip /></button>
     </span>
         <span className="ql-formats">
