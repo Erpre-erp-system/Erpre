@@ -227,40 +227,80 @@ public class OrderDispatchService {
 
 
     // 출고지시
-    public void releaseDispatches(Map<String, Object> requestData) {
-        // dispatchNos 추출
-        List<Integer> dispatchNos = extractDispatchNos(requestData.get("dispatchNos"));
+//    public void releaseDispatches(Map<String, Object> requestData) {
+//        // dispatchNos 추출
+//        List<Integer> dispatchNos = extractDispatchNos(requestData.get("dispatchNos"));
+//
+//        if (dispatchNos == null || dispatchNos.isEmpty()) {
+//            throw new IllegalArgumentException("dispatchNos는 필수입니다.");
+//        }
+//
+//        // 기타 필요한 데이터 추출
+//        String warehouseName = (String) requestData.get("warehouseName");
+//        String qrCodeData = (String) requestData.get("qrCodeData");
+//
+//        // 각 dispatchNo에 대해 처리
+//        for (Integer dispatchNo : dispatchNos) {
+//            Optional<Dispatch> dispatchOpt = orderDispatchRepository.findById(dispatchNo);
+//            if (dispatchOpt.isPresent()) {
+//                Dispatch dispatch = dispatchOpt.get();
+//
+//                // 출고 상태 업데이트
+//                dispatch.setDispatchStatus("inProgress");
+//                dispatch.setDispatchStartDate(new Timestamp(System.currentTimeMillis()));
+//
+//                // 창고 정보 업데이트
+//                if (warehouseName != null) {
+//                    Warehouse warehouse = warehouseRepository.findByWarehouseName(warehouseName);
+//                    if (warehouse != null) {
+//                        dispatch.setWarehouse(warehouse);
+//                    }
+//                }
+//
+//                // QR 코드 생성 및 저장
+//                if (qrCodeData != null) {
+//                    QrCode qrCode = new QrCode();
+//                    qrCode.setQrCodeId(UUID.randomUUID());
+//                    qrCode.setQrCodeData(qrCodeData);
+//                    qrCode.setQrCodeStatus("active");
+//                    qrCode.setQrCodeInsertDate(new Timestamp(System.currentTimeMillis()));
+//                    qrCode.setQrCodeUsageCount(0);
+//                    qrCode.setQrCodeDeleteYn("N");
+//
+//                    qrCodeRepository.save(qrCode);
+//                    dispatch.setQrCode(qrCode);
+//                }
+//
+//                // 출고 정보 저장
+//                orderDispatchRepository.save(dispatch);
+//            } else {
+//                // 해당 dispatchNo가 존재하지 않을 경우 처리 (필요에 따라 예외 처리 또는 로그 작성)
+//                // 예: throw new ResourceNotFoundException("Dispatch not found with id " + dispatchNo);
+//            }
+//        }
+//    }
 
-        if (dispatchNos == null || dispatchNos.isEmpty()) {
-            throw new IllegalArgumentException("dispatchNos는 필수입니다.");
-        }
+        // 출고 지시 후 상태 변경 및 QR 코드 생성
+        public void updateDispatchStatus(Map<String, Object> requestData) {
+            Integer dispatchNo = (Integer) requestData.get("dispatchNo");
+            String newStatus = (String) requestData.get("newStatus");
+            String qrCodeData = (String) requestData.get("qrCodeData");
 
-        // 기타 필요한 데이터 추출
-        String warehouseName = (String) requestData.get("warehouseName");
-        String qrCodeData = (String) requestData.get("qrCodeData");
+            Optional<Dispatch> optionalDispatch = orderDispatchRepository.findById(dispatchNo);
 
-        // 각 dispatchNo에 대해 처리
-        for (Integer dispatchNo : dispatchNos) {
-            Optional<Dispatch> dispatchOpt = orderDispatchRepository.findById(dispatchNo);
-            if (dispatchOpt.isPresent()) {
-                Dispatch dispatch = dispatchOpt.get();
+            if (optionalDispatch.isPresent()) {
+                Dispatch dispatch = optionalDispatch.get();
+                dispatch.setDispatchStatus(newStatus);
 
-                // 출고 상태 업데이트
-                dispatch.setDispatchStatus("inProgress");
-                dispatch.setDispatchStartDate(new Timestamp(System.currentTimeMillis()));
-
-                // 창고 정보 업데이트
-                if (warehouseName != null) {
-                    Warehouse warehouse = warehouseRepository.findByWarehouseName(warehouseName);
-                    if (warehouse != null) {
-                        dispatch.setWarehouse(warehouse);
-                    }
+                // 'inProgress' 상태로 변경될 경우 출고 시작일시 설정
+                if ("inProgress".equals(newStatus)) {
+                    dispatch.setDispatchStartDate(new Timestamp(System.currentTimeMillis()));
                 }
 
-                // QR 코드 생성 및 저장
+                // QR 코드 데이터가 있는 경우 QR 코드 생성 및 저장
                 if (qrCodeData != null) {
                     QrCode qrCode = new QrCode();
-                    qrCode.setQrCodeId(UUID.randomUUID());
+                    qrCode.setQrCodeId(UUID.fromString(UUID.randomUUID().toString())); // String 타입으로 가정
                     qrCode.setQrCodeData(qrCodeData);
                     qrCode.setQrCodeStatus("active");
                     qrCode.setQrCodeInsertDate(new Timestamp(System.currentTimeMillis()));
@@ -271,14 +311,15 @@ public class OrderDispatchService {
                     dispatch.setQrCode(qrCode);
                 }
 
-                // 출고 정보 저장
                 orderDispatchRepository.save(dispatch);
             } else {
-                // 해당 dispatchNo가 존재하지 않을 경우 처리 (필요에 따라 예외 처리 또는 로그 작성)
-                // 예: throw new ResourceNotFoundException("Dispatch not found with id " + dispatchNo);
+                // 존재하지 않는 경우: 로그 출력
+                System.out.println("Dispatch not found with id: " + dispatchNo);
             }
         }
-    }
+
+
+
 
     // dispatchNos를 추출하고 형변환하는 유틸리티 메서드
     /* Map에서 값을 추출할 때는 타입 캐스팅에 주의해야함

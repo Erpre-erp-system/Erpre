@@ -21,11 +21,25 @@ const formatDateTime = (dateString) => {
 
 // 출고 상태 매핑 함수
 const mapDispatchStatus = (orderHStatus, dispatchStatus) => {
-  return orderHStatus === 'approved' ? 'pending' : dispatchStatus;
-};
+    // 상태별 한글 매핑
+    const statusMap = {
+      'pending': '출고대기',
+      'inProgress': '출고요청',
+      'complete': '출고완료'
+    };
+  
+    // orderHStatus가 'approved'인 경우 처음에는 '출고대기'로 표시하고, 이후에는 dispatchStatus에 따라 매핑
+    if (orderHStatus === 'approved' && dispatchStatus === 'pending') {
+      return statusMap['pending'];
+    }
+  
+    // dispatchStatus에 따른 한글 매핑 반환
+    return statusMap[dispatchStatus] || dispatchStatus;
+  };
+  
 
 //출고지시 모달창
-function DispatchInstructionModal ({ show, onClose, onSave, assignedWarehouse, dispatchData }) {
+function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchData, onStatusChange }) {
     const [form, setForm] = useState({
       //고객사
       customerName: '', // 고객사 이름 - customer
@@ -76,16 +90,42 @@ function DispatchInstructionModal ({ show, onClose, onSave, assignedWarehouse, d
     }, [show, assignedWarehouse]);
 
     // 입력 값 변경 시 폼 상태 업데이트
-    const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-    };
+    // const handleInputChange = (e) => {
+    // const { name, value } = e.target;
+    // setForm({ ...form, [name]: value });
+    // };
 
     // 폼 제출 처리
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave(form); // 상위 컴포넌트로 저장된 데이터 전달
-        onClose(); // 모달 닫기
+    // const handleSubmit = (e) => {
+    //     e.preventDefault();
+    //     onSave(form); // 상위 컴포넌트로 저장된 데이터 전달
+    //     onClose(); // 모달 닫기
+    // };
+
+    //출고 확인 함수
+    const handleDispatchConfirm = () => {
+        axios.post('/api/orderDispatch/updateStatus', {
+            dispatchNo: dispatchData.dispatchNo,
+            newStatus: 'inProgress'
+        })
+        .then(response => {
+            window.showToast("출고 지시가 완료되었습니다.");
+            setShowConfirmModal(false); // 확인 모달 닫기
+            onClose(); // 출고지시 모달 닫기
+
+            // 상태 변경 알림
+            if (onStatusChange) {
+                onStatusChange(dispatchData.dispatchNo, 'inProgress');
+            }
+        })
+        .catch(error => {
+            window.showToast("출고 지시 중 에러가 발생했습니다.", 'error');
+        });
+    };
+
+    // 출고 버튼 클릭 시 확인 모달 표시
+    const handleDispatchClick = () => {
+        setShowConfirmModal(true);
     };
 
     //////////////////////////////////////////////////////////////////////////////다운로드
@@ -307,18 +347,18 @@ function DispatchInstructionModal ({ show, onClose, onSave, assignedWarehouse, d
                     {/* 출고 버튼 */}
                     <div className="modal-actions">
                         <button className="box blue" type="button" 
-                        onClick={() => setShowSaveConfirmModal(true)}>출고</button>
+                        onClick={handleDispatchClick}>출고</button>
                     </div>
                 </div>
 
-                {/* 저장 확인 모달 */}
-                {/* {showConfirmModal && (
-                <ConfirmationModal
-                    message="출고 지시 하시겠습니까?"
-                    onConfirm={handleConfirmSave}
-                    onCancel={() => setShowConfirmModal(false)}
-                    />
-                )} */}
+                   {/* 출고 확인 모달 */}
+                    {showConfirmModal && (
+                        <ConfirmationModal
+                            message="출고 지시 하시겠습니까?"
+                            onConfirm={handleDispatchConfirm}
+                            onCancel={() => setShowConfirmModal(false)}
+                        />
+                    )}
 
              </div>
         </div>
@@ -442,7 +482,6 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
 
     // 저장 동작 수행
     onSave(editableWarehouse); // 상위 컴포넌트로 저장된 데이터 전달
-    window.showToast("출고 지시가 완료되었습니다.");
     onClose(); // 상세 모달 닫기
     setShowSaveConfirmModal(false); // 저장 확인 모달 닫기
 
@@ -721,7 +760,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
         });
 
         if (!selectedDispatchesHaveWarehouse) {
-            window.showToast("선택한 항목 중 창고 배정이 되지 않은 항목이 있습니다.", 'error');
+            window.showToast("창고 배정이 필요합니다.", 'error');
             return;
         }
 
@@ -775,7 +814,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
 
 
 
-    // 출고지시 모달에서 저장된 데이터 받기
+    //출고지시 모달에서 저장된 데이터 받기
     const handleDispatchInstructionSave = (formData) => {
         const selectedDispatchNos = filteredDispatches
             .filter((_, index) => selectedDispatches[index])
@@ -808,6 +847,26 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
     };
 
 
+    // 상태 변경 콜백 함수
+const handleStatusChange = (dispatchNo, newStatus) => {
+    const updatedDispatches = dispatches.map(dispatch => {
+      if (dispatch.dispatchNo === dispatchNo) {
+        return {
+          ...dispatch,
+          dispatchStatus: newStatus,
+          dispatchStartDate: new Date() // 출고 시작일시 업데이트
+        };
+      }
+      return dispatch;
+    });
+    setDispatches(updatedDispatches);
+  
+    // 필터 타입을 'inProgress'로 변경하여 출고요청 탭으로 이동
+    setFilterType('inProgress');
+  };
+  
+
+    
     // Pagination
     const PageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -933,7 +992,6 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                             </i>
                                         </label>
                                     </th>
-                                    <th>번호</th>
                                     <th>
                                         <div className={`dispatch_wrap ${sortColumn === 'customerName' ? 'pending' : ''}`}>
                                             <span>고객사</span>
@@ -1026,7 +1084,6 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                                                     </i>
                                                 </label>
                                             </td>
-                                            <td>{dispatch.dispatchNo}</td>
                                             <td>{dispatch.customerName || '-'}</td>
                                             <td>{dispatch.productNm || '-'}</td>
                                             <td>{formatDateTime(dispatch.orderDDeliveryRequestDate)}</td>
@@ -1114,8 +1171,9 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                       onSave={handleDispatchInstructionSave}
                       assignedWarehouse={assignedWarehouse}
                       dispatchData={selectedDispatchData}
+                      onStatusChange={handleStatusChange} // 상태 변경 콜백 전달
                   />
-              )}
+              )}            
 
         </Layout>
     );
