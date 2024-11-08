@@ -48,7 +48,7 @@ function EmployeeSalary() {
             setFilteredData(salaryData);
         } else {
             const filtered = salaryData.filter(salary =>
-                salary.employee.employeeName.toLowerCase().includes(debouncedSearchSalary.toLowerCase())
+                salary.employee && salary.employee.employeeName && salary.employee.employeeName.toLowerCase().includes(debouncedSearchSalary.toLowerCase())
             );
             setFilteredData(filtered);
         }
@@ -114,6 +114,94 @@ function EmployeeSalary() {
         return date.toISOString().slice(2, 10); // "YY-MM-DD" 형식으로 날짜 반환
     };
 
+    // 정렬 기능 기본 오름차순
+    const [sortField, setSortField] = useState(null);
+    const [sortOrder, setSortOrder] = useState('asc');
+
+    const sortData = (field) => {
+        const order = sortField === field && sortOrder === 'asc' ? 'desc' : 'asc';
+        setSortField(field);
+        setSortOrder(order);
+
+        const sortedData = [...filteredData].sort((a, b) => {
+            let valueA, valueB;
+
+            switch (field) {
+                case 'employeeName': {
+                    valueA = a.employee && a.employee.employeeName ? a.employee.employeeName.toLowerCase() : '';
+                    valueB = b.employee && b.employee.employeeName ? b.employee.employeeName.toLowerCase() : '';
+                    break;
+                }
+                case 'departmentName': {
+                    valueA = a.department && a.department.departmentName ? a.department.departmentName.toLowerCase() : '';
+                    valueB = b.department && b.department.departmentName ? b.department.departmentName.toLowerCase() : '';
+                    break;
+                }
+                case 'jobName': {
+                    valueA = a.job && a.job.jobName ? a.job.jobName.toLowerCase() : '';
+                    valueB = b.job && b.job.jobName ? b.job.jobName.toLowerCase() : '';
+                    break;
+                }
+                case 'baseSalary': {
+                    valueA = a.baseSalary || 0;
+                    valueB = b.baseSalary || 0;
+                    break;
+                }
+                case 'performanceIncentive': {
+                    valueA = a.performanceIncentiveRate ? parseFloat(a.performanceIncentiveRate) : 0;
+                    valueB = b.performanceIncentiveRate ? parseFloat(b.performanceIncentiveRate) : 0;
+                    break;
+                }
+                case 'gradeIncentive': {
+                    valueA = a.gradeIncentiveRate ? parseFloat(a.gradeIncentiveRate) : 0;
+                    valueB = b.gradeIncentiveRate ? parseFloat(b.gradeIncentiveRate) : 0;
+                    break;
+                }
+                case 'bonus': {
+                    valueA = a.bonus || 0;
+                    valueB = b.bonus || 0;
+                    break;
+                }
+                case 'expectedTotalPayment': {
+                    valueA = a.totalPayment || 0;
+                    valueB = b.totalPayment || 0;
+                    break;
+                }
+                case 'deleteDate': {
+                    valueA = a.deleteDate ? new Date(a.deleteDate) : null;
+                    valueB = b.deleteDate ? new Date(b.deleteDate) : null;
+                    break;
+                }
+                default: {
+                    valueA = a[field] !== undefined && a[field] !== null ? a[field] : '';
+                    valueB = b[field] !== undefined && b[field] !== null ? b[field] : '';
+                    break;
+                }
+            }
+
+            // null 또는 빈 값 처리
+            if (valueA === null || valueA === '') return order === 'asc' ? 1 : -1;
+            if (valueB === null || valueB === '') return order === 'asc' ? -1 : 1;
+
+            // 숫자 비교
+            if (typeof valueA === 'number' && typeof valueB === 'number') {
+                return order === 'asc' ? valueA - valueB : valueB - valueA;
+            }
+
+            // 날짜 비교
+            if (valueA instanceof Date && valueB instanceof Date) {
+                return order === 'asc' ? valueA - valueB : valueB - valueA;
+            }
+
+            // 문자열 비교
+            if (valueA < valueB) return order === 'asc' ? -1 : 1;
+            if (valueA > valueB) return order === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        setFilteredData(sortedData);
+    };
+
     return (
         <Layout currentMenu="employeeSalary">
             <main className="main-content menu_employee">
@@ -175,15 +263,78 @@ function EmployeeSalary() {
                                             </i>
                                         </label>
                                     </th>
-                                    <th>직원명</th>
-                                    <th>부서</th>
-                                    <th>직급</th>
-                                    <th>기본급</th>
-                                    <th>실적인센티브</th>
-                                    <th>직급인센티브</th>
-                                    <th>보너스</th>
-                                    <th>예상 총 지급액</th>
-                                    <th>삭제 일시</th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'employeeName' ? 'active' : ''}`}>
+                                            <span>직원명</span>
+                                            <button className="btn_order" onClick={() => sortData('employeeName')}>
+                                                <i className={`bi ${sortField === 'employeeName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'departmentName' ? 'active' : ''}`}>
+                                            <span>부서</span>
+                                            <button className="btn_order" onClick={() => sortData('departmentName')}>
+                                                <i className={`bi ${sortField === 'departmentName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'jobName' ? 'active' : ''}`}>
+                                            <span>직급</span>
+                                            <button className="btn_order" onClick={() => sortData('jobName')}>
+                                                <i className={`bi ${sortField === 'jobName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'baseSalary' ? 'active' : ''}`}>
+                                            <span>기본급</span>
+                                            <button className="btn_order" onClick={() => sortData('baseSalary')}>
+                                                <i className={`bi ${sortField === 'baseSalary' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'performanceIncentive' ? 'active' : ''}`}>
+                                            <span>실적인센티브</span>
+                                            <button className="btn_order" onClick={() => sortData('performanceIncentive')}>
+                                                <i className={`bi ${sortField === 'performanceIncentive' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'gradeIncentive' ? 'active' : ''}`}>
+                                            <span>직급인센티브</span>
+                                            <button className="btn_order" onClick={() => sortData('gradeIncentive')}>
+                                                <i className={`bi ${sortField === 'gradeIncentive' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'bonus' ? 'active' : ''}`}>
+                                            <span>보너스</span>
+                                            <button className="btn_order" onClick={() => sortData('bonus')}>
+                                                <i className={`bi ${sortField === 'bonus' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'expectedTotalPayment' ? 'active' : ''}`}>
+                                            <span>예상 총 지급액</span>
+                                            <button className="btn_order" onClick={() => sortData('expectedTotalPayment')}>
+                                                <i className={`bi ${sortField === 'expectedTotalPayment' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'deleteDate' ? 'active' : ''}`}>
+                                            <span>삭제 일시</span>
+                                            <button className="btn_order" onClick={() => sortData('deleteDate')}>
+                                                <i className={`bi ${sortField === 'deleteDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -197,39 +348,52 @@ function EmployeeSalary() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredData.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE).map((salary) => (
-                                        <tr key={salary.salaryId}>
-                                            <td>
-                                                <label className="chkbox_label">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="chkbox"
-                                                        checked={selectedSalaries.has(salary.salaryId)}
-                                                        onChange={() => handleSelect(salary.salaryId)}
-                                                    />
-                                                    <i className="chkbox_icon">
-                                                        <i className="bi bi-check-lg"></i>
-                                                    </i>
-                                                </label>
-                                            </td>
-                                            <td>{salary.employee.employeeName}</td>
-                                            <td>{salary.department.departmentName}</td>
-                                            <td>{salary.job.jobName}</td>
-                                            <td>{salary.baseSalary.toLocaleString()}원</td>
-                                            <td>{salary.performanceIncentiveRate.toLocaleString()}%</td>
-                                            <td>{salary.gradeIncentiveRate.toLocaleString()}%</td>
-                                            <td>{salary.bonus.toLocaleString()}원</td>
-                                            <td>
-                                                {(
-                                                    salary.baseSalary +
-                                                    salary.baseSalary * (salary.performanceIncentiveRate / 100) +
-                                                    salary.baseSalary * (salary.gradeIncentiveRate / 100) +
-                                                    salary.bonus
-                                                ).toLocaleString()}원
-                                            </td>
-                                            <td>{salary.deleteDate ? formatDate(salary.deleteDate) : ''}</td>
-                                        </tr>
-                                    ))
+                                    filteredData.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE).map((salary) => {
+                                        // 기본급: salary.baseSalary 사용
+                                        const totalBaseSalary = salary.baseSalary || 0;
+
+                                        // 보너스: salary.bonus 사용
+                                        const bonus = salary.bonus || 0;
+
+                                        // 실적 인센티브율
+                                        const performanceIncentiveRate = salary.performanceIncentiveRate ? parseFloat(salary.performanceIncentiveRate) : 0;
+
+                                        // 직급 인센티브율
+                                        const gradeIncentiveRate = salary.gradeIncentiveRate ? parseFloat(salary.gradeIncentiveRate) : 0;
+
+                                        // 예상 총 지급액 계산
+                                        const expectedTotalPayment = totalBaseSalary +
+                                            (totalBaseSalary * (performanceIncentiveRate / 100)) +
+                                            (totalBaseSalary * (gradeIncentiveRate / 100)) +
+                                            bonus;
+
+                                        return (
+                                            <tr key={salary.salaryId}>
+                                                <td>
+                                                    <label className="chkbox_label">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="chkbox"
+                                                            checked={selectedSalaries.has(salary.salaryId)}
+                                                            onChange={() => handleSelect(salary.salaryId)}
+                                                        />
+                                                        <i className="chkbox_icon">
+                                                            <i className="bi bi-check-lg"></i>
+                                                        </i>
+                                                    </label>
+                                                </td>
+                                                <td>{salary.employee && salary.employee.employeeName ? salary.employee.employeeName : ''}</td>
+                                                <td>{salary.department && salary.department.departmentName ? salary.department.departmentName : ''}</td>
+                                                <td>{salary.job && salary.job.jobName ? salary.job.jobName : ''}</td>
+                                                <td>{totalBaseSalary.toLocaleString()}원</td>
+                                                <td>{performanceIncentiveRate.toLocaleString()}%</td>
+                                                <td>{gradeIncentiveRate.toLocaleString()}%</td>
+                                                <td>{bonus.toLocaleString()}원</td>
+                                                <td>{expectedTotalPayment.toLocaleString()}원</td>
+                                                <td>{salary.deleteDate ? formatDate(salary.deleteDate) : ''}</td>
+                                            </tr>
+                                        );
+                                    })
                                 )}
                             </tbody>
                         </table>

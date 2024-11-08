@@ -142,6 +142,25 @@ function EmployeeList() {
         });
     };
 
+    //정렬기능(기본 오름차순)
+    const [sortField, setSortField] = useState(null);
+    const [sortOrder, setSortOrder] = useState('asc');
+
+    const sortData = (field) => {
+        const order = sortField === field && sortOrder === 'asc' ? 'desc' : 'asc';
+        setSortField(field);
+        setSortOrder(order);
+
+        const sortedData = [...employees].sort((a, b) => {
+            if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
+            if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        setEmployees(sortedData);
+    };
+
+
     // 정보 수정 모달 열기
     const openModifyModal = (employee) => {
         setSelectedEmployee(employee);
@@ -376,16 +395,66 @@ function EmployeeList() {
                                             </i>
                                         </label>
                                     </th>
-                                    <th>번호</th>
-                                    <th>아이디</th>
-                                    <th>이름</th>
-                                    <th>연락처</th>
-                                    <th>직급</th>
-                                    <th>부서</th>
-                                    <th>등록일시</th>
-                                    <th>수정일시</th>
-                                    <th>삭제일시</th>
-
+                                    {/*<th>번호</th>*/}
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'employeeId' ? 'active' : ''}`}>
+                                            <span>아이디</span>
+                                            <button className="btn_order" onClick={() => sortData('employeeId')}>
+                                                <i className={`bi ${sortField === 'employeeId' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'employeeName' ? 'active' : ''}`}>
+                                            <span>이름</span>
+                                            <button className="btn_order" onClick={() => sortData('employeeName')}>
+                                                <i className={`bi ${sortField === 'employeeName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th onClick={() => sortData('employeeTel')}>연락처</th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'jobId' ? 'active' : ''}`}>
+                                            <span>직급</span>
+                                            <button className="btn_order" onClick={() => sortData('jobId')}>
+                                                <i className={`bi ${sortField === 'jobId' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'departmentName' ? 'active' : ''}`}>
+                                            <span>부서</span>
+                                            <button className="btn_order" onClick={() => sortData('departmentName')}>
+                                                <i className={`bi ${sortField === 'departmentName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'employeeInsertDate' ? 'active' : ''}`}>
+                                            <span>등록일시</span>
+                                            <button className="btn_order" onClick={() => sortData('employeeInsertDate')}>
+                                                <i className={`bi ${sortField === 'employeeInsertDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'employeeUpdateDate' ? 'active' : ''}`}>
+                                            <span>수정일시</span>
+                                            <button className="btn_order" onClick={() => sortData('employeeUpdateDate')}>
+                                                <i className={`bi ${sortField === 'employeeUpdateDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div className={`order_wrap ${sortField === 'employeeDeleteDate' ? 'active' : ''}`}>
+                                            <span>삭제일시</span>
+                                            <button className="btn_order" onClick={() => sortData('employeeDeleteDate')}>
+                                                <i className={`bi ${sortField === 'employeeDeleteDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    {/* 수정/삭제 버튼 */}
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -432,7 +501,7 @@ function EmployeeList() {
                                                     </label>
                                                 )}
                                             </td>
-                                            <td>{(page - 1) * 20 + index + 1}</td>
+                                            {/*<td>{(page - 1) * 20 + index + 1}</td>*/}
                                             <td>{employee.employeeId}</td>
                                             <td>{employee.employeeName}</td>
                                             <td>{employee.employeeTel}</td>

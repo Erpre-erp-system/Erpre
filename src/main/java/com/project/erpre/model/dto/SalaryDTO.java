@@ -21,7 +21,8 @@ public class SalaryDTO {
     private JobDTO job;
     private Integer baseSalary;
     private BigDecimal performanceIncentiveRate;
-    private BigDecimal gradeIncentiveRate;
+    private BigDecimal gradeIncentiveRate; // 타입 변경
+    private Integer minSalary;             // 필드 추가
     private Integer bonus;
     private Integer totalPayment;
     private LocalDateTime deleteDate;

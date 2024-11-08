@@ -55,37 +55,48 @@ public class SalaryService {
         return salariesPage.getContent().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    // 🔍 Salary 엔티티를 SalaryDTO로 변환하는 메서드 (급여 계산 방식 유지)
+    // 변환메서드
     private SalaryDTO convertToDTO(Salary salary) {
         SalaryDTO dto = new SalaryDTO();
         dto.setSalaryId(salary.getSalaryId());
 
+        // Employee 정보 설정
         Employee employee = salary.getEmployee();
         EmployeeDTO employeeDTO = new EmployeeDTO();
         employeeDTO.setEmployeeName(employee.getEmployeeName());
         dto.setEmployee(employeeDTO);
 
+        // Department 정보 설정
         Department department = employee.getDepartment();
         DepartmentDTO departmentDTO = new DepartmentDTO();
         departmentDTO.setDepartmentName(department.getDepartmentName());
         dto.setDepartment(departmentDTO);
 
+        // Job 정보 설정
         Job job = employee.getJob();
         JobDTO jobDTO = new JobDTO();
         jobDTO.setJobName(job.getJobName());
         jobDTO.setGradeIncentiveRate(job.getGradeIncentiveRate());
         dto.setJob(jobDTO);
 
-        dto.setBaseSalary(job.getMinSalary());
+        // 계산식 적용
+        Integer minSalary = job.getMinSalary();
+        Integer baseSalary = salary.getBaseSalary();
+        Integer totalBaseSalary = baseSalary + minSalary;
+        dto.setBaseSalary(totalBaseSalary); // 총 기본급 설정
+
         dto.setPerformanceIncentiveRate(salary.getPerformanceIncentiveRate());
         dto.setGradeIncentiveRate(job.getGradeIncentiveRate());
-        dto.setBonus((int) (dto.getBaseSalary() * 0.1)); // 기본급의 10%
+        dto.setBonus(salary.getBonus()); // salary 테이블의 bonus 값 사용
+        dto.setMinSalary(minSalary); // minSalary 설정
 
-        // totalPayment 계산
-        BigDecimal totalPayment = BigDecimal.valueOf(dto.getBaseSalary())
-                .add(BigDecimal.valueOf(dto.getBonus()))
-                .add(BigDecimal.valueOf(dto.getBaseSalary()).multiply(dto.getPerformanceIncentiveRate().divide(BigDecimal.valueOf(100))))
-                .add(BigDecimal.valueOf(dto.getBaseSalary()).multiply(dto.getGradeIncentiveRate().divide(BigDecimal.valueOf(100))));
+        // 예상 총 지급액 계산
+        BigDecimal performanceRate = dto.getPerformanceIncentiveRate().divide(BigDecimal.valueOf(100));
+        BigDecimal gradeRate = dto.getGradeIncentiveRate().divide(BigDecimal.valueOf(100));
+        BigDecimal totalPayment = BigDecimal.valueOf(totalBaseSalary)
+                .add(BigDecimal.valueOf(totalBaseSalary).multiply(performanceRate))
+                .add(BigDecimal.valueOf(totalBaseSalary).multiply(gradeRate))
+                .add(BigDecimal.valueOf(dto.getBonus()));
 
         dto.setTotalPayment(totalPayment.intValue());
 
@@ -95,6 +106,7 @@ public class SalaryService {
 
         return dto;
     }
+
 
     // 🔍 삭제 요청 시 salary_delete_yn 값을 'Y'로 변경하고 삭제 일시 설정
     public void deleteSalaries(List<Integer> salaryIds) {

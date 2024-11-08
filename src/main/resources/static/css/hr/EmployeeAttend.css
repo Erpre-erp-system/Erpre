@@ -88,3 +88,12 @@
 .menu_employee .table_wrap table td:nth-child(9) {
     width: 20%; /* 비고 */
 }
+
+.attendance.right.form-group {
+    display: flex;
+    align-items: center; /* 수직 가운데 정렬 */
+}
+
+
+
+

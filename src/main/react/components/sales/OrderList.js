@@ -196,24 +196,13 @@ function OrderList() {
         setEndDate(formattedToday);
     }, [itsAssignedMode]);
 
-
-    useEffect(() => {
-        if (Array.isArray(filteredOrders)) {
-            // 전체 선택 체크박스 상태 업데이트
-            const ingOrders = filteredOrders.filter(order => order.orderHStatus === 'ing');
-            const isAllSelected = ingOrders.length > 0 && ingOrders.every(order => selectedOrders.has(order.orderNo));
-            setAllSelected(isAllSelected);
-        } else {
-            setAllSelected(false);
-        }
-    }, [selectedOrders, filteredOrders]);
-
     // 필터링된 주문을 등록일 기준으로 내림차순 정렬
     const sortedOrders = [...orders].sort((a, b) => {
         const dateA = new Date(a.orderHInsertDate);
         const dateB = new Date(b.orderHInsertDate);
         return dateB - dateA; // 내림차순 정렬
     });
+
 
     const filteredOrders = sortedOrders.filter(order => {
         const customerName = order.customer?.customerName || '';
@@ -238,6 +227,22 @@ function OrderList() {
 
         return matchesFilter && matchesSearch && isDateInRange;
     });
+
+    useEffect(() => {
+        if (Array.isArray(filteredOrders)) {
+            // 전체 선택 체크박스 상태 업데이트
+            const ingOrders = filteredOrders.filter(order => order.orderHStatus === 'ing');
+            const isAllSelected = ingOrders.length > 0 && ingOrders.every(order => selectedOrders.has(order.orderNo));
+            setAllSelected(isAllSelected);
+        } else {
+            setAllSelected(false);
+        }
+    }, [selectedOrders, filteredOrders]);
+
+
+
+
+
 
     const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
