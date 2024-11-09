@@ -657,9 +657,11 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
         axios.get(url)
             .then(response => {
                 console.log('Fetched dispatch data:', response.data);
-                setDispatches(response.data.content);
+                // deleteYN이 'N'인 항목만 화면에 반영
+                const filteredData = response.data.content.filter(dispatch => dispatch.dispatchDeleteYn === 'N');
+                setDispatches(filteredData);
                 setTotalPages(response.data.totalPages);
-                setSelectedDispatches(new Array(response.data.content.length).fill(false));
+                setSelectedDispatches(new Array(filteredData.length).fill(false));
                 setSelectAll(false);
                 setLoading(false);
             })
@@ -668,6 +670,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                 setLoading(false);
             });
     };
+    
 
     // 필터링된 dispatches 생성
     const filteredDispatches = useMemo(() => {
@@ -887,9 +890,11 @@ const handleStatusChange = (dispatchNo, newStatus) => {
 
         window.confirmDispatch('선택한 출고 사항을 삭제하시겠습니까?').then(result => {
             if (result) {
-                axios.post('/api/orderDispatch/delete', { dispatchNos: selectedDispatchNos })
+                axios.post('/api/orderDispatch/delete', selectedDispatchNos)
                     .then(response => {
                         window.showToast("삭제가 완료 되었습니다.");
+
+                        // 화면 갱신을 위해 삭제된 항목 제외하고 다시 가져오기
                         fetchData();
                         setPage(1);
                     })
@@ -900,7 +905,7 @@ const handleStatusChange = (dispatchNo, newStatus) => {
         });
     };
 
-
+    
     return (
         <Layout currentMenu="orderDispatch">
              <main className={`main-content menu_orderDispatch `}>
