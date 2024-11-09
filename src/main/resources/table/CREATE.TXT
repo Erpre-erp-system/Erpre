@@ -109,6 +109,7 @@ create table m_employee (
     employee_status_message varchar(50)     null,
     department_id          int              not null, -- 부서 아이디
     job_id                 int              not null,  -- 직급 아이디
+    employee_image_url     varchar(255)      null,     -- 직원 프로필 사진
     primary key (employee_id) -- 기본 키 설정
 );
 

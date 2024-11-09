@@ -59,6 +59,9 @@ public class Employee {
     @Column(name = "employee_status_message")
     private String employeeStatusMessage;
 
+    @Column(name="employee_image_url")
+    private String employeeImageUrl;
+
     @ManyToOne
     @JoinColumn(name = "job_id", nullable = false)
     @JsonIgnore

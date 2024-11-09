@@ -11,10 +11,11 @@ import axios from "axios";
 import {useMessengerHooks} from "./useMessengerHooks";
 import Chat from "./Chat";
 import Note from "./Note";
+import Info from "./Info";
 import {IoChevronDown, IoClose} from "react-icons/io5";
 
 
-// ⭐ 뷰 컴포넌트: Home, Info, Note, Chat
+// ⭐ 뷰 컴포넌트
 const Home = ({treeData, expandedKeys, handleCheck}) => (
     <div className="messenger-content">
         <Tree
@@ -24,13 +25,6 @@ const Home = ({treeData, expandedKeys, handleCheck}) => (
             checkable
             onCheck={handleCheck}
         />
-    </div>
-);
-
-const Info = () => (
-    <div>
-        <h3>유저정보 화면</h3>
-        {/* 유저정보 UI*/}
     </div>
 );
 
@@ -300,35 +294,36 @@ function Messenger({isOpen, toggleMessenger }) {
 
 
                         {/* 메신저 헤더 */}
-                        <div className="messenger-header"><h3>
-                            {activeView === 'home' && 'ERPRE'}
-                            {activeView === 'info' && 'MY'}
+                        <div className={`messenger-header ${activeView === 'info' ? 'info-header' : ''}`}>
+                            <h3>
+                                {activeView === 'home' && 'ERPRE'}
+                                {activeView === 'info'}
 
-                            {activeView === 'note' ? (
-                                <div className="dropdown-header" onClick={() => setIsNoteDropdownOpen(!isNoteDropdownOpen)}>
-                                    <h3 className="dropdown-title">
-                                        {options.find(opt => opt.value === noteStatus)?.label || '받은 쪽지'}
-                                        <IoChevronDown />
-                                    </h3>
-                                    {isNoteDropdownOpen && (
-                                        <div className="dropdown-content">
-                                            {options.map((option, index) => (
-                                                <div
-                                                    key={index}
-                                                    onClick={() => handleNoteStatus(option)}
-                                                    className="dropdown-item"
-                                                >
-                                                    {option.label}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            ) : null}
+                                {activeView === 'note' ? (
+                                    <div className="dropdown-header" onClick={() => setIsNoteDropdownOpen(!isNoteDropdownOpen)}>
+                                        <h3 className="dropdown-title">
+                                            {options.find(opt => opt.value === noteStatus)?.label || '받은 쪽지'}
+                                            <IoChevronDown />
+                                        </h3>
+                                        {isNoteDropdownOpen && (
+                                            <div className="dropdown-content">
+                                                {options.map((option, index) => (
+                                                    <div
+                                                        key={index}
+                                                        onClick={() => handleNoteStatus(option)}
+                                                        className="dropdown-item"
+                                                    >
+                                                        {option.label}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : null}
 
-                            {activeView === 'chat' && '채팅'}
-                        </h3>
-                            <IoClose className="messenger-close" title="닫기" onClick={toggleMessenger}/>
+                                {activeView === 'chat' && '채팅'}
+                            </h3>
+                                <IoClose className="messenger-close" title="닫기" onClick={toggleMessenger}/>
                         </div>
 
                         {/* 검색창 */}
@@ -362,7 +357,7 @@ function Messenger({isOpen, toggleMessenger }) {
                         )}
 
                         {/* 유저 프로필*/}
-                        {(activeView === 'home' || activeView === 'info') && (
+                        {activeView === 'home' && (
                             <div className="messenger-user">
                                 <div className="erpre-logo">
                                     <img src="/img/erpre.png" alt="회사 로고"/>
@@ -413,7 +408,10 @@ function Messenger({isOpen, toggleMessenger }) {
                                 expandedKeys={expandedKeys}
                                 handleCheck={handleCheck}
                             />}
-                        {activeView === 'info' && <Info/>}
+                        {activeView === 'info' &&
+                            <Info
+
+                            />}
                         {activeView === 'chat' &&
                             <Chat
                                 chatList={chatList}

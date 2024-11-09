@@ -1,5 +1,6 @@
 package com.project.erpre.model.dto;
 
+import com.project.erpre.model.entity.Employee;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,8 @@ public class EmployeeDTO {
     private String employeeName;
     private String employeeEmail;
     private String employeeTel;
+    private String employeeImageUrl;
+
     private Integer jobId;
     private String jobRole;
     private Integer departmentId;
@@ -34,4 +37,18 @@ public class EmployeeDTO {
     private String employeeStatusMessage;
 
 
+    // 유저 정보 조회 생성자
+    public EmployeeDTO(Employee employee) {
+        this.employeeId = employee.getEmployeeId();
+        this.employeeName = employee.getEmployeeName();
+        this.employeeInsertDate = employee.getEmployeeInsertDate();
+        this.jobName = employee.getJob().getJobName();
+        this.departmentName = employee.getDepartment().getDepartmentName();
+        this.employeeStatus = employee.getEmployeeStatus();
+        this.employeeStatusUpdateTime = employee.getEmployeeStatusUpdateTime();
+        this.employeeStatusMessage = employee.getEmployeeStatusMessage();
+        this.employeeTel = employee.getEmployeeTel();
+        this.employeeEmail = employee.getEmployeeEmail();
+        this.employeeImageUrl = employee.getEmployeeImageUrl();
+    }
 }

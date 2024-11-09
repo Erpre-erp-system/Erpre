@@ -83,6 +83,18 @@ h3 {
     margin-top: 15px;
 }
 
+.messenger-header.info-header {
+    height: 28px;
+    display: flex;
+    align-items: center;
+    padding: 3px 30px 8px 30px;
+    background-color: #ffffff;
+    color: #000;
+    position: relative;
+    font-size: 25px;
+    margin-top: 15px;
+}
+
 .messenger-header .messenger-close {
     position: absolute;
     right: 20px;

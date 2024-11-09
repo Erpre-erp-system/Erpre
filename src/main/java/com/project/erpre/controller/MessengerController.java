@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
@@ -51,6 +52,37 @@ public class MessengerController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    // 유저 정보 조회 API
+    @GetMapping("/info")
+    public ResponseEntity<EmployeeDTO> getUserInfo() {
+        EmployeeDTO employeeDTO = messengerService.getUserInfo();
+        return ResponseEntity.ok(employeeDTO);
+    }
+
+    // 유저 프로필 사진 URL 업데이트 API
+    @PutMapping("/profile/update")
+    public ResponseEntity<String> updateProfileImage(@RequestBody Map<String, String> request) {
+        String fileName = request.get("fileName");
+        messengerService.updateProfileImage(fileName);
+        return ResponseEntity.ok("프로필 이미지 업데이트 성공");
+    }
+
+    // 유저 프로필 사진 URL 삭제 API
+    @DeleteMapping("/profile/delete")
+    public ResponseEntity<Void> deleteProfileImage() {
+        messengerService.deleteProfileImage();
+        return ResponseEntity.noContent().build();
+    }
+
+    // 유저 정보 업데이트 API (핸드폰번호)
+    @PutMapping("/info/update")
+    public ResponseEntity<Void> updateInfo(
+            @RequestParam(value = "employeeTel", required = false) String employeeTel
+    ) {
+        messengerService.updateInfo(employeeTel);
+        return ResponseEntity.noContent().build();
     }
 
 

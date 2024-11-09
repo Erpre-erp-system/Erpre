@@ -1,6 +1,7 @@
 package com.project.erpre.controller;
 
 import com.project.erpre.model.dto.ChatMessageDTO;
+import com.project.erpre.model.dto.MessageDTO;
 import com.project.erpre.service.MessengerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -27,8 +28,25 @@ public class TalkController {
         this.messagingTemplate = messagingTemplate;
     }
 
-//    // 🟠 쪽지 메세시 전송 및 저장
-//    @MessageMapping("/talk/note/{noteNo}")
+    // 🟠 쪽지 메세지 전송 및 저장
+//    @MessageMapping("/note")
+//    public void sendNote(MessageDTO message, Principal principal) {
+//
+//        String senderId = principal.getName();
+//        message.getEmployee().getEmployeeId(senderId);
+//
+//        // 수신자 목록 가져오기 (예: 수신자 ID들을 리스트로 포함)
+//        List<String> receiverIds = noteMessage.getReceiverIds(); // ChatMessageDTO에 수신자 ID 리스트가 있다고 가정
+//
+//        // 메시지 DB에 저장 (다수의 수신자에 대해 별도의 로직을 구현)
+//        ChatMessageDTO savedNote = messengerService.saveNoteMessage(noteMessage, senderId, receiverIds);
+//
+//        // 각 수신자에게 메시지 전송
+//        for (String receiverId : receiverIds) {
+//            messagingTemplate.convertAndSendToUser(receiverId, "/queue/note", savedNote);
+//            System.out.println("쪽지 전송 완료 - 수신자: " + receiverId + ", 경로: /user/" + receiverId + "/queue/note, 메시지 내용: " + savedNote);
+//        }
+//    }
 
 
     // 🔴 채팅 메시지 전송 및 저장

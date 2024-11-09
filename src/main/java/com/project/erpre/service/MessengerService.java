@@ -2,6 +2,7 @@ package com.project.erpre.service;
 
 import com.project.erpre.model.dto.ChatDTO;
 import com.project.erpre.model.dto.ChatMessageDTO;
+import com.project.erpre.model.dto.EmployeeDTO;
 import com.project.erpre.model.dto.MessageDTO;
 import com.project.erpre.model.entity.*;
 import com.project.erpre.repository.*;
@@ -77,6 +78,47 @@ public class MessengerService {
         } else {
             return principal.toString();
         }
+    }
+    
+    // 유저 정보 조회
+    public EmployeeDTO getUserInfo() {
+        String employeeId = getEmployeeIdFromAuthentication();
+        Employee employee = employeeRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new RuntimeException("해당 직원을 찾을 수 없습니다"));
+        return new EmployeeDTO(employee);
+    }
+
+    // 유저 프로필 사진 URL 업데이트
+    @Transactional
+    public void updateProfileImage(String fileName) {
+
+        String employeeId = getEmployeeIdFromAuthentication();
+        Employee employee = employeeRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new RuntimeException("해당 직원을 찾을 수 없습니다"));
+
+        String imageUrl = "/uploads/profile-pictures/" + fileName;
+        employee.setEmployeeImageUrl(imageUrl);
+        employeeRepository.save(employee);
+    }
+
+    // 유저 프로필 사진 URL 삭제
+    public void deleteProfileImage() {
+        String employeeId = getEmployeeIdFromAuthentication();
+        Employee employee = employeeRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new RuntimeException("해당 직원을 찾을 수 없습니다"));
+
+        employee.setEmployeeImageUrl(null);
+        employeeRepository.save(employee);
+    }
+
+    // 유저 정보 업데이트 (핸드폰번호)
+    public void updateInfo(String employeeTel) {
+        String employeeId = getEmployeeIdFromAuthentication();
+        Employee employee = employeeRepository.findByEmployeeId(employeeId)
+               .orElseThrow(() -> new RuntimeException("해당 직원을 찾을 수 없습니다"));
+
+        employee.setEmployeeTel(employeeTel);
+        employeeRepository.save(employee);
     }
 
 

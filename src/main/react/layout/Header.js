@@ -6,6 +6,8 @@ import {MessengerContext} from '../../react/context/MessengerContext';
 import '../../resources/static/css/messenger/Messenger.css';
 import "../../resources/static/css/messenger/Chat.css";
 import "../../resources/static/css/messenger/Note.css";
+import "../../resources/static/css/messenger/Info.css";
+
 
 
 function Header() {
