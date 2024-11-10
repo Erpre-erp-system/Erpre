@@ -26,9 +26,9 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
         this.queryFactory = new JPAQueryFactory(entityManager);
     }
 
-    // 1. 메신저 직원 조회 (조직도) 및 검색 (직원 이름, 부서명, 직급명)
+    // 1. 직원 검색 (직원 이름, 부서명, 직급명)
     @Override
-    public Page<Employee> getEmployeesWithDept(Pageable pageable, String searchKeyword) {
+    public Page<Employee> getEmployeeList(Pageable pageable, String searchKeyword) {
         QEmployee employee = QEmployee.employee;
         QDepartment department = QDepartment.department;
         QJob job = QJob.job;
@@ -82,6 +82,29 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
         return employee.employeeName.containsIgnoreCase(searchKeyword)
                 .or(department.departmentName.containsIgnoreCase(searchKeyword))
                 .or(job.jobName.containsIgnoreCase(searchKeyword));
+    }
+
+    // 3. 메신저 조직도 조회
+    @Override
+    public List<Employee> getMessengerEmployeeList(String searchKeyword) {
+        QEmployee employee = QEmployee.employee;
+        QDepartment department = QDepartment.department;
+        QJob job = QJob.job;
+
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(employee.employeeDeleteYn.eq("N"));
+
+        if (searchKeyword != null && !searchKeyword.isEmpty()) {
+            builder.and(containsKeyword(searchKeyword));
+        }
+
+        return queryFactory
+                .selectFrom(employee)
+                .leftJoin(employee.department, department).fetchJoin()
+                .leftJoin(employee.job, job).fetchJoin()
+                .where(builder)
+                .orderBy(department.departmentName.asc(), employee.employeeName.asc())
+                .fetch();
     }
 
 }

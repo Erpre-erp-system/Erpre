@@ -1,249 +1,133 @@
-h3 {
-    color: black;
-}
-
-.tr_empty {
-    justify-content: center;
-    align-items: center;
-    height: 50vh;
-}
+h3 { color: black; }
+.tr_empty { justify-content: center; align-items: center; height: 50vh; }
 
 /* 왼쪽 사이드바 */
-.messenger-panel .sidebar {
-    position: fixed;
-    right: -350px;
-}
-
-.messenger-panel.open .sidebar {
-    position: fixed;
-    right: 350px;
-    z-index: 500;
-    flex-direction: column;
-    align-items: center;
-    display: flex;
-    width: 62px;
-    height: 100%;
-    background-color: #f4f4f4;
-    top: 0;
-    box-shadow: -5px 0 5px rgba(0, 0, 0, 0.1);
-    transition: right 0.3s ease;
-    overflow: hidden;
-}
-
-.messenger-panel.open .sidebar button {
-    margin-top: 20px;
-    background-color: transparent;
-    width: 80px;
-    height: 40px;
-    border: none;
-    margin-bottom: 20px;
-    font-size: 25px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.messenger-panel.open .sidebar button.btn1 {
-    margin-top: 25px;
-}
-
-.messenger-panel.open .sidebar button:hover {
-    color: #0057a2;
-}
+.messenger-panel .sidebar { position: fixed; right: -350px; }
+.messenger-panel.open .sidebar { position: fixed; right: 350px; z-index: 500; flex-direction: column; align-items: center; display: flex; width: 62px; height: 100%; background-color: #f4f4f4; top: 0; mbox-shadow: -5px 0 5px rgba(0, 0, 0, 0.1); transition: right 0.3s ease; overflow: hidden; }
+.messenger-panel.open .sidebar button { margin-top: 20px; background-color: transparent; width: 80px; height: 40px; border: none; margin-bottom: 20px; font-size: 25px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+.messenger-panel.open .sidebar button.btn1 { margin-top: 25px; }
+.messenger-panel.open .sidebar button:hover { color: #0057a2; }
 
 /* 메신저 슬라이드 패널 */
-.messenger-panel {
-    position: fixed;
-    top: 0;
-    right: -350px;
-    width: 350px;
-    height: 100vh;
-    background-color: #fff;
-    transition: right 0.3s ease;
-    z-index: 1000;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.messenger-panel.open {
-    right: 0;
-}
+.messenger-panel { position: fixed; top: 0; right: -350px; width: 350px; height: 100vh; background-color: #fff; transition: right 0.3s ease; z-index: 1000; overflow-y: auto; overflow-x: hidden; }
+.messenger-panel.open { right: 0; }
 
 /* 패널이 열릴 때 오른쪽으로 이동 */
-.messenger-header {
-    height: 54px;
-    display: flex;
-    align-items: center;
-    padding: 3px 30px 8px 30px;
-    background-color: #ffffff;
-    color: #000;
-    position: relative;
-    font-size: 25px;
-    margin-top: 15px;
-}
-
-.messenger-header.info-header {
-    height: 28px;
-    display: flex;
-    align-items: center;
-    padding: 3px 30px 8px 30px;
-    background-color: #ffffff;
-    color: #000;
-    position: relative;
-    font-size: 25px;
-    margin-top: 15px;
-}
-
-.messenger-header .messenger-close {
-    position: absolute;
-    right: 20px;
-    top: 10px;
-    cursor: pointer;
-    color: rgb(188, 187, 187);
-    font-size: 25px;
-
-}
+.messenger-header { height: 54px; display: flex; align-items: center; padding: 3px 30px 0px 26px; background-color: #ffffff; color: #000; position: relative; font-size: 25px; margin-top: 15px; }
+.messenger-header.info-header { height: 28px; display: flex; align-items: center; padding: 3px 30px 8px 30px; background-color: #ffffff; color: #000; position: relative; font-size: 25px; margin-top: 15px; }
+.messenger-header .messenger-close { position: absolute; right: 20px; top: 10px; cursor: pointer; color: rgb(188, 187, 187); font-size: 25px; }
 
 /* 검색창 */
-.search-wrap {
-    margin: 10px 0;
-    padding: 10px 20px 0 20px;
-}
-
-.messenger-panel .search_box.has_text {
-    border-color: black;
-}
-
-.messenger-panel .search_box.has_text .label_floating, .select_box.selected .label_floating {
-    color: black;
-}
-
-.messenger-panel .messenger-search .search_box.has_text button i {
-    display: inline;
-    color: black;
-    position: absolute !important;
-    cursor: pointer;
-    top: 50%;
-    transform: translateY(-50%);
-}
+.search-wrap { margin: 10px 0; padding: 1px 20px 0 19px; }
+.messenger-panel .search_box { border-radius: 23px; background-color: #f4f4f478;}
+.messenger-panel .box { background-color: #f4f4f478; border-radius: 23px; }
+.messenger-panel .search_box.has_text input { margin-left: 4px; }
+.messenger-panel .search_box.has_text { border-color: black; }
+.messenger-panel .search_box.has_text .label_floating, .select_box.selected .label_floating { color: black; }
+.messenger-panel .messenger-search .search_box.has_text button i { display: inline; color: black; position: absolute; cursor: pointer; top: 50%; transform: translateY(-50%); }
 
 /* 유저 프로필*/
-.messenger-user {
-    padding: 10px;
-    margin-left: 15px;
-    display: flex;
-    align-items: center;
-}
+.messenger-user { padding: 10px 0px 10px 10px; margin-left: 15px; display: flex; align-items: center; }
+.messenger-user img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; float: left; margin-top: 5px; }
+.messenger-user .info { display: flex; flex-direction: column; margin-left: 5px; padding: 0px 0px 0px 10px;}
+.messenger-user .info-wrapper { display: flex; align-items: center; }
+.messenger-user .user-name { font-size: 18px; font-weight: bold; line-height: 1; margin: 0; width: 100%; }
 
-.messenger-user img {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    object-fit: cover;
-    float: left;
-    margin-top: 5px;
-}
+.messenger-user .profile.status { display: flex; align-items: center; height: 30px; justify-content: flex-end; width: 100%; }
 
-.info {
-    margin-left: 5px;
-}
+.status-select-wrapper { display: flex; align-items: center; height: 40px; margin-left: 21px; cursor: pointer; justify-content: space-between; width: auto; padding-right: 0px; justify-content: flex-end; margin-right: 10px; }
+.Select__control { min-height: 40px; height: 40px; }
+.custom-option { display: flex; align-items: center; color: black !important; padding: 3px !important; margin-left: 2px !important; }
+.css-1hqnu8h { padding: 2px 0px 2px 23px !important; overflow: visible !important; }
+.css-1xc3v61-indicatorContainer { padding: 2px !important; }
+.custom-single-value { display: flex; align-items: center; color: black; }
+.css-qr46ko { padding: 2px !important;}
 
-.messenger-user .info {
-    display: flex;
-    flex-direction: column;
-    padding: 0px 10px;
-}
-
-.info-wrapper {
-    display: flex;
-    align-items: center;
-}
-
-.messenger-user .user-name {
-    font-size: 18px;
-    font-weight: bold;
-    line-height: 1;
-    margin: 0;
-    width: 100%;
-}
-
-/* 상태변경*/
-.profile {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    width: 100%;
-}
-
-.profile.status {
-    display: flex;
-    align-items: center;
-    height: 30px;
-}
-
-.status-select-wrapper {
-    display: flex;
-    align-items: center;
-    height: 40px;
-    margin-left: auto;
-}
-
-.Select__control {
-    min-height: 40px;
-    height: 40px;
-}
-
-.custom-option {
-    display: flex;
-    align-items: center;
-    color: black !important;
-    padding: 3px !important;
-    margin-left: 2px !important;
-}
-
-.css-1hqnu8h {
-    padding: 2px 0px 2px 23px !important;
-    overflow: visible !important;
-}
-
-.css-1xc3v61-indicatorContainer {
-    padding: 2px !important;
-}
-
-.single-value {
-    display: flex;
-    align-items: center;
-    color: black;
-}
-
-.messenger-user .status-message {
-    margin-top: 5px;
-    font-size: 16px;
-    width: 200px;
-    word-wrap: break-word;
-    color: black;
-}
+.messenger-user .status-message { margin-top: 3px; font-size: 15px; width: 100%; word-wrap: break-word; color: black; text-align: left; }
 
 /* 메신저 조직도*/
-.messenger-content {
-    padding: 23px 30px;
-    overflow-y: auto;
-    height: calc(100% - 120px);
+.messenger-content { padding: -1px 30px; overflow-y: auto; height: calc(100% - 120px); color: black; font-size: 16px; overflow-x: hidden; }
+.rc-tree { padding: 9px 10px 10px 20px; }
+.rc-tree-list-holder-inner { font-size: 16px; }
+.rc-tree .rc-tree-treenode { padding: 2px 0 !important; }
+.rc-tree .rc-tree-title { margin-left: 3px; align-items: center; font-size: 16px; display: flex; line-height: 1.6; min-height: 26px;}
+.rc-tree .rc-tree-title span { font-size: 16px;  display:inline-block; vertical-align: middle; }
+.rc-tree .parent-icon { font-size: 18px; margin-right: 5px; }
+.rc-tree .rc-tree-title span:first-child { margin-right: 5px; }
+.rc-tree .rc-tree-treenode-checkbox-wrapper { margin-right: 8px; }
+.rc-tree-checkbox { display: none; }
+
+/* 커스텀 체크박스 */
+.rc-tree-treenode-checkbox-wrapper::before {
+    content: ''; /* 빈 내용 추가 */
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ccc;
+    border-radius: 3px;
+    margin-right: 8px;
+    vertical-align: middle;
+    box-shadow: none; /* 그림자 제거 */
+    background-color: white;
+    transition: background-color 0.3s;
+}
+
+/* 체크 상태일 때의 스타일 */
+.rc-tree-checkbox-checked .rc-tree-treenode-checkbox-wrapper::before {
+    background-color: #0057a2;
+    border-color: #0057a2;
+}
+
+/* 조직도 상태 */
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.filter-buttons button {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+.filter-buttons button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* 우클릭 메뉴 */
+.context-menu {
+    position: fixed;
+    z-index: 2000;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    visibility: visible;
+    white-space: nowrap;
     color: black;
+    box-sizing: border-box;
+    width: 130px;
     font-size: 16px;
-    overflow-x: hidden;
 }
 
-.rc-tree-treenode {
-    padding: 2px 0;
+.context-menu ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
 }
 
-.rc-tree-title {
-    margin-left: 7px;
+.context-menu ul li {
+    padding: 8px 12px !important;
+    display: flex;
     align-items: center;
+    cursor: pointer;
 }
 
-.parent-icon {
-    font-size: 18px;
-}
+.context-menu ul li:hover { background-color: #F4F4F4; }
+

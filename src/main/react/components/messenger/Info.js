@@ -1,12 +1,14 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {FaUserCircle} from "react-icons/fa";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { UserContext} from "../../context/UserContext";
 
 const Info = () => {
-    const [info, setInfo] = useState({});
-    const [phone, setPhone] = useState('');
+    const { user, setUser } = useContext(UserContext);
+    const [phone, setPhone] = useState(user?.employeeTel || "");
 
+    // 핸드폰 번호 변경 함수
     const handlePhoneChange = (e) => {
         let input = e.target.value.replace(/[^0-9]/g, "");
         if (input.length <= 3) {
@@ -18,6 +20,7 @@ const Info = () => {
         }
     };
 
+    // 입사일 날짜 형식
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         return date.toLocaleDateString("ko-KR", {
@@ -27,17 +30,7 @@ const Info = () => {
         });
     };
 
-    const fetchData = async () => {
-        try {
-            const response = await axios.get('/api/messengers/info');
-            setInfo(response.data);
-            setPhone(response.data.employeeTel);
-            console.log('유저 정보:', response.data);
-        } catch (error) {
-            console.error('유저 정보 가져오기 실패:', error);
-        }
-    };
-
+    // 입력 형식 오류 경고 함수
     const showInputAlert = () => {
         Swal.fire({
             icon: 'error',
@@ -48,6 +41,7 @@ const Info = () => {
         });
     };
 
+    // 유저 정보 업데이트 함수 (핸드폰 번호)
     const handleInfoUpdate = async () => {
         const phonePattern = /^\d{3}-\d{4}-\d{4}$/;
         if (!phonePattern.test(phone)) {
@@ -55,21 +49,14 @@ const Info = () => {
             return;
         }
 
-        const params = new URLSearchParams();
-        params.append("employeeTel", phone);
-
         try {
-            const response = await axios.put('/api/messengers/info/update?' + params.toString());
-            console.log('유저 정보 업데이트 성공:', response.data);
-            fetchData();
+            await axios.put('/api/messengers/info/update', { employeeTel: phone});
+            setUser(prevUser => ({ ...prevUser, employeeTel: phone }));
+            window.showToast("핸드폰 번호가 업데이트되었습니다");
         } catch (error) {
             console.error('유저 정보 업데이트 실패:', error);
         }
     };
-
-    useEffect(() => {
-        fetchData();
-    }, []);
 
     const handleFileChange = async (e) => {
         const selectedFile = e.target.files[0];
@@ -82,7 +69,7 @@ const Info = () => {
         document.getElementById("fileInput").click();
     };
 
-    // 프로필 사진 업로드
+    // 프로필 사진 업로드 함수
     const handleUpload = async (file) => {
         const formData = new FormData();
         formData.append("file", file);
@@ -101,23 +88,24 @@ const Info = () => {
         }
     };
 
-    // 프로필 사진 URL 업데이트
+    // 프로필 사진 URL 업데이트 함수
     const updateProfileImage = async (fileName) => {
         try {
             await axios.put('/api/messengers/profile/update', { fileName });
-            const updatedInfo = { ...info, employeeImageUrl: `/api/files/profile/${fileName}` };
-            setInfo(updatedInfo);
+            const updatedInfo = { ...user, employeeImageUrl: `/api/files/profile/${fileName}` };
+            setUser(updatedInfo);
             window.showToast('프로필 사진이 업데이트되었습니다');
         } catch (error) {
             console.error("프로필 사진 URL 업데이트 실패:", error);
         }
     };
 
+    // 프로필 사진 삭제 함수
     const handleProfileDelete = async () => {
         try {
             await axios.delete('/api/messengers/profile/delete');
+            setUser(prevUser => ({ ...prevUser, employeeImageUrl: null }));
             window.showToast("프로필 사진이 삭제되었습니다", 'error');
-            fetchData();
         } catch (error) {
             console.error("프로필 사진 삭제 실패:", error);
         }
@@ -128,8 +116,8 @@ const Info = () => {
             <div className="profile-picture">
                 {/* 이미지 편집 및 삭제 */}
                 <div className="image-placeholder">
-                    {info.employeeImageUrl ? (
-                        <img src={info.employeeImageUrl} alt="프로필 사진" className="info-icon"/>
+                    {user?.employeeImageUrl ? (
+                        <img src={user.employeeImageUrl} alt="프로필 사진" className="info-icon"/>
                     ) : (
                         <FaUserCircle className="info-icon"/>
                     )}
@@ -151,33 +139,33 @@ const Info = () => {
                 {/* 수정 불가능 필드 */}
                 <div className="info-item">
                     <label>이름</label>
-                    <input type="text" value={info.employeeName} readOnly/>
+                    <input type="text" value={user?.employeeName || ""} readOnly/>
                 </div>
                 <div className="info-item">
                     <label>부서</label>
-                    <input type="text" value={info.departmentName} readOnly/>
+                    <input type="text" value={user?.departmentName || ""} readOnly/>
                 </div>
                 <div className="info-item">
                     <label>직급</label>
-                    <input type="text" value={info.jobName} readOnly/>
+                    <input type="text" value={user?.jobName || ""} readOnly/>
                 </div>
                 <div className="info-item">
                     <label>아이디</label>
-                    <input type="text" value={info.employeeId} readOnly/>
+                    <input type="text" value={user?.employeeId || ""} readOnly/>
                 </div>
 
 
                 <div className="info-item">
                     <label>핸드폰 번호</label>
-                    <input type="text" value={phone} onChange={handlePhoneChange}/>
+                    <input type="text" value={phone || ""} onChange={handlePhoneChange}/>
                 </div>
                 <div className="info-item">
                     <label>이메일</label>
-                    <input type="text" value={info.employeeEmail} readOnly/>
+                    <input type="text" value={user?.employeeEmail || ""} readOnly/>
                 </div>
                 <div className="info-item">
                     <label>입사일</label>
-                    <input type="text" value={formatDate(info.employeeInsertDate)} readOnly/>
+                    <input type="text" value={formatDate(user?.employeeInsertDate) || ""} readOnly/>
                 </div>
             </div>
 

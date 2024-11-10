@@ -199,10 +199,10 @@ public class EmployeeService {
         return employeeRepository.countDeletedEmployeesLast30Days();
     }
 
-    // 🟡 메신저 직원 조회 (조직도)
-    public Page<EmployeeDTO> getEmployeesWithDept(int page, int size, String searchKeyword) {
+    // 메신저 직원 조회 (검색)
+    public Page<EmployeeDTO> getEmployeeList(int page, int size, String searchKeyword) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Employee> employees = employeeRepository.getEmployeesWithDept(pageable, searchKeyword);
+        Page<Employee> employees = employeeRepository.getEmployeeList(pageable, searchKeyword);
 
         List<EmployeeDTO> employeeDTO = employees.stream()
                 .map(this::convertToDTO)
@@ -211,7 +211,15 @@ public class EmployeeService {
         return new PageImpl<>(employeeDTO, pageable, employees.getTotalElements());
     }
 
-    // 🟡 현재 로그인한 직원 조회
+    // 메신저 직원 조회 (조직도)
+    public List<EmployeeDTO> getMessengerEmployeeList(String searchKeyword) {
+        return employeeRepository.getMessengerEmployeeList(searchKeyword)
+               .stream()
+               .map(this::convertToDTO)
+               .collect(Collectors.toList());
+    }
+
+    // 현재 로그인한 직원 조회
     public EmployeeDTO getLoginEmployee(String employeeId) {
         Employee employee = employeeRepository.getLoginEmployee(employeeId);
         return convertToDTO(employee);

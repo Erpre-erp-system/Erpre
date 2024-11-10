@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import Draggable from "react-draggable";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -8,7 +8,7 @@ import UseSearch from "./UseSearch";
 import { CustomToolbar } from "./CustomToolbar";
 import axios from "axios";
 
-const NewNoteModal = ({closeNewNoteModal}) => {
+const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
 
     const [recipients, setRecipients] = useState([]); // 선택된 직원 목록
     const [messageContent, setMessageContent] = useState(""); // 발신 메세지
@@ -20,11 +20,18 @@ const NewNoteModal = ({closeNewNoteModal}) => {
 
     const {data: suggestions, searchLoading} = UseSearch("/api/messengers/employeeList", employeeSearchText);
 
+    // 초기 recipients 값 설정
+    useEffect(() => {
+        if (initialRecipients && initialRecipients.length > 0) {
+            setRecipients(initialRecipients);
+        }
+    }, [initialRecipients]);
+
     const openEmployeeSearchModal = () => setEmployeeSearchModalOpen(true);
     const closeEmployeeSearchModal = () => setEmployeeSearchModalOpen(false);
 
     const onSelectedEmployees = (selectedEmployees) => {
-        // 중복 제거 로직 개선 및 데이터 형식 확인
+
         const newRecipients = selectedEmployees.filter(
             (newEmployee) => !recipients.some((r) => r.employeeId === newEmployee.employeeId)
         ).map((employee) => ({ ...employee }));
@@ -32,6 +39,11 @@ const NewNoteModal = ({closeNewNoteModal}) => {
         setRecipients([...recipients, ...newRecipients]);
 
         closeEmployeeSearchModal();
+    };
+
+    // 수신자 제거 함수
+    const handleRemoveRecipient = (employeeId) => {
+        setRecipients(recipients.filter((r) => r.employeeId !== employeeId));
     };
 
     // 파일 업로드 핸들러

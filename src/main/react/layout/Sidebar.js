@@ -18,6 +18,7 @@ function Sidebar({ currentMenu }) {
     }, []);
 
 
+
     useEffect(() => {
         const fetchEmployee = async () => {
             try {
@@ -27,7 +28,7 @@ function Sidebar({ currentMenu }) {
 
                 if (response.status === 200) {
                     const data = response.data;
-                    console.log('직원 데이터:', data);
+                    // console.log('직원 데이터:', data);console.log('직원 데이터:', data);
                     setEmployee(data);
                 } else {
                     console.error('사용자 정보를 가져오는데 실패했습니다.');

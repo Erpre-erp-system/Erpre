@@ -38,16 +38,28 @@ public class MessengerController {
 
     /////////////////////////////////////////////////////////////////////// 🟢 공통
 
+    // 메신저 조직도 조회 API
+    @GetMapping("/organization")
+    public ResponseEntity<List<EmployeeDTO>> getMessengerEmployeeList(
+            @RequestParam(required = false) String searchKeyword
+    ) {
+        try {
+            List<EmployeeDTO> employees = employeeService.getMessengerEmployeeList(searchKeyword);
+            return ResponseEntity.ok(employees);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
-    // 메신저 직원 검색 API (쪽지, 채팅) -> 조직도에서 안 쓸거면 데이터, 내용 정리하기 / 조직도에서는 페이지네이션 안 씀
+    // 메신저 직원 검색 API (쪽지, 채팅)
     @GetMapping("/employeeList")
-    public ResponseEntity<Page<EmployeeDTO>> getEmployeesWithDept(
+    public ResponseEntity<Page<EmployeeDTO>> getEmployeeList(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String searchKeyword
     ) {
         try {
-            Page<EmployeeDTO> result = employeeService.getEmployeesWithDept(page - 1, size, searchKeyword);
+            Page<EmployeeDTO> result = employeeService.getEmployeeList(page - 1, size, searchKeyword);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -76,12 +88,10 @@ public class MessengerController {
         return ResponseEntity.noContent().build();
     }
 
-    // 유저 정보 업데이트 API (핸드폰번호)
+    // 유저 정보 업데이트 API (상태 메시지, 핸드폰 번호, 상태 등)
     @PutMapping("/info/update")
-    public ResponseEntity<Void> updateInfo(
-            @RequestParam(value = "employeeTel", required = false) String employeeTel
-    ) {
-        messengerService.updateInfo(employeeTel);
+    public ResponseEntity<Void> updateInfo(@RequestBody Map<String, String> updates) {
+        messengerService.updateInfo(updates);
         return ResponseEntity.noContent().build();
     }
 

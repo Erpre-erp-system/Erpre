@@ -111,13 +111,22 @@ public class MessengerService {
         employeeRepository.save(employee);
     }
 
-    // 유저 정보 업데이트 (핸드폰번호)
-    public void updateInfo(String employeeTel) {
+    // 유저 정보 업데이트 (상태 메시지, 핸드폰 번호, 상태 등)
+    public void updateInfo(Map<String, String> updates) {
         String employeeId = getEmployeeIdFromAuthentication();
         Employee employee = employeeRepository.findByEmployeeId(employeeId)
                .orElseThrow(() -> new RuntimeException("해당 직원을 찾을 수 없습니다"));
 
-        employee.setEmployeeTel(employeeTel);
+        if (updates.containsKey("employeeTel")) {
+            employee.setEmployeeTel(updates.get("employeeTel"));
+        }
+        if (updates.containsKey("employeeStatus")) {
+            employee.setEmployeeStatus(updates.get("employeeStatus"));
+        }
+        if (updates.containsKey("employeeStatusMessage")) {
+            employee.setEmployeeStatusMessage(updates.get("employeeStatusMessage"));
+        }
+
         employeeRepository.save(employee);
     }
 

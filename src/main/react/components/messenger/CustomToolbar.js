@@ -23,13 +23,6 @@ export const CustomToolbar = () => (
       <button className="ql-strike"/>
     </span>
         <span className="ql-formats">
-      <select className="ql-color"/>
-      <select className="ql-background"/>
-    </span>
-        <span className="ql-formats">
-      <button className="ql-file"><FiPaperclip /></button>
-    </span>
-        <span className="ql-formats">
       <button className="ql-clean"/>
     </span>
     </div>
