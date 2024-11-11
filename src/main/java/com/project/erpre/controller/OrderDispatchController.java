@@ -67,12 +67,6 @@ public class OrderDispatchController {
         return ResponseEntity.ok("창고 배정이 완료되었습니다.");
     }
 
-    // 출고 지시
-//    @PostMapping("/release")
-//    public ResponseEntity<?> releaseDispatches(@RequestBody Map<String, Object> requestData) {
-//        orderDispatchService.releaseDispatches(requestData);
-//        return ResponseEntity.ok("출고 지시가 완료되었습니다.");
-//    }
 
     //출고 지시 후 상태 변경
     @PostMapping("/updateStatus")

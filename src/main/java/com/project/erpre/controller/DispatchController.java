@@ -1,6 +1,7 @@
 package com.project.erpre.controller;
 
 import com.project.erpre.model.dto.AndroidDispatchDTO;
+import com.project.erpre.model.dto.DispatchDTO;
 import com.project.erpre.service.DispatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,5 +33,13 @@ public class DispatchController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Dispatch not found");
         }
+    }
+
+    @CrossOrigin(origins = "")
+    @GetMapping("/get/dispatch/completed")
+    public List<DispatchDTO> getCompletedDispatches(
+            @RequestParam Integer warehouseNo,
+            @RequestParam int daysAgo) {
+        return dispatchService.getCompletedDispatchesForLastDays(warehouseNo, daysAgo);
     }
 }

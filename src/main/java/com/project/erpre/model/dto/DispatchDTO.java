@@ -21,7 +21,7 @@ public class DispatchDTO {
     private Timestamp dispatchStartDate; // 출고 시작일
     private Timestamp dispatchEndDate; // 출고 완료일
     private String dispatchDeleteYn; // 출고 삭제 여부
-    private Integer warehouseNo; // 출고 창고 이름
+    private Integer warehouseNo; // 출고 창고 번호
     private String qrCodeId; // 출고 QR 코드
     private Integer orderDNo; // 출고 상품 상세
     private Integer customerNo; // 출고 납품 고객사
