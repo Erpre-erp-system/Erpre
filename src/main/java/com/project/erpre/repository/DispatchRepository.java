@@ -23,7 +23,8 @@ public interface DispatchRepository extends JpaRepository<Dispatch, Integer> {
 
     //3일 전 데이터 가져오기
     @Query("SELECT d FROM Dispatch d WHERE d.dispatchStatus = 'complete' " +
-            "AND d.dispatchEndDate BETWEEN :startDate AND :endDate AND d.warehouse.warehouseNo = :warehouseNo")
+            "AND d.dispatchEndDate >= :startDate AND d.dispatchEndDate <= :endDate " +
+            "AND d.warehouse.warehouseNo = :warehouseNo")
     List<Dispatch> findCompletedDispatchesWithinDays(
             @Param("warehouseNo") Integer warehouseNo,
             @Param("startDate") Timestamp startDate,

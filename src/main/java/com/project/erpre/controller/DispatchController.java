@@ -24,22 +24,36 @@ public class DispatchController {
         return dispatchService.getInProgressDispatches(warehouseNo);
     }
 
+//    @CrossOrigin(origins = "")
+//    @PostMapping("/update/dispatch/complete/{dispatchNo}")
+//    public ResponseEntity<?> updateDispatchStatus(@PathVariable Integer dispatchNo) {
+//        boolean updated = dispatchService.updateDispatchStatus(dispatchNo);
+//        if (updated) {
+//            return ResponseEntity.ok().build();
+//        } else {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Dispatch not found");
+//        }
+//    }
+
     @CrossOrigin(origins = "")
     @PostMapping("/update/dispatch/complete/{dispatchNo}")
     public ResponseEntity<?> updateDispatchStatus(@PathVariable Integer dispatchNo) {
-        boolean updated = dispatchService.updateDispatchStatus(dispatchNo);
-        if (updated) {
-            return ResponseEntity.ok().build();
+        AndroidDispatchDTO updatedDispatch = dispatchService.updateDispatchStatus(dispatchNo);
+        if (updatedDispatch != null) {
+            return ResponseEntity.ok(updatedDispatch);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Dispatch not found");
         }
     }
 
+
+
     @CrossOrigin(origins = "")
-    @GetMapping("/get/dispatch/completed")
-    public List<DispatchDTO> getCompletedDispatches(
-            @RequestParam Integer warehouseNo,
-            @RequestParam int daysAgo) {
+    @GetMapping("/get/dispatch/completed/{warehouseNo}/{daysAgo}")
+    public List<AndroidDispatchDTO> getCompletedDispatches(
+            @PathVariable Integer warehouseNo,
+            @PathVariable int daysAgo) {
         return dispatchService.getCompletedDispatchesForLastDays(warehouseNo, daysAgo);
     }
+
 }

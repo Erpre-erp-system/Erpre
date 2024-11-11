@@ -176,9 +176,8 @@ public class OrderDispatchService {
         for (Integer no : nos) {
             Dispatch dispatch = orderDispatchRepository.findById(no).orElse(null);
             if (dispatch != null) {
-                dispatch.setDispatchDeleteYn("Y");
-//                employee.setEmployeeDeleteDate(new Timestamp(System.currentTimeMillis()));
-                orderDispatchRepository.save(dispatch);  // update로 N -> Y로 바꿈
+                dispatch.setDispatchDeleteYn("Y"); // deleteYn 필드를 'N'에서 'Y'로 변경
+                orderDispatchRepository.save(dispatch);  // 업데이트 수행
             }
         }
     }

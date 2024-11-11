@@ -2,7 +2,6 @@ package com.project.erpre.controller;
 
 
 import com.project.erpre.model.dto.DispatchDTO;
-import com.project.erpre.model.entity.Employee;
 import com.project.erpre.service.OrderDispatchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +55,7 @@ public class OrderDispatchController {
     // 목록화면에서 체크된 직원 logical 삭제
     @PostMapping("/delete")
     public ResponseEntity<?> deleteDispatches(@RequestBody List<Integer> no) {
-        orderDispatchService.deleteDispatches(no);
+        orderDispatchService.deleteDispatches(no); // 서비스에서 deleteYn 변경
         return ResponseEntity.ok("Dispatches deleted successfully");
     }
 

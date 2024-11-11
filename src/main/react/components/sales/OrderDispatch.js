@@ -37,7 +37,6 @@ const mapDispatchStatus = (orderHStatus, dispatchStatus) => {
     // dispatchStatus에 따른 한글 매핑 반환
     return statusMap[dispatchStatus] || dispatchStatus;
   };
-  
 
 //출고지시 모달창
 function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchData, onStatusChange }) {
@@ -90,19 +89,6 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
       }
     }, [show, assignedWarehouse]);
 
-    // 입력 값 변경 시 폼 상태 업데이트
-    // const handleInputChange = (e) => {
-    // const { name, value } = e.target;
-    // setForm({ ...form, [name]: value });
-    // };
-
-    // 폼 제출 처리
-    // const handleSubmit = (e) => {
-    //     e.preventDefault();
-    //     onSave(form); // 상위 컴포넌트로 저장된 데이터 전달
-    //     onClose(); // 모달 닫기
-    // };
-
     //출고 확인 함수
     const handleDispatchConfirm = () => {
         axios.post('/api/orderDispatch/updateStatus', {
@@ -129,23 +115,8 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
         setShowConfirmModal(true);
     };
 
-    //////////////////////////////////////////////////////////////////////////////다운로드
     // 다운로드 옵션 표시 여부 상태 (pdf,excel)
     const [showDownloadOptions, setShowDownloadOptions] = useState(false);
-    // const dropdownRef = useRef(null);
-
-    // 모달 바깥 클릭 시 드롭다운 닫기
-    // useEffect(() => {
-    //     const handleClickOutside = (event) => {
-    //         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-    //             setShowDownloadOptions(false);
-    //         }
-    //     };
-    //     document.addEventListener('mousedown', handleClickOutside);
-    //     return () => {
-    //         document.removeEventListener('mousedown', handleClickOutside);
-    //     };
-    // }, []);
 
     // 다운로드 버튼 클릭 핸들러 (pdf,excel)
     const handleDownloadClick = () => {
@@ -196,7 +167,6 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
         setShowDownloadOptions(false); // 옵션 선택 후 닫기
     };
 
-    ////////////////////////////////////////////////////////////////////////////////QR코드
     // QR코드 모달 표시 상태
     const [showQrModal, setShowQrModal] = useState(false);
 
@@ -371,7 +341,6 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
 
     const [isEditMode, setIsEditMode] = useState(false); // 편집 모드 여부
     const [editableWarehouse, setEditableWarehouse] = useState({}); // 편집 가능한 창고 데이터
-    //const [showEditConfirmModal, setShowEditConfirmModal] = useState(false); // 수정 확인 모달 표시 여부
     const [showSaveConfirmModal, setShowSaveConfirmModal] = useState(false); // 저장 확인 모달 표시 여부
     const [warehouseManagers, setWarehouseManagers] = useState([]); // 창고명->창고담당자
     const [warehouses, setWarehouses] = useState([]); // 창고목록
@@ -403,22 +372,6 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
           }
       };
 
-
-//    // 편집 모드 토글 함수
-//    const toggleEditMode = () => {
-//        if (dispatchStatus !== 'pending') {
-//            window.showToast("출고 대기 상태에서만 수정 가능합니다.", 'error');
-//            return;
-//          }
-//          setShowEditConfirmModal(true);
-//        };
-//
-//    // 수정 확인 모달에서 확인을 누르면 편집 모드 활성화
-//    const handleConfirmEdit = () => {
-//        setIsEditMode(true); // 편집 모드 활성화
-//        setShowEditConfirmModal(false); // 수정 확인 모달 닫기
-//    };
-
   // 창고명 변경 핸들러
     const handleWarehouseNameChange = async (e) => {
     const selectedWarehouseName = e.target.value;
@@ -442,16 +395,6 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
         const { name, value } = e.target;
         setEditableWarehouse((prev) => ({ ...prev, [name]: value }));
       };
-
-//    // 저장 처리 함수 : 저장 확인 모달 표시
-//    const handleSave = () => {
-//        if (dispatchStatus !== 'pending') {
-//          window.showToast("출고 대기 상태에서만 저장 가능합니다.", 'error');
-//          return;
-//        }
-//        setShowSaveConfirmModal(true);
-//      };
-//
 
     // 저장 확인 모달에서 확인을 누르면 실제 저장 동작 수행
     const handleConfirmSave = () => {
@@ -594,7 +537,7 @@ function ConfirmationModal({ message, onConfirm, onCancel }) {
 };
 
 //주문 출고
-function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
+function OrderDispatch() { //주문번호1-출고1
 
     // 출고 데이터
     const [dispatches, setDispatches] = useState([]);
@@ -848,7 +791,6 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
       };
   
 
-    
     // Pagination
     const PageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -859,7 +801,7 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
      // 체크된 것만 삭제
      const deleteDispatches = () => {
        const selectedDispatchNos = filteredDispatches
-         .filter((_, index) => selectedDispatches[index])
+         .filter((_, index) => selectedDispatches[index]) // 체크된 항목의 dispatchNo만 가져옴
          .map(dispatch => dispatch.dispatchNo);
 
        if (selectedDispatchNos.length === 0) {
@@ -867,15 +809,15 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
          return;
        }
 
-       window.confirmDispatch('선택한 출고 사항을 삭제하시겠습니까?').then(result => {
+       window.confirmCustom('선택한 출고 사항을 삭제하시겠습니까?').then(result => {
          if (result) {
            axios.post('/api/orderDispatch/delete', selectedDispatchNos)
              .then(response => {
                window.showToast("삭제가 완료 되었습니다.");
 
-               // 데이터 갱신
+               // 데이터 갱신: deleteYn이 Y로 바뀐 항목을 화면에서 제외하기 위해 갱신
                mutate();
-               setPage(1);
+               setPage(1); // 첫 페이지로 이동하여 갱신된 목록 표시
              })
              .catch(error => {
                console.error('삭제 중 발생된 에러 : ', error);
@@ -883,7 +825,6 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
          }
        });
      };
-
 
 
     return (
@@ -957,7 +898,6 @@ function OrderDispatch() { //주문번호1-상품번호1-상품 한 행1-출고1
                     </div>
                 </div>
 
-                
                     {/* 테이블 영역 */}
                     <div className="table_wrap">
                         <table>
