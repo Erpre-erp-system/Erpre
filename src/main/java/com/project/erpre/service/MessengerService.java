@@ -492,6 +492,7 @@ public class MessengerService {
         Employee sender = employeeRepository.findById(senderId)
                 .orElseThrow(() -> new RuntimeException("해당 발신자를 찾을 수 없습니다: " + senderId));
         String senderName = sender.getEmployeeName();
+        String employeeImageUrl = sender.getEmployeeImageUrl();
 
         Chat chat = chatRepository.findById(chatNo)
                 .orElseThrow(() -> new RuntimeException("해당 채팅방을 찾을 수 없습니다: " + chatNo));
@@ -504,6 +505,7 @@ public class MessengerService {
 
         ChatMessageDTO savedMessageDTO = new ChatMessageDTO(savedMessage);
         savedMessageDTO.setChatSenderName(senderName);
+        savedMessageDTO.setEmployeeImageUrl(employeeImageUrl);
 
         // 채팅방의 모든 참여자에 대해 ChatMessageRead 엔티티 생성
         List<ChatParticipant> participants = chatParticipantRepository.findByChat(chat);

@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Draggable from "react-draggable";
-import { FaPaperclip } from "react-icons/fa";
+import {FaPaperclip, FaUserCircle} from "react-icons/fa";
 import SockJS from 'sockjs-client';
 import { Client as StompClient } from '@stomp/stompjs';
+import {IoClose} from "react-icons/io5";
 
 const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDate, fetchChatList }) => {
     // 로딩 관리 state
@@ -170,26 +171,40 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
                 <div className="chat-room">
                     <div className="chat-room-header">
                         <h2>{messages?.[0]?.chatTitle || ''}</h2>
-                        <button onClick={closeChatModal} className="close-button">닫기</button>
+                        <IoClose className="close-button" title="닫기" onClick={closeChatModal}/>
                     </div>
-                    <div
-                        className="chat-room-body"
-                        ref={chatBodyRef}
-                    >
+                    <div className="chat-room-body" ref={chatBodyRef}>
                         {messages.map((message, index) => (
                             <div
                                 key={index}
                                 className={`chat-message ${message.chatSenderId === user ? "own" : ""}`}
                             >
-                                <div className="message-sender">{message.chatSenderName}</div>
+                                {message.chatSenderId !== user && (
+                                    <div className="message-recipient">
+                                        {message.employeeImageUrl ? (
+                                            <img
+                                                src={message.employeeImageUrl}
+                                                alt="수신자 프로필"
+                                                className="profile-image"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = FaUserCircle;
+                                                }}
+                                            />
+                                        ) : (
+                                            <FaUserCircle className="chat-icon"/>
+                                        )}
+                                    </div>
+                                )}
                                 <div className="message-content">{message.chatMessageContent}</div>
+                                <div className="message-sender">{message.employeeName}</div>
                                 <div className="message-timestamp">{formatDate(message.chatSendDate)}</div>
                             </div>
                         ))}
                     </div>
                     <div className="chat-room-footer">
                         <div className="file-icon">
-                            <FaPaperclip />
+                            <FaPaperclip/>
                         </div>
                         <input
                             type="text"

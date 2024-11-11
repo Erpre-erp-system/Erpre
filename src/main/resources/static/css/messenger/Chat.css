@@ -163,90 +163,79 @@
     align-items: center;
 }
 
-.chat-room-header h2 {
-    margin: 0;
-}
+.chat-room-header h2 { margin: 0; }
+.chat-room-modal .close-button { background: none; border: none; font-size: 21px; cursor: pointer; color: #888;}
 
-.close-button {
-    background: none;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.chat-room-body {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.chat-message {
-    display: flex;
-    flex-direction: column;
-    padding: 8px;
-    border-radius: 8px;
-    background-color: #f0f0f0;
-    max-width: 80%;
-    align-self: flex-start;
-}
-
+/* 채팅방 메시지 */
+.chat-room-body { flex: 1; padding: 15px; overflow-y: auto; display:flex; flex-direction: column; gap: 10px; position: relative; }
+/* 수신 메시지 */
+.chat-message { display:flex; flex-direction: column; border-radius: 8px; background-color: #c9e3f9;  color: #333333;
+    border: none; align-self: flex-start; max-width: 70%; margin: 5px 0; z-index: 2000; min-width: 106px;
+    position: relative; }
+/* 발신 메시지 */
 .chat-message.own {
-    background-color: #d1e7dd;
-    align-self: flex-end;
-}
-
-.message-sender {
-    font-size: 12px;
-    font-weight: bold;
-    color: #555;
-    margin-bottom: 5px;
-}
-
-.message-content {
-    font-size: 14px;
-}
-
-.message-timestamp {
-    font-size: 10px;
-    color: #999;
-    text-align: right;
-}
-
-.chat-room-footer {
-    padding: 10px;
-    background-color: #f8f8f8;
+    padding: 8px 13px 8px 10px;
     display: flex;
-    align-items: center;
-    gap: 5px;
-    border-top: 1px solid #ddd;
+    color:white; flex-direction: column; border-radius: 8px;
+    align-self: flex-end; background-color: #f0f0f0; max-width: 70%;
+    margin: 5px 0; position: relative; border: none;}
+.chat-message .message-content { padding: 0 14px; font-size: 15px; color: #333333;
+    margin: 0; word-wrap: break-word; overflow-wrap: break-word;
+    border: none; background-color: #c9e3f9; z-index: 2000;}
+.chat-message.own .message-content { padding: 3px; font-size: 15px; background-color: #f0f0f0; color: #333; margin: 0;
+    word-wrap: break-word; overflow-wrap: break-word;  border: none;}
+
+/* 수신메시지 화살표 */
+.chat-message::after {
+    z-index: 2000;
+    content: "";
+    position: absolute !important;
+    top: 50%;
+    left: -10px;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    background: #c9e3f9;
+    clip-path: polygon(0 50%, 100% 0, 100% 100%);
+    border-radius: 5px;
+}
+/* 발신메시지 화살표 */
+.chat-message.own::after {
+    content: "";
+    position: absolute !important;
+    top: 50%;
+    right: -15px;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    background: #f0f0f0;
+    clip-path: polygon(100% 50%, 0 0, 0 100%);
+    border-radius: 5px;
+    left: auto;
 }
 
-.file-icon {
-    font-size: 18px;
-    color: #5b5b5f;
-    margin-right: 5px;
-}
+.chat-message .profile-image { width: 30px; height: 30px; border-radius: 50%; margin-right: 8px; }
 
-.chat-room-footer input[type="text"] {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ddd;
-    outline: none;
-}
+.message-recipient { font-size: 12px; font-weight: bold; color: #555; margin-bottom: 5px; }
+
+.message-timestamp { font-size: 11px; color: #999; text-align: right;  margin-top: 5px;}
+
+.chat-room-footer { padding: 10px; background-color: #f8f8f8; display: flex; align-items: center; gap: 5px; border-top: 1px solid #ddd; }
+
+
+.file-icon { font-size: 18px; color: #5b5b5f; margin-right: 5px; }
+.chat-room-footer input[type="text"] { flex: 1; padding: 8px; border: 1px solid #ddd; outline: none; }
 
 .chat-room-footer button {
-    background-color: #0057A2;
-    color: #fff;
+    background-color: #c9e3f9;
+    color: black;
     border: none;
     padding: 8px 12px;
     border-radius: 4px;
     cursor: pointer;
 }
 
-/* 🟡 직원 검색 모달 */
+/* 직원 검색 모달 */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -259,10 +248,7 @@
     justify-content: center;
 }
 
-.modal_overlay {
-    z-index: 3000 !important;
-}
-
+.modal_overlay { z-index: 3000 !important; }
 .modal_container {
     position: fixed;
     top: 50%;
@@ -311,20 +297,9 @@
     transition: background-color 0.3s, border-radius 0.3s;
 }
 
-.btn-create:hover {
-    background-color: #f0f0f0;
-    border-radius: 20px;
-}
-
-.btn-create:hover svg {
-    display: none;
-}
-
-.new-chat-modal .pagination-container .pagination .box.active {
-    background-color: #f0f0f0 !important;
-    border-color: #f0f0f0 !important;
-    color: #333 !important;
-}
+.btn-create:hover { background-color: #f0f0f0;border-radius: 20px; }
+.btn-create:hover svg { display: none; }
+.new-chat-modal .pagination-container .pagination .box.active { background-color: #f0f0f0 !important; border-color: #f0f0f0 !important; color: #333 !important; }
 
 /* 직원 검색 */
 .modal_container.search_employee .table_wrap table th:nth-child(1),
@@ -336,15 +311,8 @@
 .modal_container.search_employee .table_wrap table th:nth-child(4),
 .modal_container.search_employee .table_wrap table td:nth-child(4) { width: 28%; /* 직급 */ }
 
-.search_employee .search_box.has_text .btn-del {
-    color: black;
-}
-
-.search_employee .messenger-panel .search_box.has_text button i {
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-}
+.search_employee .search_box.has_text .btn-del { color: black; }
+.search_employee .messenger-panel .search_box.has_text button i { top: 50%; right: 10px; transform: translateY(-50%); }
 
 
 /* 선택된 직원 목록 */
@@ -380,11 +348,7 @@
 }
 
 /* 체크박스 */
-.checkbox-container {
-    display: inline-block;
-    position: relative;
-}
-
+.checkbox-container { display: inline-block; position: relative; }
 .checkbox-container input[type="checkbox"] {
     appearance: none;
     -webkit-appearance: none;
@@ -426,30 +390,10 @@
     font-size: 16px;
 }
 
-.context-menu ul {
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-    display: flex;
-    flex-direction: column;
-}
-
-.context-menu ul li {
-    padding: 8px 12px !important;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-}
-
+.context-menu ul { margin: 0; padding: 0; list-style-type: none; display: flex; flex-direction: column; }
+.context-menu ul li { padding: 8px 12px !important; display: flex; align-items: center; cursor: pointer; }
 .context-menu ul li:hover { background-color: #F4F4F4; }
 
-/* #B1CAE3 #C9DAEC #F1F1F1*/
-
 /* sweetalert2 커스텀 */
-div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
-    background-color: #C9DAEC;
-}
-
-div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm):focus-visible {
-    box-shadow: 0 0 0 3px #F1F1F1;
-}
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) { background-color: #C9DAEC; }
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm):focus-visible { box-shadow: 0 0 0 3px #F1F1F1; }

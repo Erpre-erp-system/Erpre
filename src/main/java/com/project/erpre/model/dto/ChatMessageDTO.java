@@ -26,6 +26,7 @@ public class ChatMessageDTO {
     private String chatMessageReadYn;
     private Long readCount;
     private Long participantCount;
+    private String employeeImageUrl;
 
     // 개별 채팅방 조회 생성자
     public ChatMessageDTO(Long chatMessageNo, String chatSenderId, String chatSenderName,
