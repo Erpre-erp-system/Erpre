@@ -254,6 +254,7 @@ export const useMessengerHooks = () => {
 
         // 🔴 채팅
         chatList,
+        setChatList,
         fetchChatList,
         selectedChat,
         isChatModalOpen,

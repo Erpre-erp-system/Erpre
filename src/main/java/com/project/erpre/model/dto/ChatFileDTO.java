@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder
 @Getter
@@ -19,4 +20,13 @@ public class ChatFileDTO {
     private String chatFileUrl;
     private BigInteger chatFileSize;
     private String chatFileType;
+
+    @Builder
+    public ChatFileDTO(String chatFileName, String chatFileUrl, BigInteger chatFileSize, String chatFileType) {
+        this.chatFileName = chatFileName;
+        this.chatFileUrl = chatFileUrl;
+        this.chatFileSize = chatFileSize;
+        this.chatFileType = chatFileType;
+    }
+
 }

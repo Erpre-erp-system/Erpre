@@ -13,7 +13,7 @@ h3 { color: black; }
 .messenger-panel.open { right: 0; }
 
 /* 패널이 열릴 때 오른쪽으로 이동 */
-.messenger-header { height: 54px; display: flex; align-items: center; padding: 3px 30px 0px 26px; background-color: #ffffff; color: #000; position: relative; font-size: 25px; margin-top: 15px; }
+.messenger-header { height: 54px; display: flex; align-items: center; padding: 3px 30px 0px 26px; background-color: #ffffff; color: #000; position: relative; font-size: 21px; margin-top: 15px; }
 .messenger-header.info-header { height: 28px; display: flex; align-items: center; padding: 3px 30px 8px 30px; background-color: #ffffff; color: #000; position: relative; font-size: 25px; margin-top: 15px; }
 .messenger-header .messenger-close { position: absolute; right: 20px; top: 10px; cursor: pointer; color: rgb(188, 187, 187); font-size: 25px; }
 
@@ -28,7 +28,7 @@ h3 { color: black; }
 
 /* 유저 프로필*/
 .messenger-user { padding: 10px 0px 10px 10px; margin-left: 15px; display: flex; align-items: center; }
-.messenger-user img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; float: left; margin-top: 5px; }
+.messenger-user img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; float: left; margin-top: 5px; object-fit: cover; }
 .messenger-user .info { display: flex; flex-direction: column; margin-left: 5px; padding: 0px 0px 0px 10px;}
 .messenger-user .info-wrapper { display: flex; align-items: center; }
 .messenger-user .user-name { font-size: 18px; font-weight: bold; line-height: 1; margin: 0; width: 100%; }

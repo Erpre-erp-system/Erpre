@@ -2,6 +2,7 @@ package com.project.erpre.repository;
 
 import com.project.erpre.model.dto.ChatDTO;
 import com.project.erpre.model.dto.ChatMessageDTO;
+import com.project.erpre.model.dto.ChatParticipantDTO;
 import com.project.erpre.model.entity.*;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -34,7 +35,7 @@ public class ChatRepositoryImpl implements ChatRepositoryCustom {
 
         QChatParticipant subChatParticipant = new QChatParticipant("subChatParticipant");
 
-        return queryFactory
+        List<ChatDTO> chatList = queryFactory
                 .select(Projections.constructor(ChatDTO.class,
                         chat.chatNo,
                         chatParticipant.chatTitle,
@@ -69,6 +70,24 @@ public class ChatRepositoryImpl implements ChatRepositoryCustom {
                 )
                 .orderBy(chatMessage.chatSendDate.desc())
                 .fetch();
+
+        // 각 채팅방의 참여자 리스트 추가
+        for (ChatDTO chatDTO : chatList) {
+            List<ChatParticipantDTO> participants = queryFactory
+                    .select(Projections.constructor(ChatParticipantDTO.class,
+                            chatParticipant.chatParticipantId.participantId,
+                            chatParticipant.employee.employeeName,
+                            chatParticipant.employee.employeeImageUrl
+                    ))
+                    .from(chatParticipant)
+                    .where(chatParticipant.chat.chatNo.eq(chatDTO.getChatNo()))
+                    .fetch();
+
+            // 각 채팅방 DTO에 참여자 리스트를 설정
+            chatDTO.setParticipants(participants);
+        }
+
+        return chatList;
     }
 
     // 1 -1. 검색 조건 관리
@@ -101,6 +120,7 @@ public class ChatRepositoryImpl implements ChatRepositoryCustom {
                         chatMessage.chatMessageNo,
                         chatMessage.employee.employeeId, // 발신자의 ID (보낸 메세지 띄울 때 프론트단에서 비교할 것)
                         chatMessage.employee.employeeName, // 발신자의 이름
+                        chatMessage.employee.employeeImageUrl, // 프로필 사진 Url
                         chatMessage.chatMessageContent,
                         chatMessage.chatSendDate,
 
@@ -157,7 +177,7 @@ public class ChatRepositoryImpl implements ChatRepositoryCustom {
         return chatParticipant.employee.employeeName.containsIgnoreCase(searchKeyword)
                 .or(chatMessage.chatMessageContent.containsIgnoreCase(searchKeyword));
     }
-    
+
     // 3. 특정 메세지 읽음 관리
 
 }

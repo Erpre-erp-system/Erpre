@@ -1,17 +1,22 @@
 package com.project.erpre.controller;
 
+import com.project.erpre.model.dto.ChatFileDTO;
 import com.project.erpre.service.FileService;
 import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/files")
@@ -37,17 +42,16 @@ public class FileController {
         }
     }
 
-    // 파일 불러오기 (브라우저에서 직접 표시하기 위해 Content-Disposition 제거)
+    // 파일 불러오기
     @GetMapping("/{fileType}/{filename}")
     public ResponseEntity<Resource> serveFile(@PathVariable String fileType, @PathVariable String filename) {
         try {
-            String folder = fileType.equals("profile") ? "profile-pictures" : "documents";
+            String folder = fileType.equals("profile") ? "profile-pictures" : fileType.equals("chat") ? "chat" : "documents";
             Path filePath = Paths.get(baseUploadDir, folder).resolve(filename).normalize();
             Resource resource = new UrlResource(filePath.toUri());
 
             if (resource.exists() && resource.isReadable()) {
-                return ResponseEntity.ok()
-                        .body(resource);  // Content-Disposition 제거
+                return ResponseEntity.ok().body(resource);  // Content-Disposition 제거
             } else {
                 return ResponseEntity.notFound().build();
             }
@@ -56,7 +60,8 @@ public class FileController {
         }
     }
 
-    // 파일 다운로드 (기존의 Content-Disposition 헤더 유지)
+
+    // 파일 다운로드
     @GetMapping("/download/{fileType}/{fileName}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileType, @PathVariable String fileName) {
         Resource resource = fileService.loadFileAsResource(fileName, fileType);

@@ -53,7 +53,7 @@ public class TalkController {
     public void sendTalk(@DestinationVariable Long chatNo, ChatMessageDTO chatMessage) {
 
         // 메시지 DB에 저장
-        ChatMessageDTO savedMessage = messengerService.saveChatMessage(chatNo, chatMessage,  chatMessage.getChatSenderId());
+        ChatMessageDTO savedMessage = messengerService.saveChatMessage(chatNo, chatMessage, chatMessage.getChatSenderId());
 
         // 메시지 저장 및 전송 확인
         System.out.println("메시지 저장 후 전송: 채팅방 번호 " + chatNo + ", 메시지 내용: " + savedMessage);
@@ -64,5 +64,6 @@ public class TalkController {
         System.out.println("메시지 저장 후 전송: 채팅방 번호 " + chatNo + ", 메시지 내용: " + savedMessage);
         System.out.println("메시지 전송 완료 - 구독 경로: /topic/chat/" + chatNo + ", 메시지 내용: " + savedMessage);
     }
+
 
 }

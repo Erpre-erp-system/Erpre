@@ -1,9 +1,6 @@
 package com.project.erpre.service;
 
-import com.project.erpre.model.dto.ChatDTO;
-import com.project.erpre.model.dto.ChatMessageDTO;
-import com.project.erpre.model.dto.EmployeeDTO;
-import com.project.erpre.model.dto.MessageDTO;
+import com.project.erpre.model.dto.*;
 import com.project.erpre.model.entity.*;
 import com.project.erpre.repository.*;
 import org.hibernate.StaleStateException;
@@ -16,17 +13,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.io.IOException;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -42,6 +39,8 @@ public class MessengerService {
 
     private static final Logger logger = LoggerFactory.getLogger(MessengerService.class);
 
+    private final FileService fileService;
+
     private final ChatRepository chatRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final EmployeeRepository employeeRepository;
@@ -52,7 +51,8 @@ public class MessengerService {
     private final MessageRecipientRepository messageRecipientRepository;
 
     @Autowired
-    public MessengerService(ChatRepository chatRepository, ChatParticipantRepository chatParticipantRepository, EmployeeRepository employeeRepository, ChatMessageRepository chatMessageRepository, ChatMessageReadRepository chatMessageReadRepository, ChatFileRepository chatFileRepository, MessageRepository messageRepository, MessageRecipientRepository messageRecipentRepository) {
+    public MessengerService(FileService fileService, ChatRepository chatRepository, ChatParticipantRepository chatParticipantRepository, EmployeeRepository employeeRepository, ChatMessageRepository chatMessageRepository, ChatMessageReadRepository chatMessageReadRepository, ChatFileRepository chatFileRepository, MessageRepository messageRepository, MessageRecipientRepository messageRecipentRepository) {
+        this.fileService = fileService;
         this.chatRepository = chatRepository;
         this.chatParticipantRepository = chatParticipantRepository;
         this.employeeRepository = employeeRepository;
@@ -381,7 +381,6 @@ public class MessengerService {
         List<ChatMessageDTO> chatMessages = chatRepository.getSelectedChat(chatNo, searchKeyword, employeeId);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("employeeId", employeeId);
         response.put("chatMessages", chatMessages);
 
         return response;
@@ -489,39 +488,35 @@ public class MessengerService {
     // 채팅 메시지 저장
     public ChatMessageDTO saveChatMessage(Long chatNo, ChatMessageDTO chatMessage, String senderId) {
 
+
         Employee sender = employeeRepository.findById(senderId)
                 .orElseThrow(() -> new RuntimeException("해당 발신자를 찾을 수 없습니다: " + senderId));
-        String senderName = sender.getEmployeeName();
-        String employeeImageUrl = sender.getEmployeeImageUrl();
-
         Chat chat = chatRepository.findById(chatNo)
                 .orElseThrow(() -> new RuntimeException("해당 채팅방을 찾을 수 없습니다: " + chatNo));
 
+        // 새로운 메시지 생성 및 저장
         ChatMessage newMessage = new ChatMessage();
         newMessage.setChat(chat);
         newMessage.setEmployee(sender);
         newMessage.setChatMessageContent(chatMessage.getChatMessageContent());
         ChatMessage savedMessage = chatMessageRepository.save(newMessage);
 
+        // 메시지 DTO 반환 준비
         ChatMessageDTO savedMessageDTO = new ChatMessageDTO(savedMessage);
-        savedMessageDTO.setChatSenderName(senderName);
-        savedMessageDTO.setEmployeeImageUrl(employeeImageUrl);
+        savedMessageDTO.setChatSenderName(sender.getEmployeeName());
+        savedMessageDTO.setEmployeeImageUrl(sender.getEmployeeImageUrl());
+
+        // 파일이 있는 경우 메타데이터 저장
+        if (chatMessage.getChatFileUrl() != null) {
+            saveChatFileMetadata(savedMessage, chatMessage.getChatFileUrl(), chatMessage.getChatFileName());
+        }
 
         // 채팅방의 모든 참여자에 대해 ChatMessageRead 엔티티 생성
         List<ChatParticipant> participants = chatParticipantRepository.findByChat(chat);
         for (ChatParticipant participant : participants) {
-
             if (!participant.getEmployee().getEmployeeId().equals(senderId)) {
-                ChatMessageReadId readId = new ChatMessageReadId();
-                readId.setChatMessageNo(savedMessage.getChatMessageNo());
-                readId.setChatMessageRecipientId(participant.getEmployee().getEmployeeId());
-
-                ChatMessageRead messageRead = new ChatMessageRead();
-                messageRead.setChatMessageReadId(readId);
-                messageRead.setChatMessage(savedMessage);
-                messageRead.setEmployee(participant.getEmployee());
-                messageRead.setChatMessageReadYn("N");
-
+                ChatMessageReadId readId = new ChatMessageReadId(savedMessage.getChatMessageNo(), participant.getEmployee().getEmployeeId());
+                ChatMessageRead messageRead = new ChatMessageRead(readId, savedMessage, participant.getEmployee(), "N");
                 chatMessageReadRepository.save(messageRead);
             }
         }
@@ -529,5 +524,12 @@ public class MessengerService {
         return savedMessageDTO;
     }
 
-
+    // 파일 메타데이터 저장 메서드
+    private void saveChatFileMetadata(ChatMessage chatMessage, String chatFileUrl, String chatFileName) {
+        ChatFile chatFile = new ChatFile();
+        chatFile.setChatMessage(chatMessage);
+        chatFile.setChatFileUrl(chatFileUrl);
+        chatFile.setChatFileName(chatFileName);
+        chatFileRepository.save(chatFile);
+    }
 }

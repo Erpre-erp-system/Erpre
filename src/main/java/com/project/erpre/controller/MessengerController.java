@@ -1,8 +1,10 @@
 package com.project.erpre.controller;
 
 import com.project.erpre.model.dto.*;
+import com.project.erpre.model.entity.ChatFile;
 import com.project.erpre.model.entity.ChatParticipant;
 import com.project.erpre.service.EmployeeService;
+import com.project.erpre.service.FileService;
 import com.project.erpre.service.MessengerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +20,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/messengers")
@@ -29,11 +34,13 @@ public class MessengerController {
 
     private final MessengerService messengerService;
     private final EmployeeService employeeService;
+    private final FileService fileService;
 
     @Autowired
-    public MessengerController(MessengerService messengerService, EmployeeService employeeService) {
+    public MessengerController(MessengerService messengerService, EmployeeService employeeService, FileService fileService) {
         this.messengerService = messengerService;
         this.employeeService = employeeService;
+        this.fileService = fileService;
     }
 
     /////////////////////////////////////////////////////////////////////// 🟢 공통
@@ -247,6 +254,22 @@ public class MessengerController {
         }
     }
 
-
+//    // 채팅 메시지 파일 업로드 API
+//    @PostMapping("/chat/{chatMessageNo}/upload")
+//    public ResponseEntity<?> uploadChatFiles(
+//            @PathVariable Long chatMessageNo,
+//            @RequestParam("files") List<MultipartFile> files) {
+//
+//        try {
+//            List<String> fileUrls = messengerService.uploadChatFiles(chatMessageNo, files);
+//            return ResponseEntity.ok(fileUrls);
+//        } catch (IOException e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("파일 업로드 중 오류 발생: " + e.getMessage());
+//        } catch (NoSuchElementException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body("해당 메시지를 찾을 수 없습니다.");
+//        }
+//    }
 
 }

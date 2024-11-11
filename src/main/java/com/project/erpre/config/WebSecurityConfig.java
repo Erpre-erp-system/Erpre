@@ -60,7 +60,7 @@ public class WebSecurityConfig {
                 .and()
                 .authorizeRequests()
                     .antMatchers("/android/api/**").permitAll()
-                    .antMatchers("/talk/**", "/app/**", "/topic/**", "/ws/**", "/queue/**", "/uploads/**", "/profile-pictures/**").permitAll()
+                    .antMatchers("/talk/**", "/app/**", "/topic/**", "/ws/**", "/queue/**", "/uploads/**", "/profile-pictures/**", "/chat/**").permitAll()
                     .antMatchers("/",  "/static/**", "/bundle/**", "/img/**", "/css/**", "/fonts/**", "/index.html").permitAll()
                     .antMatchers("/api/login", "/login").permitAll() // 로그인 앤드포인트 허용 (현재 모든 페이지 접근 허용! 이거 나중에 바꿔야 함)
                     .antMatchers("/user/**", "/").hasAnyRole("Staff", "Admin", "Assistant Manager", "Executive", "Director", "Manager")

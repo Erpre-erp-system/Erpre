@@ -16,6 +16,8 @@ public class ChatParticipantDTO {
     private Long chatNo;
     private String participantId;
     private String chatTitle;
+    private String employeeImageUrl;
+    private String employeeName;
 
     // DTO -> Entity 변환 메서드 (새 채팅방 생성)
     public ChatParticipantDTO(ChatParticipant chatParticipant) {
@@ -31,5 +33,11 @@ public class ChatParticipantDTO {
     public static class ChatTitleUpdateDTO {
         private Long chatNo;
         private String chatTitle;
+    }
+
+    public ChatParticipantDTO(String participantId, String employeeName, String employeeImageUrl) {
+        this.participantId = participantId;
+        this.employeeName = employeeName;
+        this.employeeImageUrl = employeeImageUrl;
     }
 }
