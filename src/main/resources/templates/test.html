@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <!-- SockJS와 StompJS 라이브러리 추가 -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/dist/stomp.min.js"></script>
+</head>
+<body>
+<h1>WebSocket Test</h1>
+<script>
+    // WebSocket 연결 테스트 코드
+
+    const socket = new SockJS('http://localhost:8787/talk');
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+        console.log("WebSocket 연결 성공");
+        // 연결 후 메시지 전송 예시
+        stompClient.subscribe('/topic/chat/1', (message) => {
+            console.log("새로운 메시지 수신:", message.body);
+        });
+    }, (error) => {
+        console.error("WebSocket 연결 오류:", error);
+    });
+</script>
+</body>
+</html>

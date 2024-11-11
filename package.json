@@ -1,4 +1,5 @@
 {
+  "proxy": "hppt://localhost:8787",
   "comments": {
     "dependencies": {
       "process": "0905 cho - Node.js의 프로세스 정보 라이브러리",

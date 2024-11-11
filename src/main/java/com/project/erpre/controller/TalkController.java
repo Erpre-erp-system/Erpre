@@ -18,7 +18,6 @@ import java.security.Principal;
 @Controller
 public class TalkController {
 
-
     private final MessengerService messengerService;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -50,14 +49,11 @@ public class TalkController {
 
 
     // 🔴 채팅 메시지 전송 및 저장
-    @MessageMapping("/chat/{chatNo}")
-    public void sendTalk(@DestinationVariable Long chatNo, ChatMessageDTO chatMessage, Principal principal) {
-
-        String employeeId = principal.getName();
-        chatMessage.setChatSenderId(employeeId);
+    @MessageMapping("/chat/{chatNo}") //  클라이언트가 /app/chat/{chatNo}로 메시지를 전송하면 서버의 @MessageMapping("/chat/{chatNo}") 메서드가 실행
+    public void sendTalk(@DestinationVariable Long chatNo, ChatMessageDTO chatMessage) {
 
         // 메시지 DB에 저장
-        ChatMessageDTO savedMessage = messengerService.saveChatMessage(chatNo, chatMessage, employeeId);
+        ChatMessageDTO savedMessage = messengerService.saveChatMessage(chatNo, chatMessage,  chatMessage.getChatSenderId());
 
         // 메시지 저장 및 전송 확인
         System.out.println("메시지 저장 후 전송: 채팅방 번호 " + chatNo + ", 메시지 내용: " + savedMessage);
@@ -65,7 +61,7 @@ public class TalkController {
         // 특정 채팅방 구독자들에게만 메시지 전송
         messagingTemplate.convertAndSend("/topic/chat/" + chatNo, savedMessage);
 
-        // 로그 추가: 메시지 전송 완료 확인
+        System.out.println("메시지 저장 후 전송: 채팅방 번호 " + chatNo + ", 메시지 내용: " + savedMessage);
         System.out.println("메시지 전송 완료 - 구독 경로: /topic/chat/" + chatNo + ", 메시지 내용: " + savedMessage);
     }
 

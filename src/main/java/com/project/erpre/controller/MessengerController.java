@@ -179,27 +179,27 @@ public class MessengerController {
         return ResponseEntity.ok("쪽지가 전송되었습니다");
     }
     
-    // 실시간 알림 구독
-    @GetMapping(value = "/note/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter noteSubscribe() {
-        SseEmitter emitter = new SseEmitter();
-
-        try {
-            // SseEmitter에 초기 연결 이벤트를 전송
-            emitter.send(SseEmitter.event().name("INIT"));
-
-//             서비스 계층에서 쪽지 전송 로직을 통해 알림 발생 시 emitter를 사용하여 전송
-//             emitter.send(SseEmitter.event().name("NEW_NOTE").data(newNoteData));
-
-            // 예외 처리 및 타임아웃 설정
-            emitter.onCompletion(() -> logger.info("SSE 연결 완료"));
-            emitter.onTimeout(() -> logger.info("SSE 연결 타임아웃"));
-        } catch (Exception e) {
-            logger.error("SSE 구독 중 오류 발생", e);
-        }
-
-        return emitter;
-    }
+//    // 실시간 알림 구독
+//    @GetMapping(value = "/note/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//    public SseEmitter noteSubscribe() {
+//        SseEmitter emitter = new SseEmitter();
+//
+//        try {
+//            // SseEmitter에 초기 연결 이벤트를 전송
+//            emitter.send(SseEmitter.event().name("INIT"));
+//
+////             서비스 계층에서 쪽지 전송 로직을 통해 알림 발생 시 emitter를 사용하여 전송
+////             emitter.send(SseEmitter.event().name("NEW_NOTE").data(newNoteData));
+//
+//            // 예외 처리 및 타임아웃 설정
+//            emitter.onCompletion(() -> logger.info("SSE 연결 완료"));
+//            emitter.onTimeout(() -> logger.info("SSE 연결 타임아웃"));
+//        } catch (Exception e) {
+//            logger.error("SSE 구독 중 오류 발생", e);
+//        }
+//
+//        return emitter;
+//    }
 
 
     /////////////////////////////////////////////////////////////////////// 🔴 채팅

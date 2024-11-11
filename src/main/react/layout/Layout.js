@@ -24,23 +24,23 @@ function Layout({currentMenu, children}) {
 
     const [newNote, setNewNote] = useState(null);
 
-    useEffect(() => {
-        const eventSource = new EventSource('/api/messengers/note/subscribe');
-
-        eventSource.addEventListener("NEW_NOTE", (event) => {
-            const note = JSON.parse(event.data);
-            setNewNote(note);
-        });
-
-        eventSource.onerror = (error) => {
-            console.error('SSE 연결 오류:', error);
-            eventSource.close();
-        };
-
-        return () => {
-            eventSource.close();
-        };
-    }, []);
+    // useEffect(() => {
+    //     const eventSource = new EventSource('/api/messengers/note/subscribe');
+    //
+    //     eventSource.addEventListener("NEW_NOTE", (event) => {
+    //         const note = JSON.parse(event.data);
+    //         setNewNote(note);
+    //     });
+    //
+    //     eventSource.onerror = (error) => {
+    //         console.error('SSE 연결 오류:', error);
+    //         eventSource.close();
+    //     };
+    //
+    //     return () => {
+    //         eventSource.close();
+    //     };
+    // }, []);
 
     const handleCloseAlert = () => setNewNote(null);
 

@@ -16,7 +16,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // 클라이언트가 연결할 수 있는 웹소켓 엔드포인트(접속 지점)를 "/talk"로 설정
         // talk는 전체 사용자 구독, queue는 일대일 사용자 구독
         registry.addEndpoint("/talk", "/queue") 
-                .setAllowedOrigins("http://localhost:8787", "http://localhost:3000")
+//                .setAllowedOrigins("http://localhost:8787", "http://localhost:3000")
+                .setAllowedOriginPatterns("*")
                 .addInterceptors(new HttpSessionHandshakeInterceptor())
                 .withSockJS();
     }

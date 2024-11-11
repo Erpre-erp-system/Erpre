@@ -6,24 +6,22 @@ import SockJS from 'sockjs-client';
 import { Client as StompClient } from '@stomp/stompjs';
 
 const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDate, fetchChatList }) => {
-    // 로딩 관리
+    // 로딩 관리 state
     const [isLoading, setIsLoading] = useState(false);
 
-    // 현재 로그인한 유저 stat
+    // 현재 로그인한 유저 state
     const [user, setUser] = useState('')
 
     // 채팅 메시지 state
-    const [messages, setMessages] = useState([]);
-    const [message, setMessage] = useState("");
+    const [messages, setMessages] = useState([]); // 채팅방 내 모든 메시지 저장 - 화면 표시용
+    const [message, setMessage] = useState(""); // 현재 입력중인 메시지 저장
 
     // Websocket 연결 관련 state
-    const stompClientRef = useRef(null);
-    const chatBodyRef = useRef(null);
+    const stompClientRef = useRef(null); // WebSocket 연결 객체를 참조하는 useRef
+    const chatBodyRef = useRef(null); // 채팅 메시지 출력 영역 참조 - 스크롤 위치 관리
+    const subscriptionRef = useRef(null); // WebSocket 구독 객체 참조 - 새로운 채팅 메시지 수신하는 WebSocket 구독 관리
 
-    // 구독 객체를 저장할 ref 생성
-    const subscriptionRef = useRef(null);
-
-    // 채팅방 데이터 fetch (비동기)
+    // 채팅방 데이터 가져오기 (비동기)
     const fetchChatRoom = async () => {
         setIsLoading(true);
 
@@ -31,42 +29,13 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
             const response = await axios.get(`/api/messengers/chat/${chatNo}`);
             const { employeeId, chatMessages } = response.data;
 
-            setUser(employeeId); // 유저 아이디 설정
-            setMessages(chatMessages || []); // 초기 메시지 설정
+            setUser(employeeId);
+            setMessages(chatMessages || []);
             console.log("채팅 데이터", response.data);
         } catch (error) {
             console.error("채팅 데이터를 가져오는 중 오류 발생:", error);
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    const handleSendMessage = () => {
-
-        console.log("handleSendMessage 함수 호출");
-        
-        if (message.trim() && stompClientRef.current && stompClientRef.current.connected) {
-            const newMessage = {
-                chatNo: chatNo,
-                chatSenderId: user,
-                chatMessageContent: message
-            };
-            
-            // 메시지 전송
-            stompClientRef.current.publish({
-                destination: `/app/chat/${chatNo}`,
-                body: JSON.stringify(newMessage)
-            });
-
-            // 메시지 초기화
-            setMessage("");
-
-            // 메시지를 전송한 직후에도 스크롤 이동
-            setTimeout(() => {
-                if (chatBodyRef.current) {
-                    chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
-                }
-            }, 100);
         }
     };
 
@@ -77,7 +46,7 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
             return;
         }
 
-        const socket = new SockJS('/talk');
+        const socket = new SockJS('http://localhost:8787/talk');
         const stompClient = new StompClient({
             webSocketFactory: () => socket,
             reconnectDelay: 10000,
@@ -93,7 +62,17 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
                 subscriptionRef.current = stompClient.subscribe(`/topic/chat/${chatNo}`, (message) => {
                     const newMessage = JSON.parse(message.body);
                     console.log("새로운 메시지 수신:", newMessage);
-                    setMessages((prevMessages) => [...prevMessages, newMessage]);
+                    console.log("받아온 message", message);
+
+                    // 중복 여부 확인 후 메시지 추가
+                    setMessages((prevMessages) => {
+                        const isDuplicate = prevMessages.some((msg) => msg.chatMessageNo === newMessage.chatMessageNo);
+                        if (!isDuplicate) {
+                            return [...prevMessages, newMessage];
+                        }
+                        return prevMessages;
+                    });
+                    console.log("수신 메시지 목록:", message);
                 });
 
                 console.log(`채팅방 /topic/chat/${chatNo} 구독 완료`);
@@ -101,13 +80,42 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
             onStompError: (error) => {
                 console.error("WebSocket 연결 오류:", error);
             },
-            onWebSocketClose: () => {
+            onDisconnect: () => { // onWebSocketClose 대신 onDisconnect 사용
                 console.error("WebSocket 연결이 닫혔습니다.");
             }
         });
 
         stompClientRef.current = stompClient;
         stompClient.activate();
+    };
+
+    // 메시지 전송 함수
+    const handleSendMessage = () => {
+        console.log("handleSendMessage 함수 호출");
+
+        if (message.trim() && stompClientRef.current && stompClientRef.current.connected) {
+            const newMessage = {
+                chatNo: chatNo,
+                chatSenderId: user,
+                chatMessageContent: message
+            };
+
+            // 메시지 전송
+            stompClientRef.current.publish({
+                destination: `/app/chat/${chatNo}`,
+                body: JSON.stringify(newMessage)
+            });
+
+            // 메시지 초기화
+            setMessage("");
+
+            // 메시지를 전송한 직후에도 스크롤 이동
+            setTimeout(() => {
+                if (chatBodyRef.current) {
+                    chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+                }
+            }, 1);
+        }
     };
 
     useEffect(() => {
@@ -121,6 +129,7 @@ const ChatRoomModal = ({ chatList, setChatList, chatNo, closeChatModal, formatDa
         fetchChatRoom().then(() => {
             connectWebSocket();
         });
+
 
         return () => {
             // 컴포넌트 언마운트 시 구독 및 연결 해제

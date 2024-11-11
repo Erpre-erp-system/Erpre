@@ -65,7 +65,7 @@ public class WebSecurityConfig {
                     .antMatchers("/api/login", "/login").permitAll() // 로그인 앤드포인트 허용 (현재 모든 페이지 접근 허용! 이거 나중에 바꿔야 함)
                     .antMatchers("/user/**", "/").hasAnyRole("Staff", "Admin", "Assistant Manager", "Executive", "Director", "Manager")
                     .antMatchers("/admin/**").hasRole("Admin")
-                    .anyRequest().authenticated() // 그 외의 모든 요청은 인증 필요
+                    .anyRequest().permitAll() // 인증 필요 없음
                 .and()
                 .formLogin() // 기본 로그인 폼 제공
                     .loginPage("/login")

@@ -486,30 +486,30 @@ public class MessengerService {
         }
     }
 
-
     // 채팅 메시지 저장
     public ChatMessageDTO saveChatMessage(Long chatNo, ChatMessageDTO chatMessage, String senderId) {
 
-        // Chat과 Employee(발신자)
-        Chat chat = chatRepository.findById(chatNo)
-                .orElseThrow(() -> new RuntimeException("해당 채팅방을 찾을 수 없습니다: " + chatNo));
         Employee sender = employeeRepository.findById(senderId)
                 .orElseThrow(() -> new RuntimeException("해당 발신자를 찾을 수 없습니다: " + senderId));
+        String senderName = sender.getEmployeeName();
 
-        // ChatMessage 생성 및 저장
+        Chat chat = chatRepository.findById(chatNo)
+                .orElseThrow(() -> new RuntimeException("해당 채팅방을 찾을 수 없습니다: " + chatNo));
+
         ChatMessage newMessage = new ChatMessage();
         newMessage.setChat(chat);
         newMessage.setEmployee(sender);
         newMessage.setChatMessageContent(chatMessage.getChatMessageContent());
-
         ChatMessage savedMessage = chatMessageRepository.save(newMessage);
+
+        ChatMessageDTO savedMessageDTO = new ChatMessageDTO(savedMessage);
+        savedMessageDTO.setChatSenderName(senderName);
 
         // 채팅방의 모든 참여자에 대해 ChatMessageRead 엔티티 생성
         List<ChatParticipant> participants = chatParticipantRepository.findByChat(chat);
         for (ChatParticipant participant : participants) {
-            // 발신자가 아닌 수신자에 대해 ChatMessageRead 엔티티 생성
-            if (!participant.getEmployee().getEmployeeId().equals(senderId)) {
 
+            if (!participant.getEmployee().getEmployeeId().equals(senderId)) {
                 ChatMessageReadId readId = new ChatMessageReadId();
                 readId.setChatMessageNo(savedMessage.getChatMessageNo());
                 readId.setChatMessageRecipientId(participant.getEmployee().getEmployeeId());
@@ -524,7 +524,7 @@ public class MessengerService {
             }
         }
 
-        return new ChatMessageDTO(savedMessage);
+        return savedMessageDTO;
     }
 
 
