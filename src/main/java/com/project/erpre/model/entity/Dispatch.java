@@ -37,20 +37,15 @@ public class Dispatch {
     @JoinColumn(name = "warehouse_no", nullable = true)
     private Warehouse warehouse;
 
-    // 출고 QR코드
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "qr_code_id", referencedColumnName = "qr_code_id", nullable = true)
-    private QrCode qrCode;
-
     // 주문 상세
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_d_no")
     private OrderDetail orderDetail;
 
-    // 주문
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "order_h_no")
-//    private OrderDetail order;
+     //주문
+     @OneToOne(fetch = FetchType.LAZY)
+     @JoinColumn(name = "order_h_no")
+    private Order order;
 
 
 }

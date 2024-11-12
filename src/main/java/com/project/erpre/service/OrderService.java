@@ -184,14 +184,11 @@ public class OrderService {
         logger.debug("EntityManager.flush() 호출됨");
 
         // 주문 상태가 'approved'이면 Dispatch 레코드 생성
-        if ("approved".equals(order.getOrderHStatus())) {
+        if ("approved".equals(savedOrder.getOrderHStatus())) {
             orderDispatchService.createDispatchForOrder(savedOrder);
         }
-
         return savedOrder;
     }
-
-
 
 
     public OrderDetail addOrderDetail(Integer orderNo, OrderDetailDTO orderDetailDTO) {

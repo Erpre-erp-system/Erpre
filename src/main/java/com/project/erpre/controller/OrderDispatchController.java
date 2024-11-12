@@ -2,6 +2,7 @@ package com.project.erpre.controller;
 
 
 import com.project.erpre.model.dto.DispatchDTO;
+import com.project.erpre.model.entity.Dispatch;
 import com.project.erpre.service.OrderDispatchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/orderDispatch")
@@ -74,6 +76,7 @@ public class OrderDispatchController {
         return ResponseEntity.ok("출고 지시가 완료되었습니다.");
     }
 
+
     // pdf다운로드
     @GetMapping("/export/pdf/{dispatchNo}")
     public ResponseEntity<byte[]> exportDispatchAsPdf(@PathVariable int dispatchNo) {
@@ -93,7 +96,6 @@ public class OrderDispatchController {
         headers.setContentDispositionFormData("attachment", "dispatch_" + dispatchNo + ".xlsx");
         return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
     }
-
 
 
 }

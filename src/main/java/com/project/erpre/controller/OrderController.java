@@ -187,12 +187,6 @@ public class OrderController {
             entityManager.flush();
             logger.debug("EntityManager.flush() 호출됨");
 
-            // 주문 상태가 'approved'이면 Dispatch 레코드 생성
-            if ("approved".equals(orderDTO.getOrderHStatus())) {
-                logger.info("Order is approved. Creating dispatch record for order: " + existingOrder.getOrderNo());
-                orderDispatchService.createDispatchForOrder(existingOrder);
-            }
-
             return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -200,6 +194,7 @@ public class OrderController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     // 주문 상세 항목 추가
     @PostMapping("/{orderNo}/details")
     public ResponseEntity<?> addOrderDetail(@PathVariable Integer orderNo, @RequestBody OrderDetailDTO orderDetailDTO) {

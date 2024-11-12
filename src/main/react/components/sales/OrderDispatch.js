@@ -8,6 +8,7 @@ import axios from 'axios';
 import { QRCodeCanvas } from 'qrcode.react'; // QR 코드 라이브러리 임포트
 import useSWR from 'swr'; //사용자가 탭을 변경하거나 페이지에 다시 돌아올 때 자동으로 최신 데이터가 로드
 
+
 // 날짜 포맷팅 함수
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
@@ -18,7 +19,7 @@ const formatDateTime = (dateString) => {
     const hours = (`0${date.getHours()}`).slice(-2);
     const minutes = (`0${date.getMinutes()}`).slice(-2);
     return `${year}-${month}-${day} ${hours}:${minutes}`;
-};
+}
 
 // 출고 상태 매핑 함수
 const mapDispatchStatus = (orderHStatus, dispatchStatus) => {
@@ -28,313 +29,15 @@ const mapDispatchStatus = (orderHStatus, dispatchStatus) => {
       'inProgress': '출고요청',
       'complete': '출고완료'
     };
-  
+
     // orderHStatus가 'approved'인 경우 처음에는 '출고대기'로 표시하고, 이후에는 dispatchStatus에 따라 매핑
     if (orderHStatus === 'approved' && dispatchStatus === 'pending') {
       return statusMap['pending'];
     }
-  
+
     // dispatchStatus에 따른 한글 매핑 반환
     return statusMap[dispatchStatus] || dispatchStatus;
-  };
-
-//출고지시 모달창
-function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchData, onStatusChange }) {
-    const [form, setForm] = useState({
-      //고객사
-      customerName: '', // 고객사 이름 - customer
-      customerAddr: '', // 고객사 주소(납품지주소) - customer
-      //출하창고
-      warehouseName: '', //창고명 - warehouse
-      warehouseManagerName: '', //창고명 담당자 - warehouse
-      orderDDeliveryRequestDate: '', //납품요청일 - orderD
-      //상품(orderH)
-      productNm: '', //품목명 - product
-      orderDPrice: '', //출고단가 - orderD
-      orderDQty: '', //수량(단위포함) - orderD
-      orderDTotalPrice: '', //총금액 - orderD
-      //qr코드
-      qrCodeData: '', //qr코드 데이터 - qr_code
-    });
-
-
-    //모달 알림창 2번 뜨는거 방지
-    const [showConfirmModal, setShowConfirmModal] = useState(false);
-
-    useEffect(() => {
-        if (show && dispatchData) {
-          setForm({
-              customerName: dispatchData.customerName,
-              customerAddr: dispatchData.customerAddr,
-              warehouseName: dispatchData.warehouseName || '',
-              warehouseManagerName: dispatchData.warehouseManagerName || '',
-              orderDDeliveryRequestDate: formatDateTime(dispatchData.orderDDeliveryRequestDate),
-              productNm: dispatchData.productNm,
-              orderDPrice: dispatchData.orderDPrice,
-              orderDQty: dispatchData.orderDQty,
-              orderDTotalPrice: dispatchData.orderDTotalPrice,
-              qrCodeData: dispatchData.qrCodeData,
-          });
-        }
-      }, [show, dispatchData]);
-
-
-    //창고배정에서 선택한 창고명으로 저장
-    useEffect(() => {
-      if (show) {
-        setForm(prevForm => ({
-          ...prevForm,
-          warehouseName: assignedWarehouse || '',
-        }));
-      }
-    }, [show, assignedWarehouse]);
-
-    //출고 확인 함수
-    const handleDispatchConfirm = () => {
-        axios.post('/api/orderDispatch/updateStatus', {
-            dispatchNo: dispatchData.dispatchNo,
-            newStatus: 'inProgress'
-        })
-        .then(response => {
-            window.showToast("출고 지시가 완료되었습니다.");
-            setShowConfirmModal(false); // 확인 모달 닫기
-            onClose(); // 출고지시 모달 닫기
-
-            // 상태 변경 알림
-            if (onStatusChange) {
-                onStatusChange(dispatchData.dispatchNo, 'inProgress');
-            }
-        })
-        .catch(error => {
-            window.showToast("출고 지시 중 에러가 발생했습니다.", 'error');
-        });
-    };
-
-    // 출고 버튼 클릭 시 확인 모달 표시
-    const handleDispatchClick = () => {
-        setShowConfirmModal(true);
-    };
-
-    // 다운로드 옵션 표시 여부 상태 (pdf,excel)
-    const [showDownloadOptions, setShowDownloadOptions] = useState(false);
-
-    // 다운로드 버튼 클릭 핸들러 (pdf,excel)
-    const handleDownloadClick = () => {
-        setShowDownloadOptions(prev => !prev);
-    };
-
-   // PDF 다운로드 핸들러
-    const handlePdfDownload = () => {
-        axios({
-            url: `/api/orderDispatch/export/pdf/${dispatchData.dispatchNo}`,
-            method: 'GET',
-            responseType: 'blob',
-        })
-        .then((response) => {
-            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `dispatch_${dispatchData.dispatchNo}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-        })
-        .catch((error) => {
-            console.error('Error downloading PDF:', error);
-        });
-
-        setShowDownloadOptions(false); // 옵션 선택 후 닫기
-    };
-
-    // Excel 다운로드 핸들러
-    const handleExcelDownload = () => {
-        axios({
-            url: `/api/orderDispatch/export/excel/${dispatchData.dispatchNo}`,
-            method: 'GET',
-            responseType: 'blob',
-        })
-        .then((response) => {
-            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `dispatch_${dispatchData.dispatchNo}.xlsx`);
-            document.body.appendChild(link);
-            link.click();
-        })
-        .catch((error) => {
-            console.error('Error downloading Excel:', error);
-        });
-
-        setShowDownloadOptions(false); // 옵션 선택 후 닫기
-    };
-
-    // QR코드 모달 표시 상태
-    const [showQrModal, setShowQrModal] = useState(false);
-
-    // QR 코드 생성 핸들러
-    const handleQrCode = () => {
-        const qrData = `dispatchNo:${dispatchData.dispatchNo}`;
-        setForm(prevForm => ({
-            ...prevForm,
-            qrCodeData: qrData
-        }));
-        setShowQrModal(true); // QR코드 모달 표시
-    };
-
-    // QR코드 모달 닫기 핸들러
-    const handleCloseQrModal = () => {
-        setShowQrModal(false);
-    };
-
-
-    if (!show) return null; // 모달 표시 여부 체크
-
-    return (
-        <div className="modal_overlay">
-            <div className="modal_container dispatch">
-
-                <button className="btn_close" onClick={onClose}><i className="bi bi-x-lg"></i></button>
-
-                <div className="dispatch-wrap">
-                {/* 출고증 제목 */}
-                    <div className="dispatch-note">
-                        <h2>출고증</h2>
-                    </div>
-
-                    <div className="customer-supplier">
-
-                        {/* 고객사 정보 */}
-                        <div className="customer-info">
-                            <table>
-                                <tbody>
-                                <tr>
-                                    <th>고객사 이름</th>
-                                    <td>{form.customerName}</td>
-                                </tr>
-                                <tr>
-                                    <td colSpan="2" className="qr-modal-content">
-                                        <QRCodeCanvas value={form.qrCodeData} />
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* 공급자 정보 */}
-                        <div className="supplier-info">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <th>공급자 상호</th>
-                                        <td>이케아</td>
-                                    </tr>
-                                    <tr>
-                                        <th>공급자 주소</th>
-                                        <td>이케아</td>
-                                    </tr>
-                                    <tr>
-                                        <th>공급자 대표성명</th>
-                                        <td>박인욱</td>
-                                    </tr>
-                                    <tr>
-                                        <th>공급자 전화번호</th>
-                                        <td>02-111-5555</td>
-                                    </tr>
-                                    <tr>
-                                        <th>공급자 사업자 등록번호</th>
-                                        <td>123-456-7890</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                        {/* 출하관련 정보 */}
-                        <div className="dispatch-info">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <th>납품지 주소</th>
-                                        <td>{form.customerAddr}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>납품 요청일</th>
-                                        <td>{form.orderDDeliveryRequestDate}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>출하창고</th>
-                                        <td>{form.warehouseName}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* 상품관련 정보 */}
-                        <div className="product-info">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>품목명</th>
-                                        <th>수량</th>
-                                        <th>출고단가</th>
-                                        <th>총금액</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{form.productNm}</td>
-                                        <td>{form.orderDQty}EA</td>
-                                        <td>{Number(form.orderDPrice).toLocaleString()}</td>
-                                        <td>{Number(form.orderDTotalPrice).toLocaleString()}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* 수량 및 인수 */}
-                        <div className="acceptance">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <th>인수</th>
-                                        <td>인</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                </div>
-
-                <div className="download-actions"> 
-                    {/* 다운로드 버튼 */}
-                    <div className={`download-section ${showDownloadOptions ? 'show' : ''}`} >
-                        <button className="dropbtn" onClick={handleDownloadClick}>다운로드</button>
-                        {showDownloadOptions && (
-                            <div className="dropdown-content">
-                                <button className="pdfDownload" onClick={handlePdfDownload}>PDF</button>
-                                <button className="excelDownload" onClick={handleExcelDownload}>Excel</button>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* 출고 버튼 */}
-                    <div className="modal-actions">
-                        <button className="box blue" type="button" 
-                        onClick={handleDispatchClick}>출고</button>
-                    </div>
-                </div>
-
-                   {/* 출고 확인 모달 */}
-                    {showConfirmModal && (
-                        <ConfirmationModal
-                            message="출고 지시 하시겠습니까?"
-                            onConfirm={handleDispatchConfirm}
-                            onCancel={() => setShowConfirmModal(false)}
-                        />
-                    )}
-
-             </div>
-        </div>
-    );
-};
+  }
 
 //창고배정 모달창
 function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchStatus }) {
@@ -516,7 +219,331 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
                 </div>
             </div>
         );
-};
+}
+
+//출고지시 모달창
+function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchData, onStatusChange }) {
+    const [form, setForm] = useState({
+      //고객사
+      customerName: '', // 고객사 이름 - customer
+      customerAddr: '', // 고객사 주소(납품지주소) - customer
+      //출하창고
+      warehouseName: '', //창고명 - warehouse
+      warehouseManagerName: '', //창고명 담당자 - warehouse
+      orderDDeliveryRequestDate: '', //납품요청일 - orderD
+      //상품(orderH)
+      productNm: '', //품목명 - product
+      orderDPrice: '', //출고단가 - orderD
+      orderDQty: '', //수량(단위포함) - orderD
+      orderDTotalPrice: '', //총금액 - orderD
+
+    });
+
+
+    //모달 알림창 2번 뜨는거 방지
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+    useEffect(() => {
+        if (show && dispatchData) {
+          setForm({
+              customerName: dispatchData.customerName,
+              customerAddr: dispatchData.customerAddr,
+              warehouseName: dispatchData.warehouseName || '',
+              warehouseManagerName: dispatchData.warehouseManagerName || '',
+              orderDDeliveryRequestDate: formatDateTime(dispatchData.orderDDeliveryRequestDate),
+              productNm: dispatchData.productNm,
+              orderDPrice: dispatchData.orderDPrice,
+              orderDQty: dispatchData.orderDQty,
+              orderDTotalPrice: dispatchData.orderDTotalPrice,
+
+          });
+        }
+      }, [show, dispatchData]);
+
+
+   // 창고 배정 모달 열림 상태 관리
+    const [showWarehouseModal, setShowWarehouseModal] = useState(false);
+
+    // 창고 배정 모달 열기 함수
+    const handleWarehouseModalOpen = () => {
+    setShowWarehouseModal(true);
+    };
+
+    // 창고 배정 모달 닫기 함수
+    const handleWarehouseModalClose = () => {
+    setShowWarehouseModal(false);
+    };
+
+    // 창고 배정 모달에서 저장할 때 호출되는 함수
+    const handleWarehouseAssignmentSave = (warehouseData) => {
+    setForm(prevForm => ({
+        ...prevForm,
+        warehouseName: warehouseData.warehouseName, // 선택한 창고명 업데이트
+        warehouseManagerName: warehouseData.warehouseManagerName, // 선택한 창고 담당자명 업데이트
+    }));
+    setShowWarehouseModal(false); // 모달 닫기
+    };
+
+    //출고 확인 함수
+    const handleDispatchConfirm = () => {
+        axios.post('/api/orderDispatch/updateStatus', {
+            dispatchNo: dispatchData.dispatchNo,
+            newStatus: 'inProgress'
+        })
+        .then(response => {
+            window.showToast("출고 지시가 완료되었습니다.");
+            setShowConfirmModal(false); // 확인 모달 닫기
+            onClose(); // 출고지시 모달 닫기
+
+            // 상태 변경 알림
+            if (onStatusChange) {
+                onStatusChange(dispatchData.dispatchNo, 'inProgress');
+            }
+        })
+        .catch(error => {
+            window.showToast("출고 지시 중 에러가 발생했습니다.", 'error');
+        });
+    };
+
+    // 출고 버튼 클릭 시 확인 모달 표시
+    const handleDispatchClick = () => {
+        setShowConfirmModal(true);
+    };
+
+    // 다운로드 옵션 표시 여부 상태 (pdf,excel)
+    const [showDownloadOptions, setShowDownloadOptions] = useState(false);
+
+    // 다운로드 버튼 클릭 핸들러 (pdf,excel)
+    const handleDownloadClick = () => {
+        setShowDownloadOptions(prev => !prev);
+    };
+
+   // PDF 다운로드 핸들러
+    const handlePdfDownload = () => {
+        axios({
+            url: `/api/orderDispatch/export/pdf/${dispatchData.dispatchNo}`,
+            method: 'GET',
+            responseType: 'blob',
+        })
+        .then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `dispatch_${dispatchData.dispatchNo}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+        })
+        .catch((error) => {
+            console.error('Error downloading PDF:', error);
+        });
+
+        setShowDownloadOptions(false); // 옵션 선택 후 닫기
+    };
+
+    // Excel 다운로드 핸들러
+    const handleExcelDownload = () => {
+        axios({
+            url: `/api/orderDispatch/export/excel/${dispatchData.dispatchNo}`,
+            method: 'GET',
+            responseType: 'blob',
+        })
+        .then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `dispatch_${dispatchData.dispatchNo}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+        })
+        .catch((error) => {
+            console.error('Error downloading Excel:', error);
+        });
+
+        setShowDownloadOptions(false); // 옵션 선택 후 닫기
+    };
+
+    // QR 코드에 표시할 데이터 생성
+    const qrCodeValue = `품목명: ${dispatchData ? dispatchData.productNm : ''}, 수량: ${dispatchData ? dispatchData.orderDQty : ''}`;
+    // QR url 연결
+    const qrCodeUrl = `http://localhost:8787/dispatch/${dispatchData ? dispatchData.dispatchNo : ''}`;
+
+
+    // QR코드 모달 표시 상태
+    const [showQrModal, setShowQrModal] = useState(false);
+
+    // QR 코드 생성 핸들러
+    const handleQrCode = () => {
+        const qrData = `dispatchNo:${dispatchData.dispatchNo}`;
+        setForm(prevForm => ({
+            ...prevForm,
+            qrCodeData: qrData
+        }));
+        setShowQrModal(true); // QR코드 모달 표시
+    };
+
+    // QR코드 모달 닫기 핸들러
+    const handleCloseQrModal = () => {
+        setShowQrModal(false);
+    };
+
+
+    if (!show) return null; // 모달 표시 여부 체크
+
+    return (
+        <div className="modal_overlay">
+            <div className="modal_container dispatch">
+
+                <button className="btn_close" onClick={onClose}><i className="bi bi-x-lg"></i></button>
+
+                <div className="dispatch-wrap">
+                {/* 출고증 제목 */}
+                    <div className="dispatch-note">
+                        <h2>출고증</h2>
+                    </div>
+
+                    <div className="customer-supplier">
+
+                        {/* 고객사 정보 */}
+                        <div className="customer-info">
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <th>고객사 이름</th>
+                                    <td>{form.customerName}</td>
+                                </tr>
+                                <tr>
+                                    <td colSpan="2" className="qr-modal-content">
+                                        <QRCodeCanvas value={qrCodeValue} />
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* 공급자 정보 */}
+                        <div className="supplier-info">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th>공급자 상호</th>
+                                        <td>이케아</td>
+                                    </tr>
+                                    <tr>
+                                        <th>공급자 주소</th>
+                                        <td>이케아</td>
+                                    </tr>
+                                    <tr>
+                                        <th>공급자 대표성명</th>
+                                        <td>박인욱</td>
+                                    </tr>
+                                    <tr>
+                                        <th>공급자 전화번호</th>
+                                        <td>02-111-5555</td>
+                                    </tr>
+                                    <tr>
+                                        <th>공급자 사업자 등록번호</th>
+                                        <td>123-456-7890</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                        {/* 출하관련 정보 */}
+                        <div className="dispatch-info">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th>납품지 주소</th>
+                                        <td>{form.customerAddr}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>납품 요청일</th>
+                                        <td>{form.orderDDeliveryRequestDate}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>출하창고</th>
+                                        <td>{form.warehouseName}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* 상품관련 정보 */}
+                        <div className="product-info">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>품목명</th>
+                                        <th>수량</th>
+                                        <th>출고단가</th>
+                                        <th>총금액</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{form.productNm}</td>
+                                        <td>{form.orderDQty}EA</td>
+                                        <td>{Number(form.orderDPrice).toLocaleString()}</td>
+                                        <td>{Number(form.orderDTotalPrice).toLocaleString()}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* 인수 */}
+                        <div className="acceptance">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th>인수</th>
+                                        <td>인</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                </div>
+
+                <div className="download-actions">
+                    {/* 다운로드 버튼 */}
+                    <div className={`download-section ${showDownloadOptions ? 'show' : ''}`} >
+                        <button className="dropbtn" onClick={handleDownloadClick}>다운로드</button>
+                        {showDownloadOptions && (
+                            <div className="dropdown-content">
+                                <button className="pdfDownload" onClick={handlePdfDownload}>PDF</button>
+                                <button className="excelDownload" onClick={handleExcelDownload}>Excel</button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 출고 버튼 */}
+                    <div className="modal-actions">
+                        <button className="box blue" type="button"
+                        onClick={handleDispatchClick}>출고</button>
+                    </div>
+                </div>
+
+                   {/* 출고 확인 모달 */}
+                    {showConfirmModal && (
+                        <ConfirmationModal
+                            message="출고 지시 하시겠습니까?"
+                            onConfirm={handleDispatchConfirm}
+                            onCancel={() => setShowConfirmModal(false)}
+                        />
+                    )}
+
+                    {showWarehouseModal && (
+                        <WarehouseAssignmentModal
+                            show={showWarehouseModal}
+                            onClose={handleWarehouseModalClose}
+                            onSave={handleWarehouseAssignmentSave}
+                        />
+                    )}
+
+             </div>
+        </div>
+    );
+}
 
 //모달창 확인 컴포넌트
 function ConfirmationModal({ message, onConfirm, onCancel }) {
@@ -534,7 +561,7 @@ function ConfirmationModal({ message, onConfirm, onCancel }) {
             </div>
         </div>
     );
-};
+}
 
 //주문 출고
 function OrderDispatch() { //주문번호1-출고1
@@ -666,7 +693,7 @@ function OrderDispatch() { //주문번호1-출고1
         setSortColumn(column);
         setSortOrder(order);
     };
-    
+
 
     // 필터 타입 변경 핸들러 (출고 상태 필터)
     const handleFilterTypeChange = (e) => {
@@ -789,7 +816,7 @@ function OrderDispatch() { //주문번호1-출고1
         // 필터 타입을 'inProgress'로 변경하여 출고요청 탭으로 이동
         setFilterType('inProgress');
       };
-  
+
 
     // Pagination
     const PageChange = (newPage) => {
@@ -923,7 +950,7 @@ function OrderDispatch() { //주문번호1-출고1
                                             <button className="btn_order" onClick={() => sortDispatches('customerName')}>
                                                 <i className={`bi ${sortColumn === 'customerName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
                                             </button>
-                                        
+
                                         </div>
                                     </th>
                                     <th>
@@ -972,7 +999,7 @@ function OrderDispatch() { //주문번호1-출고1
                                     <th></th>
                                 </tr>
                             </thead>
-                            
+
                             {/* 테이블 본문 */}
                             <tbody>
                                 {loading ? (
@@ -1036,7 +1063,7 @@ function OrderDispatch() { //주문번호1-출고1
                                  <i className="bi bi-trash"></i> 선택 삭제
                              </button>
                          </div>
-                         
+
                          {/* 페이지네이션 */}
                          <div className="pagination">
                             {page > 1 && (
@@ -1098,11 +1125,11 @@ function OrderDispatch() { //주문번호1-출고1
                       dispatchData={selectedDispatchData}
                       onStatusChange={handleStatusChange} // 상태 변경 콜백 전달
                   />
-              )}            
+              )}
 
         </Layout>
     );
-};
+}
 
 // 최종 렌더링
 const root = ReactDOM.createRoot(document.getElementById('root'));

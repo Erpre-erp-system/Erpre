@@ -28,37 +28,20 @@ public interface OrderDispatchRepository extends JpaRepository<Dispatch, Integer
 
     // 상태에 따라 Dispatch를 페이징하여 조회 (주문 상태가 'ing' 또는 'denied'가 아닌 경우)
     @Query(value = "SELECT d FROM Dispatch d " +
-            "JOIN FETCH d.orderDetail od " +
-            "JOIN FETCH od.order o " +
-            "JOIN FETCH o.customer c " +
-            "JOIN FETCH od.product p " +
-            "LEFT JOIN FETCH d.warehouse w " +
+            "JOIN FETCH d.order o " + // Dispatch와 Order를 직접 조인
+            "JOIN FETCH o.customer c " + // Order와 Customer 조인
+            "JOIN FETCH d.orderDetail od " + // Dispatch와 OrderDetail 조인
+            "JOIN FETCH od.product p " + // OrderDetail과 Product 조인
+            "LEFT JOIN FETCH d.warehouse w " + // Dispatch와 Warehouse를 좌측 조인
             "WHERE d.dispatchStatus = :dispatchStatus " +
-            "AND o.orderHStatus = 'approved' " +
-            //"AND o.orderHStatus NOT IN ('ing', 'denied') " +
+            "AND o.orderHStatus = 'approved' " + // 주문 상태가 'approved'인 경우만 조회
             "AND d.dispatchDeleteYn = 'N'",
             countQuery = "SELECT COUNT(d) FROM Dispatch d " +
-                    "JOIN d.orderDetail od " +
-                    "JOIN od.order o " +
+                    "JOIN d.order o " + // Dispatch와 Order를 직접 조인
                     "WHERE d.dispatchStatus = :dispatchStatus " +
-                    "AND o.orderHStatus = 'approved' " +
-                    //"AND o.orderHStatus NOT IN ('ing', 'denied') " +
+                    "AND o.orderHStatus = 'approved' " + // 주문 상태가 'approved'인 경우만 카운트
                     "AND d.dispatchDeleteYn = 'N'")
     Page<Dispatch> findByDispatchStatus(@Param("dispatchStatus") String dispatchStatus, Pageable pageable);
-
-    // 출고 완료 상태 조회 메서드
-    @Query(value = "SELECT d FROM Dispatch d " +
-            "JOIN FETCH d.orderDetail od " +
-            "JOIN FETCH od.order o " +
-            "JOIN FETCH o.customer c " +
-            "JOIN FETCH od.product p " +
-            "LEFT JOIN FETCH d.warehouse w " +
-            "WHERE d.dispatchStatus = 'complete' " +
-            "AND d.dispatchDeleteYn = 'N'",
-            countQuery = "SELECT COUNT(d) FROM Dispatch d " +
-                    "WHERE d.dispatchStatus = 'complete' " +
-                    "AND d.dispatchDeleteYn = 'N'")
-    Page<Dispatch> findByDispatchStatusComplete(Pageable pageable);
 
 
 }

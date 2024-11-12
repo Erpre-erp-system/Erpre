@@ -33,9 +33,5 @@ public class Warehouse {
     @Column(name = "warehouse_manager_name", length = 30)
     private String warehouseManagerName; // 창고 담당자 이름
 
-    @ToString.Exclude
-    @OneToMany(mappedBy = "warehouse", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<QrCode> qrCodes; //QR 코드 리스트
 
 }
