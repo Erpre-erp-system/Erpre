@@ -42,6 +42,14 @@ public class MessageRecipient {
     @Column(nullable = false, length = 1)
     private String bookmarkedYn = "N";
 
+    public MessageRecipient(Message message, Employee employee) {
+        this.messageRecipientId = new MessageRecipientId(message.getMessageNo(), employee.getEmployeeId());
+        this.message = message;
+        this.employee = employee;
+        this.recipientReadYn = "N";
+        this.recipientDeleteYn = "N";
+        this.bookmarkedYn = "N";
+    }
 
 
 }

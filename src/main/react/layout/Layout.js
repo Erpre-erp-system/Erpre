@@ -9,9 +9,6 @@ import {useLocation} from 'react-router-dom';
 import EmailSidebar from './EmailSidebar';
 import {MessengerProvider} from "../context/MessengerContext";
 import {UserContext, UserProvider} from '../context/UserContext';
-import SockJS from "sockjs-client";
-import {useMessengerHooks} from "../components/messenger/useMessengerHooks";
-import { Client as StompClient } from '@stomp/stompjs';
 
 
 function Layout({currentMenu, children}) {
@@ -21,43 +18,7 @@ function Layout({currentMenu, children}) {
     //     return <div>Loading...</div>; // 유저 데이터 로딩 중에 표시할 내용
     // } // 프로젝트 마무리할때 로딩넣기
 
-    const {
-        noteList,
-        setNoteList,
-        newNote,
-        setNewNote,
-    } = useMessengerHooks();
-
     const location = useLocation();
-    // 최상위 루트에서 쪽지 구독
-    useEffect(() => {
-        const socket = new SockJS('http://localhost:8787/talk');
-        const stompClient = new StompClient({
-            webSocketFactory: () => socket,
-            reconnectDelay: 10000,
-            onConnect: () => {
-                console.log("쪽지 WebSocket 연결 성공");
-
-                stompClient.subscribe('/user/queue/note', (message) => {
-                    const receivedNote = JSON.parse(message.body);
-                    setNoteList((prevNoteList) => [receivedNote, ...prevNoteList]);
-                });
-            },
-            onDisconnect: () => console.log("WebSocket 연결이 닫혔습니다."),
-        });
-
-        stompClient.activate();
-
-
-        return () => {
-            stompClient.deactivate()
-                .then(() => console.log("WebSocket 연결이 성공적으로 해제되었습니다."))
-                .catch((error) => console.error("WebSocket 해제 중 오류:", error));
-        };
-    }, []);
-
-    const handleCloseAlert = () => setNewNote(null);
-
 
     return (
         <UserProvider>

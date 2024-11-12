@@ -190,56 +190,47 @@ public class MessengerService {
         messageRepository.save(message);
     }
 
-//    // 새 쪽지 생성
-//    @Transactional
-//    public MessageDTO createNote(String messageContent, Optional<LocalDateTime> scheduledDate, List<String> receiverIds) {
-//
-//        // 현재 로그인된 발신자 아이디 조회
-//        String employeeId = getEmployeeIdFromAuthentication();
-//
-//        // 발신자 조회
-//        Employee employee = employeeRepository.findById(employeeId)
-//                .orElseThrow(() -> new RuntimeException("발신자를 찾을 수 없습니다: " + employeeId));
-//
-//        // 수신자 목록이 null 이거나 비어 있는지 확인
-//        if (receiverIds == null || receiverIds.isEmpty()) {
-//            receiverIds.add(employeeId);
-//        }
-//
-//        // 1. 메시지 생성 및 발신자 설정
-//        Message message = new Message();
-//        message.setEmployee(employee);
-//        message.setMessageContent(messageContent);
-//        message.setMessageSendDate(scheduledDate != null ? scheduledDate : LocalDateTime.now());
-//
-//        // 메시지 저장
-//        messageRepository.save(message);
-//
-//        // 2. 수신자에 대한 처리 (내부용으로만 사용, 반환 데이터에 포함되지 않음)
-//        for (String receiverId : receiverIds) {
-//            Employee recipientEmployee = employeeRepository.findById(receiverId)
-//                    .orElseThrow(() -> new RuntimeException("수신자를 찾을 수 없습니다: " + receiverId));
-//
-//            MessageRecipient messageRecipient = new MessageRecipient();
-//            MessageRecipientId recipientId = new MessageRecipientId();
-//            recipientId.setMessageNo(message.getMessageNo());
-//            recipientId.setRecipientId(receiverId);
-//
-//            messageRecipient.setMessageRecipientId(recipientId);
-//            messageRecipient.setMessage(message);
-//            messageRecipient.setEmployee(recipientEmployee);
-//
-//            messageRecipientRepository.save(messageRecipient);
-//        }
-//
-//        // 3. 발신자 ID 포함하여 MessageDTO 생성 후 반환 (수신자 정보는 포함하지 않음)
-//        MessageDTO messageDTO = new MessageDTO(message);
-//        messageDTO.setMessageSenderId(employeeId);
-//
-//        // 4. 파일 및 사진 저장 로직
-//
-//        return messageDTO;
-//    }
+    // 새 쪽지 생성
+    @Transactional
+    public MessageDTO createNote(String senderId, String messageContent, Optional<LocalDateTime> scheduledDate, List<String> receiverIds) {
+
+        // 발신자 조회
+        Employee sender = employeeRepository.findById(senderId)
+                .orElseThrow(() -> new RuntimeException("발신자를 찾을 수 없습니다: " + senderId));
+
+        // 수신자 목록이 null 이거나 비어 있는지 확인
+        if (receiverIds == null || receiverIds.isEmpty()) {
+            receiverIds.add(senderId);
+        }
+
+        // 1. 메시지 생성 및 발신자 설정
+        Message message = new Message();
+        message.setEmployee(sender);
+        message.setMessageContent(messageContent);
+        message.setMessageSendDate(scheduledDate.orElse(LocalDateTime.now()));
+
+        // 메시지 저장
+        messageRepository.save(message);
+
+        Message newMessage = messageRepository.findById(message.getMessageNo())
+                .orElseThrow(() -> new RuntimeException("쪽지를 찾을 수 없습니다"));
+
+        // 2. 수신자에 대한 처리 (내부용으로만 사용, 반환 데이터에 포함되지 않음)
+        List<String> savedReceiverIds = new ArrayList<>();
+        for (String receiverId : receiverIds) {
+            Employee recipient = employeeRepository.findById(receiverId)
+                    .orElseThrow(() -> new RuntimeException("수신자를 찾을 수 없습니다: " + receiverId));
+
+            MessageRecipient messageRecipient = new MessageRecipient(newMessage, recipient);
+            messageRecipientRepository.save(messageRecipient);
+            savedReceiverIds.add(receiverId);
+        }
+
+        MessageDTO messageDTO = new MessageDTO(message);
+        messageDTO.setMessageReceiverIds(savedReceiverIds);
+
+        return messageDTO;
+    }
 
     // 쪽지 전체 삭제 (상태별)
     @Transactional

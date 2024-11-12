@@ -1,11 +1,18 @@
 package com.project.erpre.config;
 
+import lombok.NonNull;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
+
+import java.security.Principal;
+import java.util.Map;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -13,12 +20,19 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // 클라이언트가 연결할 수 있는 웹소켓 엔드포인트(접속 지점)를 "/talk"로 설정
-        // talk는 전체 사용자 구독, queue는 일대일 사용자 구독
-        registry.addEndpoint("/talk", "/queue") 
-//                .setAllowedOrigins("http://localhost:8787", "http://localhost:3000")
+        registry.addEndpoint("/talk")
                 .setAllowedOriginPatterns("*")
-                .addInterceptors(new HttpSessionHandshakeInterceptor())
+                .setHandshakeHandler(new DefaultHandshakeHandler() {
+                    @Override
+                    protected Principal determineUser(@NonNull ServerHttpRequest request, @NonNull WebSocketHandler wsHandler, @NonNull  Map<String, Object> attributes) {
+                        Principal user = request.getPrincipal();
+                        if (user == null) {
+                            logger.error("인증 정보를 찾을 수 없습니다.");
+                        }
+                        return user;
+                    }
+                })
+                .addInterceptors(new HttpSessionHandshakeInterceptor()) // 추가된 인터셉터
                 .withSockJS();
     }
 

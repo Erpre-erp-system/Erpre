@@ -6,6 +6,7 @@ import {FaStar, FaTrashAlt} from "react-icons/fa";
 import axios from "axios";
 import DOMPurify from "dompurify";
 import Swal from "sweetalert2";
+import { useMessenger } from '../../context/MessengerContext';
 
 const Note = ({ noteStatus, isNewNoteModalOpen, openNewNoteModal, closeNewNoteModal, noteList = [], setNoteList, formatDate }) => {
 
@@ -91,7 +92,7 @@ const Note = ({ noteStatus, isNewNoteModalOpen, openNewNoteModal, closeNewNoteMo
         window.addEventListener('click', handleClickOutside);
         return () => window.removeEventListener('click', handleClickOutside);
     }, [menuVisible]);
-    
+
     // 북마크 선택/해제 함수
     const handleBookmark = async (note) => {
         try {

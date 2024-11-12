@@ -6,6 +6,7 @@ import DOMPurify from 'dompurify';
 const ReceivedNoteModal = ({ note, onClose }) => {
     if (!note) return null;
 
+    console.log("ReceivedNoteModal 열린 쪽지:", note); // 확인용 로그
     const cleanHTML = DOMPurify.sanitize(note.messageContent);
 
     return (

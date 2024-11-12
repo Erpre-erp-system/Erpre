@@ -11,7 +11,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 // 웹소켓 메시지 커치
 // 클라이언트 간 실시간 메시지 전송 (채팅, 쪽지, 알림 등)
@@ -29,19 +31,25 @@ public class TalkController {
         this.messagingTemplate = messagingTemplate;
     }
 
-//    // 🟠 쪽지 메세지 전송 및 저장
-//    @MessageMapping("/note")
-//    public void sendNote(MessageDTO message, Principal principal) {
-//        String senderId = principal.getName();
-//
-//        // 메시지 저장 처리
-//        ChatMessageDTO savedNote = messengerService.createNote(message, senderId);
-//
-//        // 각 수신자에게 메시지 전송
-//        for (String receiverId : message.getReceiverIds()) {
-//            messagingTemplate.convertAndSendToUser(receiverId, "/queue/note", savedNote);
-//        }
-//    }
+    // 🟠 쪽지 메세지 전송 및 저장
+    @MessageMapping("/note")
+    public void sendNote(MessageDTO message, Principal principal) {
+        if (principal == null) {
+            throw new IllegalStateException("인증된 사용자가 필요합니다.");
+        }
+
+        String senderId = principal.getName();
+
+        Optional<LocalDateTime> scheduledDate = Optional.ofNullable(message.getMessageSendDate());
+
+        // 메시지 저장 처리
+        MessageDTO savedNote = messengerService.createNote(senderId, message.getMessageContent(), scheduledDate, message.getMessageReceiverIds());
+
+        // 각 수신자에게 메시지 전송D
+        for (String receiverId : message.getMessageReceiverIds()) {
+            messagingTemplate.convertAndSendToUser(receiverId, "/queue/note", savedNote);
+        }
+    }
 
 
     // 🔴 채팅 메시지 전송 및 저장

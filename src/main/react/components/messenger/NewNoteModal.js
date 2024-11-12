@@ -10,6 +10,7 @@ import { CustomToolbar } from "./CustomToolbar";
 import axios from "axios";
 import SockJS from "sockjs-client";
 import { Client as StompClient } from '@stomp/stompjs';
+import { Stomp } from '@stomp/stompjs';
 
 const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
 
@@ -22,6 +23,7 @@ const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
     const [isEmployeeSearchModalOpen, setEmployeeSearchModalOpen] = useState(false); // 직원 검색 모달창
     const { user, setUser } = useContext(UserContext);
     const stompClientRef = useRef(null);
+
 
     const {data: suggestions, searchLoading} = UseSearch("/api/messengers/employeeList", employeeSearchText);
 
@@ -56,14 +58,14 @@ const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
             onConnect: () => {
                 console.log("쪽지 전송 WebSocket 연결 성공");
             },
-            onDisconnect: () => console.log("WebSocket 연결이 닫혔습니다."),
+            onDisconnect: () => console.log("쪽지 WebSocket 연결이 닫혔습니다."),
         });
 
         stompClientRef.current.activate();
 
         return () => {
             stompClientRef.current.deactivate()
-                .then(() => console.log("WebSocket 연결이 성공적으로 해제되었습니다."))
+                .then(() => console.log("쪽지 WebSocket 연결이 성공적으로 해제되었습니다."))
                 .catch((error) => console.error("WebSocket 해제 중 오류:", error));
         };
     }, []);
@@ -118,18 +120,21 @@ const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
             }
 
             // 노트 생성 API 호출
-            const response = await axios.post('/api/messengers/note/create', {
+            const newNote = {
                 messageReceiverIds: receiverIds,
                 messageContent: messageContent,
                 messageSendDate: scheduledSend ? scheduledDate : null,
-            });
-            const newNote = response.data;
-            console.log('전송된 쪽지:', newNote);
+            };
+            
             // WebSocket 연결이 설정되었는지 확인 후 send 호출
             if (stompClientRef.current && stompClientRef.current.connected) {
-                stompClientRef.current.send('/app/note', {}, JSON.stringify(newNote));
+                stompClientRef.current.publish({
+                    destination: "/app/note",
+                    body: JSON.stringify(newNote),
+                });
+                console.log("전송된 쪽지:", newNote);
             } else {
-                console.error("WebSocket 연결이 설정되지 않았습니다.");
+                console.error("쪽지 WebSocket 연결이 설정되지 않았습니다.");
             }
 
             closeNewNoteModal();
