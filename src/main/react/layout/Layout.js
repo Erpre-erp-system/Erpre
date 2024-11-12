@@ -9,8 +9,6 @@ import {useLocation} from 'react-router-dom';
 import EmailSidebar from './EmailSidebar';
 import {MessengerProvider} from "../context/MessengerContext";
 import {UserContext, UserProvider} from '../context/UserContext';
-import {UserContext} from '../context/UserContext';
-import ReceivedNoteModal from "../components/messenger/ReceivedNoteModal";
 import SockJS from "sockjs-client";
 import {useMessengerHooks} from "../components/messenger/useMessengerHooks";
 import { Client as StompClient } from '@stomp/stompjs';
