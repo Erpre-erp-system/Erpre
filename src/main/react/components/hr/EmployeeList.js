@@ -41,6 +41,29 @@ function EmployeeList() {
         employeeRole: ''
     });
 
+    // 로그인한 사용자 정보를 저장할 상태 추가
+    const [loggedInUser, setLoggedInUser] = useState(null);
+
+    // 로그인한 사용자 정보를 가져오는 useEffect 추가
+    useEffect(() => {
+        const fetchLoggedInUser = async () => {
+            try {
+                const response = await axios.get('/api/employee', {
+                    withCredentials: true
+                });
+
+                if (response.status === 200) {
+                    setLoggedInUser(response.data);
+                } else {
+                    console.error('로그인한 사용자 정보를 가져오는데 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('로그인한 사용자 정보를 가져오는 중 오류 발생:', error);
+            }
+        };
+        fetchLoggedInUser();
+    }, []);
+
     // 초기 화면에 재직자만 표시
     useEffect(() => {
         pageEmployees(1, 'employeesN');
@@ -95,9 +118,14 @@ function EmployeeList() {
 
         axios.get(url)
             .then(response => {
-                setEmployees(response.data.content);
+                const sortedData = response.data.content.sort((a, b) => {
+                    if (a.employeeId < b.employeeId) return -1;
+                    if (a.employeeId > b.employeeId) return 1;
+                    return 0;
+                });
+                setEmployees(sortedData);
                 setTotalPages(response.data.totalPages);
-                setSelectedEmployees(new Array(response.data.content.length).fill(false));
+                setSelectedEmployees(new Array(sortedData.length).fill(false));
             })
             .catch(error => {
                 console.error(`${type} 목록 조회 에러:`, error);
@@ -575,25 +603,27 @@ function EmployeeList() {
                                             <td>{employee.employeeUpdateDate ? format(new Date(employee.employeeUpdateDate), 'yyyy-MM-dd HH:mm') : '-'}</td>
                                             <td>{employee.employeeDeleteDate ? format(new Date(employee.employeeDeleteDate), 'yyyy-MM-dd HH:mm') : '-'}</td>
                                             <td>
-                                                {employee.employeeDeleteYn !== 'Y' ? (
-                                                    <div className="btn_group">
-                                                        <button
-                                                            className="box small"
-                                                            onClick={() => openModifyModal(employee)}
-                                                        >
-                                                            수정하기
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div className="btn_group">
-                                                        <button
-                                                            className="box small disabled"
-                                                            disabled
-                                                        >
-                                                            수정하기
-                                                        </button>
-                                                    </div>
-                                                )}
+                                                {loggedInUser && loggedInUser.jobId >= 1 && loggedInUser.jobId <= 4 ? (
+                                                    employee.employeeDeleteYn !== 'Y' ? (
+                                                        <div className="btn_group">
+                                                            <button
+                                                                className="box small"
+                                                                onClick={() => openModifyModal(employee)}
+                                                            >
+                                                                수정하기
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="btn_group">
+                                                            <button
+                                                                className="box small disabled"
+                                                                disabled
+                                                            >
+                                                                수정하기
+                                                            </button>
+                                                        </div>
+                                                    )
+                                                ) : null}
                                             </td>
                                         </tr>
                                     ))

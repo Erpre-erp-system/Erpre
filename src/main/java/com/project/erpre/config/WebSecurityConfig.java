@@ -59,11 +59,11 @@ public class WebSecurityConfig {
                     .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // 세션 기반으로 설정
                 .and()
                 .authorizeRequests()
+                    .antMatchers("/orderReport", "/employeeAttend", "/employeeSalary").hasAuthority("ROLE_SPECIAL_ACCESS") // 특정 페이지 접근 제한
                     .antMatchers("/android/api/**").permitAll()
                     .antMatchers("/**", "/talk/**", "/user/**", "/app/**", "/topic/**", "/ws/**", "/queue/**", "/uploads/**", "/profile-pictures/**", "/chat/**", "/Temp/**").permitAll()
                     .antMatchers("/",  "/static/**", "/bundle/**", "/img/**", "/css/**", "/fonts/**", "/index.html").permitAll()
                     .antMatchers("/api/login", "/login").permitAll() // 로그인 앤드포인트 허용 (현재 모든 페이지 접근 허용! 이거 나중에 바꿔야 함)
-                    .antMatchers("/orderReport", "/employeeAttend", "/employeeSalary").hasAuthority("ROLE_SPECIAL_ACCESS") // 특정 페이지 접근 제한
                     .antMatchers("/user/**", "/").hasAnyRole("Staff", "Admin", "Assistant Manager", "Executive", "Director", "Manager")
                     .antMatchers("/admin/**").hasRole("Admin")
                     .anyRequest().permitAll() // 인증 필요 없음

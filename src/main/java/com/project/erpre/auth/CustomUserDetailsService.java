@@ -51,7 +51,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return User.builder()
                 .username(employee.getEmployeeId()) // employeeId를 username으로 사용
                 .password(employee.getEmployeePw()) // employeePw를 password로 사용 (평문 그대로 사용)
-                .authorities(new SimpleGrantedAuthority(role)) // job 테이블에서 가져온 role을 authority로 사용
+                .authorities(authorities) // 기존 생성한 authorities 리스트를 사용
                 .build();
     }
 }

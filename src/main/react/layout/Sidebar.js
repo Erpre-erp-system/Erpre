@@ -28,7 +28,7 @@ function Sidebar({ currentMenu }) {
 
                 if (response.status === 200) {
                     const data = response.data;
-                    // console.log('직원 데이터:', data);console.log('직원 데이터:', data);
+                    //console.log('직원 데이터:', data);console.log('직원 데이터:', data);
                     setEmployee(data);
                 } else {
                     console.error('사용자 정보를 가져오는데 실패했습니다.');
@@ -107,9 +107,11 @@ function Sidebar({ currentMenu }) {
                                 주문 목록
                             </a>
                         </li>
-                        <li className={currentMenu === 'orderReport' ? 'active' : ''}>
-                            <a href="#" onClick={() => handleSubMenuClick('orderReport', '/orderReport')}>주문 현황 보고서</a>
-                        </li>
+                        {employee && employee.jobId >= 1 && employee.jobId <= 4 && (
+                            <li className={currentMenu === 'orderReport' ? 'active' : ''}>
+                                <a href="#" onClick={() => handleSubMenuClick('orderReport', '/orderReport')}>주문 현황 보고서</a>
+                            </li>
+                        )}
                         <li className={currentMenu === 'orderDispatch' ? 'active' : ''}>
                             <a href="#" onClick={() => handleSubMenuClick('orderDispatch', '/orderDispatch')}>주문 출고</a>
                         </li>
@@ -148,12 +150,16 @@ function Sidebar({ currentMenu }) {
                         <li className={currentMenu === 'employeeList' ? 'active' : ''}>
                             <a href="#" onClick={() => handleSubMenuClick('employeeList', '/employeeList')}>직원 관리</a>
                         </li>
-                        <li className={currentMenu === 'employeeAttend' ? 'active' : ''}>
-                            <a href="#" onClick={() => handleSubMenuClick('employeeAttend', '/employeeAttend')}>근태 관리</a>
-                        </li>
-                        <li className={currentMenu === 'employeeSalary' ? 'active' : ''}>
-                            <a href="#" onClick={() => handleSubMenuClick('employeeSalary', '/employeeSalary')}>급여 관리</a>
-                        </li>
+                        {employee && employee.jobId >= 1 && employee.jobId <= 4 && (
+                            <>
+                                <li className={currentMenu === 'employeeAttend' ? 'active' : ''}>
+                                    <a href="#" onClick={() => handleSubMenuClick('employeeAttend', '/employeeAttend')}>근태 관리</a>
+                                </li>
+                                <li className={currentMenu === 'employeeSalary' ? 'active' : ''}>
+                                    <a href="#" onClick={() => handleSubMenuClick('employeeSalary', '/employeeSalary')}>급여 관리</a>
+                                </li>
+                            </>
+                        )}
                     </ul>
                 </li>
             </ul>
