@@ -109,14 +109,18 @@ function Order() {
             try {
                 const empData = await fetchEmployee();
                 if (empData) {
-                    setRole(empData.employeeRole);
+                    const jobId = empData.jobId; // jobId 가져오기
+                    if (jobId >= 1 && jobId <= 4) {
+                        setRole('admin');
+                    } else {
+                        setRole('normal');
+                    }
                 }
             } catch (err) {
                 window.showToast('해당 페이지에 접근 권한이 없습니다.', 'error');
                 setTimeout(() => {
                     window.location.href = '/main';
                 }, 1000); // 1000 밀리초
-            } finally {
             }
         };
         fetchData();
@@ -148,20 +152,18 @@ function Order() {
 
     const handleApproveOrder = async () => {    
         try {
-
-            window.confirmCustom("해당 주문을 승인하시겠습니까?<br>이 결정은 되돌릴 수 없습니다.").then(result => {
-                if (result) {
-                    const result = updateOrderStatus(orderNo, 'approved');
-
-                    if (result) {
-                        window.showToast("주문 승인이 정상적으로 완료되었습니다.");
-                        window.location.reload();
-                    } else {
-                        throw new Error("주문 승인 중 오류 발생");
-                    }
+            const result = await window.confirmCustom("해당 주문을 승인하시겠습니까?<br>이 결정은 되돌릴 수 없습니다.");
+            if (result) {
+                const updateResult = await updateOrderStatus(orderNo, 'approved');
+                if (updateResult) {
+                    window.showToast("주문 승인이 정상적으로 완료되었습니다.");
+                    setTimeout(() => {
+                        window.location.href = '/orderList';
+                    }, 500); // 0.5초 후에 주문 목록 페이지로 이동
+                } else {
+                    throw new Error("주문 승인 중 오류 발생");
                 }
-            });
-
+            }
         } catch (error) {
             window.showToast('주문 승인이 실패했습니다. 관리자에게 문의하세요', 'error');
         }
@@ -175,7 +177,9 @@ function Order() {
 
                     if (result) {
                         window.showToast("주문 반려가 정상적으로 완료되었습니다.");
-                        window.location.reload();
+                        setTimeout(() => {
+                            window.location.href = '/orderList';
+                        }, 500);
                     } else {
                         throw new Error('주문 반려 중 오류 발생');
                     }

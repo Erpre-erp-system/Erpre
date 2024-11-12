@@ -137,9 +137,9 @@ function EmployeeSalary() {
                     valueB = b.department && b.department.departmentName ? b.department.departmentName.toLowerCase() : '';
                     break;
                 }
-                case 'jobName': {
-                    valueA = a.job && a.job.jobName ? a.job.jobName.toLowerCase() : '';
-                    valueB = b.job && b.job.jobName ? b.job.jobName.toLowerCase() : '';
+                case 'jobId ': {
+                    valueA = a.job && a.job.jobId ? a.job.jobId.toLowerCase() : '';
+                    valueB = b.job && b.job.jobId ? b.job.jobId.toLowerCase() : '';
                     break;
                 }
                 case 'baseSalary': {
@@ -228,23 +228,24 @@ function EmployeeSalary() {
                                     </button>
                                 )}
                             </div>
+                            <div className="radio_box">
+                                <span>상태</span>
+                                <input type="radio" id="all" name="filterType" value="all"
+                                       checked={currentView === 'all'}
+                                       onChange={() => handleFilterChange('all')} />
+                                <label htmlFor="all">전체</label>
+                                <input type="radio" id="active" name="filterType" value="active"
+                                       checked={currentView === 'active'}
+                                       onChange={() => handleFilterChange('active')} />
+                                <label htmlFor="active">정상</label>
+                                <input type="radio" id="deleted" name="filterType" value="deleted"
+                                       checked={currentView === 'deleted'}
+                                       onChange={() => handleFilterChange('deleted')} />
+                                <label htmlFor="deleted">삭제</label>
+                            </div>
                         </div>
 
-                        <div className="radio_box">
-                            <span>상태</span>
-                            <input type="radio" id="all" name="filterType" value="all"
-                                   checked={currentView === 'all'}
-                                   onChange={() => handleFilterChange('all')} />
-                            <label htmlFor="all">전체</label>
-                            <input type="radio" id="active" name="filterType" value="active"
-                                   checked={currentView === 'active'}
-                                   onChange={() => handleFilterChange('active')} />
-                            <label htmlFor="active">정상</label>
-                            <input type="radio" id="deleted" name="filterType" value="deleted"
-                                   checked={currentView === 'deleted'}
-                                   onChange={() => handleFilterChange('deleted')} />
-                            <label htmlFor="deleted">삭제</label>
-                        </div>
+
                     </div>
 
                     <div className="table_wrap">
@@ -458,4 +459,4 @@ root.render(
     <BrowserRouter>
         <EmployeeSalary />
     </BrowserRouter>
-);
+)

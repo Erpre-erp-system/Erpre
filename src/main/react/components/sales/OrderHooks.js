@@ -435,7 +435,7 @@ export const useHooksList = () => {
                 // 2초 후에 페이지 이동 (토스트 메시지가 충분히 표시될 시간을 확보)
                 setTimeout(() => {
                     window.location.href = `/order?no=${order_h_no}`;
-                }, 1500); // 1500 밀리초
+                }, 500); // 500 밀리초
             } else {
                 const errorText = await response.text();
                 console.error('주문 처리 오류:', errorText);
@@ -588,8 +588,8 @@ export const useHooksList = () => {
             window.showToast("주문을 성공적으로 수정했습니다.");
             // 2초 후에 페이지 이동 (토스트 메시지가 충분히 표시될 시간을 확보)
             setTimeout(() => {
-                window.location.href = `/order?no=${orderNo}`;
-            }, 1500); // 1500 밀리초
+                window.location.href = `/orderList`;
+            }, 500); // 500 밀리초
         } catch (error) {
             console.error('주문 수정 중 오류 발생:', error.message);
             window.showToast("주문 수정 중 오류가 발생했습니다. 다시 확인해주세요.", 'error');
@@ -677,8 +677,8 @@ export const useHooksList = () => {
 
                 window.showToast("반려된 주문이 성공적으로 다시 제출되었습니다.");
                 setTimeout(() => {
-                    window.location.href = `/order?no=${newOrderNo}`;
-                }, 1500);
+                    window.location.href = `/orderList`;
+                }, 500);
             } else {
                 const errorText = await response.text();
                 console.error('주문 생성 오류:', errorText);

@@ -46,6 +46,29 @@ function EmployeeList() {
         pageEmployees(1, 'employeesN');
     }, []);
 
+    const departmentOptions = [
+        { departmentId: 1, departmentName: '본부' },
+        { departmentId: 2, departmentName: 'IT부' },
+        { departmentId: 3, departmentName: '영업부' },
+        { departmentId: 4, departmentName: '인사부' },
+        { departmentId: 5, departmentName: '재고 관리부' },
+        { departmentId: 6, departmentName: '경영 지원부' },
+        { departmentId: 7, departmentName: '전략 기획부' },
+        { departmentId: 8, departmentName: '수출입 관리부' },
+        { departmentId: 9, departmentName: '마케팅부' },
+        { departmentId: 10, departmentName: 'R&D부' }
+    ];
+
+    const jobOptions = [
+        { jobId: 1, jobName: '대표이사' },
+        { jobId: 2, jobName: '임원' },
+        { jobId: 3, jobName: '부장' },
+        { jobId: 4, jobName: '팀장' },
+        { jobId: 5, jobName: '대리' },
+        { jobId: 6, jobName: '계장' },
+        { jobId: 7, jobName: '사원' }
+    ];
+
     // 검색어 변경 시 직원 목록 필터링
     useEffect(() => {
         if (debouncedSearchEmployee === '') {
@@ -182,9 +205,30 @@ function EmployeeList() {
 
     // 수정된 직원 정보 저장 및 서버로 전송
     const handleModifySubmit = () => {
+
+        if (!selectedEmployee.departmentId) {
+            window.showToast('부서를 선택해주세요.', 'error');
+            return;
+        }
+
+        if (!selectedEmployee.jobId) {
+            window.showToast('직급을 선택해주세요.', 'error');
+            return;
+        }
+
         if (!validateEmployeeData(selectedEmployee)) return;
 
-        axios.put(`/api/updateEmployee/${selectedEmployee.employeeId}`, selectedEmployee)
+        const employeeData = {
+            employeeId: selectedEmployee.employeeId,
+            employeePw: selectedEmployee.employeePw,
+            employeeName: selectedEmployee.employeeName,
+            employeeEmail: selectedEmployee.employeeEmail,
+            employeeTel: selectedEmployee.employeeTel,
+            departmentId: selectedEmployee.departmentId,
+            jobId: selectedEmployee.jobId
+        };
+
+        axios.put(`/api/updateEmployee/${selectedEmployee.employeeId}`, employeeData)
             .then(() => {
                 window.showToast("직원 정보가 성공적으로 수정되었습니다.");
                 closeModifyModal();
@@ -195,6 +239,7 @@ function EmployeeList() {
                 window.showToast('직원 정보 수정 중 에러가 발생했습니다.', 'error');
             });
     };
+
 
     // 선택된 직원의 정보 수정
     const handleEmployeeChange = (field, value) => {
@@ -230,7 +275,9 @@ function EmployeeList() {
             employeeName: '',
             employeeEmail: '',
             employeeTel: '',
-            employeeRole: ''
+            employeeRole: '',
+            departmentId: '',
+            jobId: ''
         });
         setShowInsertModal(true);
     };
@@ -249,8 +296,13 @@ function EmployeeList() {
 
     // 직원 등록
     const InsertSubmit = () => {
-        if (newEmployee.employeeRole === '') {
-            window.showToast('권한을 선택해주세요.', 'error');
+        if (newEmployee.departmentId === '') {
+            window.showToast('부서를 선택해주세요.', 'error');
+            return;
+        }
+
+        if (newEmployee.jobId === '') {
+            window.showToast('직급을 선택해주세요.', 'error');
             return;
         }
 
@@ -263,7 +315,17 @@ function EmployeeList() {
                 if (response.data) {
                     window.showToast('이미 존재하는 아이디입니다.', 'error');
                 } else {
-                    axios.post('/api/registerEmployee', newEmployee)
+                    const employeeData = {
+                        employeeId: newEmployee.employeeId,
+                        employeePw: newEmployee.employeePw,
+                        employeeName: newEmployee.employeeName,
+                        employeeEmail: newEmployee.employeeEmail,
+                        employeeTel: newEmployee.employeeTel,
+                        departmentId: newEmployee.departmentId,
+                        jobId: newEmployee.jobId
+                    };
+
+                    axios.post('/api/registerEmployee', employeeData)
                         .then(() => {
                             window.showToast('직원 등록이 완료되었습니다.');
                             closeInsertModal();
@@ -273,7 +335,8 @@ function EmployeeList() {
                                 employeeName: '',
                                 employeeEmail: '',
                                 employeeTel: '',
-                                employeeRole: ''
+                                departmentId: '',
+                                jobId: ''
                             });
                             pageEmployees(1, currentView);
                         })
@@ -288,6 +351,7 @@ function EmployeeList() {
                 window.showToast('ID 중복 체크 중 에러가 발생했습니다.', 'error');
             });
     };
+
 
     // 유효성 검사
     const validateEmployeeData = (employeeData) => {
@@ -647,16 +711,35 @@ function EmployeeList() {
                                     />
                                 </div>
                                 <div className='field_wrap'>
-                                    <label>권한</label>
+                                    <label>부서</label>
                                     <select
                                         className='box'
-                                        value={selectedEmployee.employeeRole}
-                                        onChange={(e) => handleEmployeeChange('employeeRole', e.target.value)}
+                                        value={selectedEmployee.departmentId || ''}
+                                        onChange={(e) => handleEmployeeChange('departmentId', e.target.value)}
                                     >
-                                        <option value="">권한을 선택해주세요</option>
-                                        <option value="admin">admin</option>
-                                        <option value="staff">staff</option>
-                                        <option value="manager">manager</option>
+                                        <option value="">부서를 선택해주세요</option>
+                                        {departmentOptions.map(department => (
+                                            <option key={department.departmentId} value={department.departmentId}>
+                                                {department.departmentName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* 직급 선택 필드 */}
+                                <div className='field_wrap'>
+                                    <label>직급</label>
+                                    <select
+                                        className='box'
+                                        value={selectedEmployee.jobId || ''}
+                                        onChange={(e) => handleEmployeeChange('jobId', e.target.value)}
+                                    >
+                                        <option value="">직급을 선택해주세요</option>
+                                        {jobOptions.map(job => (
+                                            <option key={job.jobId} value={job.jobId}>
+                                                {job.jobName}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>
@@ -730,16 +813,35 @@ function EmployeeList() {
                                     />
                                 </div>
                                 <div className='field_wrap'>
-                                    <label>권한</label>
+                                    <label>부서</label>
                                     <select
                                         className='box'
-                                        value={newEmployee.employeeRole}
-                                        onChange={(e) => setNewEmployee({ ...newEmployee, employeeRole: e.target.value })}
+                                        value={newEmployee.departmentId}
+                                        onChange={(e) => setNewEmployee({ ...newEmployee, departmentId: e.target.value })}
                                     >
-                                        <option value="">권한을 선택해주세요</option>
-                                        <option value="admin">admin</option>
-                                        <option value="staff">staff</option>
-                                        <option value="manager">manager</option>
+                                        <option value="">부서를 선택해주세요</option>
+                                        {departmentOptions.map(department => (
+                                            <option key={department.departmentId} value={department.departmentId}>
+                                                {department.departmentName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* 직급 선택 필드 */}
+                                <div className='field_wrap'>
+                                    <label>직급</label>
+                                    <select
+                                        className='box'
+                                        value={newEmployee.jobId}
+                                        onChange={(e) => setNewEmployee({ ...newEmployee, jobId: e.target.value })}
+                                    >
+                                        <option value="">직급을 선택해주세요</option>
+                                        {jobOptions.map(job => (
+                                            <option key={job.jobId} value={job.jobId}>
+                                                {job.jobName}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>

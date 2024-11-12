@@ -10,6 +10,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 // Spring Security 인증처리
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -34,6 +37,15 @@ public class CustomUserDetailsService implements UserDetailsService {
         String role = job.getJobRole();
         if (!role.startsWith("ROLE_")) {
             role = "ROLE_" + role;
+        }
+
+        // 권한 리스트 생성
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(role)); // 기본 역할 추가
+
+        // jobId가 1 이상 4 이하인 경우 ROLE_SPECIAL_ACCESS 추가
+        if (job.getJobId() >= 1 && job.getJobId() <= 4) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_SPECIAL_ACCESS"));
         }
 
         return User.builder()

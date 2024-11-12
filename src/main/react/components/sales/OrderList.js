@@ -36,7 +36,7 @@ const fetchEmployee = async () => {
 };
 
 const updateOrderStatus = async (orderNo) => {
-    logger.info("Order status update request received for orderNo: " + orderNo + ", new status: " + orderDTO.getOrderHStatus());
+//    logger.info("Order status update request received for orderNo: " + orderNo + ", new status: " + orderDTO.getOrderHStatus());
 
     try {
         const response = await fetch(`/api/order/updateStatus/${orderNo}`, {
@@ -44,11 +44,10 @@ const updateOrderStatus = async (orderNo) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ orderHStatus: 'approved' }),
-
+            body: JSON.stringify({ orderHStatus: status }),
         });
         if (response.ok) {
-            console.log("approved success");
+            console.log(`${status} success`);
             return true;
         } else {
             throw new Error('주문 상태 업데이트 실패');
@@ -153,47 +152,48 @@ function OrderList() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // 직원 정보 가져오기
                 const empData = await fetchEmployee();
                 if (empData) {
-                    setRole(empData.employeeRole);
+                    const jobId = empData.jobId;
+                    const determinedRole = (jobId >= 1 && jobId <= 4) ? 'admin' : 'normal';
+                    setRole(determinedRole);
                     setEmployeeId(empData.employeeId);
 
                     // Assigned 모드에 대한 권한 검사
-                    if (itsAssignedMode && empData.employeeRole !== 'admin') {
+                    if (itsAssignedMode && determinedRole !== 'admin') {
                         window.showToast('해당 페이지에 접근 권한이 없습니다.', 'error');
                         setTimeout(() => {
-                            window.location.href = '/main'; // 권한 없는 사용자는 메인 페이지로 리디렉션
-                        }, 1000); // 1000 밀리초
+                            window.location.href = '/main';
+                        }, 1000);
                         return;
                     }
 
-                }
-                // 주문 정보 가져오기
-                const orderData = await fetchOrders();
+                    // 주문 정보 가져오기
+                    const orderData = await fetchOrders();
 
-                // 주문 필터링
-                if (empData.employeeRole === 'admin') {
-                    setOrders(orderData); // 관리자일 경우 모든 주문 표시
-                } else {
-                    const filteredOrders = orderData.filter(order => order.employee.employeeId === empData.employeeId);
-                    setOrders(filteredOrders);
+                    // 역할에 따른 주문 필터링
+                    if (determinedRole === 'admin') {
+                        setOrders(orderData); // 관리자는 모든 주문을 볼 수 있음
+                    } else {
+                        const filteredOrders = orderData.filter(order => order.employee.employeeId === empData.employeeId);
+                        setOrders(filteredOrders); // 일반 직원은 자신이 담당한 주문만 볼 수 있음
+                    }
                 }
             } catch (err) {
                 window.showToast('해당 페이지에 접근 권한이 없습니다.', 'error');
                 setTimeout(() => {
                     window.location.href = '/main';
-                }, 1000); // 1000 밀리초
+                }, 1000);
             } finally {
-                setLoading(false); // 데이터 로딩 완료
+                setLoading(false);
             }
         };
         fetchData();
-        // 현재 날짜를 기본값으로 설정
-        const today = new Date();
-        today.setHours(today.getHours() + 9); // UTC 시간에 9시간 더하기 (한국 시간)
-        const formattedToday = today.toISOString().split('T')[0];
-        setEndDate(formattedToday);
+        // 현재 날짜를 기본값으로 설정  밑의 코드는 주문목록페이지를 처음 로드할때 종료날짜가 자동으로 오늘날짜로 하게끔해줌
+//        const today = new Date();
+//        today.setHours(today.getHours() + 9); // UTC 시간에 9시간 더하기 (한국 시간)
+//        const formattedToday = today.toISOString().split('T')[0];
+//        setEndDate(formattedToday);
     }, [itsAssignedMode]);
 
     // 필터링된 주문을 등록일 기준으로 내림차순 정렬
@@ -368,7 +368,7 @@ function OrderList() {
 
                 // 선택된 주문에 대해 비동기 요청 실행
                 const orderPromises = Array.from(selectedOrders).map(orderNo => {
-                    return updateOrderStatus(orderNo)
+                    return updateOrderStatus(orderNo, 'approved')
                         .then(result => {
                             if (result) {
                                 successCount++;

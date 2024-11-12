@@ -140,8 +140,14 @@ public class EmployeeService {
         }
     }
 
-    //신규직원 등록
+    // 신규직원 등록
     public void registerEmployee(EmployeeDTO employeeDTO) {
+        // Department와 Job 엔티티 조회
+        Department department = departmentRepository.findById(employeeDTO.getDepartmentId())
+                .orElseThrow(() -> new RuntimeException("부서를 찾을 수 없습니다."));
+        Job job = jobRepository.findById(employeeDTO.getJobId())
+                .orElseThrow(() -> new RuntimeException("직급을 찾을 수 없습니다."));
+
         Employee employee = Employee.builder()
                 .employeeId(employeeDTO.getEmployeeId())
                 .employeePw(employeeDTO.getEmployeePw())
@@ -150,12 +156,14 @@ public class EmployeeService {
                 .employeeTel(employeeDTO.getEmployeeTel())
                 .employeeDeleteYn("N")  // 기본값 설정
                 .employeeInsertDate(new Timestamp(System.currentTimeMillis()))
+                .department(department) // 추가된 부분
+                .job(job) // 추가된 부분
                 .build();
 
         employeeRepository.save(employee);
     }
 
-    //수정모달에서 직원정보 수정
+    // 수정모달에서 직원정보 수정
     public void updateEmployee(String employeeId, EmployeeDTO employeeDTO) {
         Employee employee = employeeRepository.findById(employeeId).orElse(null);
         if (employee != null) {
@@ -164,6 +172,16 @@ public class EmployeeService {
             employee.setEmployeeEmail(employeeDTO.getEmployeeEmail());
             employee.setEmployeeTel(employeeDTO.getEmployeeTel());
             employee.setEmployeeUpdateDate(new Timestamp(System.currentTimeMillis()));  // 수정일자 업데이트
+
+            // Department와 Job 업데이트
+            Department department = departmentRepository.findById(employeeDTO.getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("부서를 찾을 수 없습니다."));
+            Job job = jobRepository.findById(employeeDTO.getJobId())
+                    .orElseThrow(() -> new RuntimeException("직급을 찾을 수 없습니다."));
+
+            employee.setDepartment(department);
+            employee.setJob(job);
+
             employeeRepository.save(employee);  // 수정된 정보 저장
         }
     }
