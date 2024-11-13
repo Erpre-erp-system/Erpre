@@ -61,9 +61,7 @@ dependencies {
 	implementation 'software.amazon.awssdk:s3:2.29.8' // AWS S3 첨부파일
 	implementation 'io.github.cdimascio:java-dotenv:5.2.2' // 계정 보안 env 파일 라이브러리
 
-
-
-	implementation 'com.itextpdf:itextpdf:5.5.13.3' //pdf 다운로드
+	implementation 'org.apache.pdfbox:pdfbox:2.0.27' //pdf 다운로드
 	//Microsoft Office 문서 다운로드
 	implementation 'org.apache.poi:poi:5.2.3'        // POI 라이브러리
 	implementation 'org.apache.poi:poi-ooxml:5.2.3'  // OOXML 지원 라이브러리

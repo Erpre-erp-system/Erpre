@@ -1,10 +1,13 @@
 /* 모달 공통 레이아웃 */
-.modal_container.dispatch { width: 620px;}
+.modal_container.dispatch { width: 400px;}
 .modal_container.dispatch .modal-actions { margin-top: 5px; }
 .modal_container .header {
-    text-align: center;
-    font-size: 1.5em;
+    display: flex;
+    justify-content: center;
+    font-size: 20px;
     font-weight: bold;
+    margin-bottom: 20px;
+    text-decoration: underline;
 }
 /* 모달 닫기 버튼 */
 .btn_close {
@@ -70,20 +73,62 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
 }
+/* 섹션 구분 */
+.form-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+/* 위쪽 섹션 (창고명, 창고 담당자명) */
+.form-section.top-section {
+    margin-bottom: 20px;
+}
+/* 아래쪽 섹션 (창고 전화번호, 창고 주소) */
+.form-section.bottom-section {
+    margin-top: 10px;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
-    text-align: center;
+    width: 90%; 
+    margin-bottom: 10px;
 }
-.form-group label { margin-bottom: 2px; font-weight: 500; color: #444; margin-left: 2px; font-size: 15px; }
-.form-group input,
-.form-group select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; transition: border-color 0.3s ease; font-family: "Pretendard", sans-serif; height: 40px;  }
-.form-group input[readonly], .form-group select[readonly]
-.form-group input:disabled, .form-group select:disabled { background-color: #fafafa; }
-.form-group input:focus, .form-group select:focus { border-color: #007CC1; }
+
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #444;
+    font-size: 15px;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.form-group select,
+.form-group p {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: "Pretendard", sans-serif;
+    height: 40px;
+    transition: border-color 0.3s ease;
+    text-align: center; 
+    text-align-last: center;
+}
+
+.form-group select:focus {
+    border-color: #007CC1;
+}
 .form-group .span_red { color:red }
 
 /* 출고 버튼을 모달 상단 오른쪽에 위치 */
@@ -360,4 +405,33 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
+}
+
+/* 출고 상태 컬럼 스타일 */
+.dispatch-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    border-radius: 5px;
+    color: #fff;
+    font-weight: bold;
+    margin-top: 14px;
+    margin-left: 5px;
+    height: 29px;
+    width: 68px;
+}
+
+
+/* 각 상태에 따른 색상 */
+.dispatch-status.pending {
+    background-color: #e57368;
+}
+
+.dispatch-status.inProgress {
+    background-color: #f0ad4e;
+}
+
+.dispatch-status.complete {
+    background-color: #5cb85c;
 }

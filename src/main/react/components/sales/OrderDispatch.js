@@ -222,69 +222,65 @@ function WarehouseAssignmentModal({ show, onClose, onSave, onDelete, dispatchSta
 }
 
 //출고지시 모달창
-function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchData, onStatusChange }) {
+function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchData, onStatusChange, showDispatchButton }) {
     const [form, setForm] = useState({
-      //고객사
-      customerName: '', // 고객사 이름 - customer
-      customerAddr: '', // 고객사 주소(납품지주소) - customer
-      //출하창고
-      warehouseName: '', //창고명 - warehouse
-      warehouseManagerName: '', //창고명 담당자 - warehouse
-      orderDDeliveryRequestDate: '', //납품요청일 - orderD
-      //상품(orderH)
-      productNm: '', //품목명 - product
-      orderDPrice: '', //출고단가 - orderD
-      orderDQty: '', //수량(단위포함) - orderD
-      orderDTotalPrice: '', //총금액 - orderD
-
+        // 고객사
+        customerName: '',
+        customerAddr: '',
+        // 출하창고
+        warehouseName: '',
+        warehouseManagerName: '',
+        orderDDeliveryRequestDate: '',
+        // 상품(orderH)
+        productNm: '',
+        orderDPrice: '',
+        orderDQty: '',
+        orderDTotalPrice: '',
     });
 
-
-    //모달 알림창 2번 뜨는거 방지
+    // 모달 알림창 2번 뜨는 거 방지
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     useEffect(() => {
         if (show && dispatchData) {
-          setForm({
-              customerName: dispatchData.customerName,
-              customerAddr: dispatchData.customerAddr,
-              warehouseName: dispatchData.warehouseName || '',
-              warehouseManagerName: dispatchData.warehouseManagerName || '',
-              orderDDeliveryRequestDate: formatDateTime(dispatchData.orderDDeliveryRequestDate),
-              productNm: dispatchData.productNm,
-              orderDPrice: dispatchData.orderDPrice,
-              orderDQty: dispatchData.orderDQty,
-              orderDTotalPrice: dispatchData.orderDTotalPrice,
-
-          });
+            setForm({
+                customerName: dispatchData.customerName,
+                customerAddr: dispatchData.customerAddr,
+                warehouseName: dispatchData.warehouseName || '',
+                warehouseManagerName: dispatchData.warehouseManagerName || '',
+                orderDDeliveryRequestDate: formatDateTime(dispatchData.orderDDeliveryRequestDate),
+                productNm: dispatchData.productNm,
+                orderDPrice: dispatchData.orderDPrice,
+                orderDQty: dispatchData.orderDQty,
+                orderDTotalPrice: dispatchData.orderDTotalPrice,
+            });
         }
-      }, [show, dispatchData]);
+    }, [show, dispatchData]);
 
-
-   // 창고 배정 모달 열림 상태 관리
+    // 창고 배정 모달 열림 상태 관리
     const [showWarehouseModal, setShowWarehouseModal] = useState(false);
 
     // 창고 배정 모달 열기 함수
     const handleWarehouseModalOpen = () => {
-    setShowWarehouseModal(true);
+        setShowWarehouseModal(true);
     };
 
     // 창고 배정 모달 닫기 함수
     const handleWarehouseModalClose = () => {
-    setShowWarehouseModal(false);
+        setShowWarehouseModal(false);
     };
 
     // 창고 배정 모달에서 저장할 때 호출되는 함수
     const handleWarehouseAssignmentSave = (warehouseData) => {
-    setForm(prevForm => ({
-        ...prevForm,
-        warehouseName: warehouseData.warehouseName, // 선택한 창고명 업데이트
-        warehouseManagerName: warehouseData.warehouseManagerName, // 선택한 창고 담당자명 업데이트
-    }));
-    setShowWarehouseModal(false); // 모달 닫기
+        setForm(prevForm => ({
+            ...prevForm,
+            warehouseName: warehouseData.warehouseName, // 선택한 창고명 업데이트
+            warehouseManagerName: warehouseData.warehouseManagerName, // 선택한 창고 담당자명 업데이트
+        }));
+        setShowWarehouseModal(false); // 모달 닫기
     };
 
-    //출고 확인 함수
+    // 출고 확인 함수
     const handleDispatchConfirm = () => {
         axios.post('/api/orderDispatch/updateStatus', {
             dispatchNo: dispatchData.dispatchNo,
@@ -310,15 +306,15 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
         setShowConfirmModal(true);
     };
 
-    // 다운로드 옵션 표시 여부 상태 (pdf,excel)
+    // 다운로드 옵션 표시 여부 상태 (pdf, excel)
     const [showDownloadOptions, setShowDownloadOptions] = useState(false);
 
-    // 다운로드 버튼 클릭 핸들러 (pdf,excel)
+    // 다운로드 버튼 클릭 핸들러 (pdf, excel)
     const handleDownloadClick = () => {
         setShowDownloadOptions(prev => !prev);
     };
 
-   // PDF 다운로드 핸들러
+    // PDF 다운로드 핸들러
     const handlePdfDownload = () => {
         axios({
             url: `/api/orderDispatch/export/pdf/${dispatchData.dispatchNo}`,
@@ -362,11 +358,15 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
         setShowDownloadOptions(false); // 옵션 선택 후 닫기
     };
 
+    // QR 코드 제목 생성
+    const qrCodeTitle = `상품상세(${dispatchData ? dispatchData.dispatchNo : ''})`;
+    
     // QR 코드에 표시할 데이터 생성
-    const qrCodeValue = `품목명: ${dispatchData ? dispatchData.productNm : ''}, 수량: ${dispatchData ? dispatchData.orderDQty : ''}`;
+    const qrCodeValue = `상품상세(${dispatchData ? dispatchData.dispatchNo : ''})\n품목명: ${dispatchData ? dispatchData.productNm : ''}, 수량: ${dispatchData ? dispatchData.orderDQty + 'EA' : ''}`;
+
+
     // QR url 연결
     const qrCodeUrl = `http://localhost:8787/dispatch/${dispatchData ? dispatchData.dispatchNo : ''}`;
-
 
     // QR코드 모달 표시 상태
     const [showQrModal, setShowQrModal] = useState(false);
@@ -386,7 +386,6 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
         setShowQrModal(false);
     };
 
-
     if (!show) return null; // 모달 표시 여부 체크
 
     return (
@@ -396,7 +395,7 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
                 <button className="btn_close" onClick={onClose}><i className="bi bi-x-lg"></i></button>
 
                 <div className="dispatch-wrap">
-                {/* 출고증 제목 */}
+                    {/* 출고증 제목 */}
                     <div className="dispatch-note">
                         <h2>출고증</h2>
                     </div>
@@ -407,15 +406,16 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
                         <div className="customer-info">
                             <table>
                                 <tbody>
-                                <tr>
-                                    <th>고객사 이름</th>
-                                    <td>{form.customerName}</td>
-                                </tr>
-                                <tr>
-                                    <td colSpan="2" className="qr-modal-content">
-                                        <QRCodeCanvas value={qrCodeValue} />
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <th>고객사 이름</th>
+                                        <td>{form.customerName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colSpan="2" className="qr-modal-content">
+                                            <h3>{qrCodeTitle}</h3>
+                                            <QRCodeCanvas value={qrCodeValue} />
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -449,59 +449,59 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
                         </div>
                     </div>
 
-                        {/* 출하관련 정보 */}
-                        <div className="dispatch-info">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <th>납품지 주소</th>
-                                        <td>{form.customerAddr}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>납품 요청일</th>
-                                        <td>{form.orderDDeliveryRequestDate}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>출하창고</th>
-                                        <td>{form.warehouseName}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    {/* 출하관련 정보 */}
+                    <div className="dispatch-info">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th>납품지 주소</th>
+                                    <td>{form.customerAddr}</td>
+                                </tr>
+                                <tr>
+                                    <th>납품 요청일</th>
+                                    <td>{form.orderDDeliveryRequestDate}</td>
+                                </tr>
+                                <tr>
+                                    <th>출하창고</th>
+                                    <td>{form.warehouseName}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                        {/* 상품관련 정보 */}
-                        <div className="product-info">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>품목명</th>
-                                        <th>수량</th>
-                                        <th>출고단가</th>
-                                        <th>총금액</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{form.productNm}</td>
-                                        <td>{form.orderDQty}EA</td>
-                                        <td>{Number(form.orderDPrice).toLocaleString()}</td>
-                                        <td>{Number(form.orderDTotalPrice).toLocaleString()}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    {/* 상품관련 정보 */}
+                    <div className="product-info">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>품목명</th>
+                                    <th>수량</th>
+                                    <th>출고단가</th>
+                                    <th>총금액</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{form.productNm}</td>
+                                    <td>{form.orderDQty}EA</td>
+                                    <td>{Number(form.orderDPrice).toLocaleString()}</td>
+                                    <td>{Number(form.orderDTotalPrice).toLocaleString()}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                        {/* 인수 */}
-                        <div className="acceptance">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <th>인수</th>
-                                        <td>인</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    {/* 인수 */}
+                    <div className="acceptance">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th>인수</th>
+                                    <td>인</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div className="download-actions">
@@ -517,33 +517,37 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
                     </div>
 
                     {/* 출고 버튼 */}
-                    <div className="modal-actions">
-                        <button className="box blue" type="button"
-                        onClick={handleDispatchClick}>출고</button>
-                    </div>
+                    {showDispatchButton && (
+                        <div className="modal-actions">
+                            <button className="box blue" type="button" onClick={handleDispatchClick}>
+                                출고
+                            </button>
+                        </div>
+                    )}
                 </div>
 
-                   {/* 출고 확인 모달 */}
-                    {showConfirmModal && (
-                        <ConfirmationModal
-                            message="출고 지시 하시겠습니까?"
-                            onConfirm={handleDispatchConfirm}
-                            onCancel={() => setShowConfirmModal(false)}
-                        />
-                    )}
+                {/* 출고 확인 모달 */}
+                {showConfirmModal && (
+                    <ConfirmationModal
+                        message="출고 지시 하시겠습니까?"
+                        onConfirm={handleDispatchConfirm}
+                        onCancel={() => setShowConfirmModal(false)}
+                    />
+                )}
 
-                    {showWarehouseModal && (
-                        <WarehouseAssignmentModal
-                            show={showWarehouseModal}
-                            onClose={handleWarehouseModalClose}
-                            onSave={handleWarehouseAssignmentSave}
-                        />
-                    )}
+                {showWarehouseModal && (
+                    <WarehouseAssignmentModal
+                        show={showWarehouseModal}
+                        onClose={handleWarehouseModalClose}
+                        onSave={handleWarehouseAssignmentSave}
+                    />
+                )}
 
-             </div>
+            </div>
         </div>
     );
 }
+
 
 //모달창 확인 컴포넌트
 function ConfirmationModal({ message, onConfirm, onCancel }) {
@@ -731,31 +735,89 @@ function OrderDispatch() { //주문번호1-출고1
         const selectedDispatchIndices = filteredDispatches
             .map((_, index) => selectedDispatches[index] ? index : -1)
             .filter(index => index !== -1);
-
+    
         if (selectedDispatchIndices.length === 0) {
             window.showToast("출고 지시할 항목을 선택해주세요.", 'error');
             return;
         }
+    
+        if (selectedDispatchIndices.length > 1) {
+            window.showToast("출고지시는 하나의 항목만 선택해주세요.", 'error');
+            return;
+        }
+    
+        if (filterType === 'pending') {
+            // 창고 배정 여부 확인 로직
+            const selectedDispatchesHaveWarehouse = selectedDispatchIndices.every(index => {
+                const dispatch = filteredDispatches[index];
+                return dispatch.warehouseName && dispatch.warehouseName.trim() !== '';
+            });
+    
+            if (!selectedDispatchesHaveWarehouse) {
+                window.showToast("창고 배정이 필요합니다.", 'error');
+                return;
+            }
+        }
+    
+        setSelectedDispatchData(filteredDispatches[selectedDispatchIndices[0]]);
+        setShowDispatchButton(filterType === 'pending');
+        setDispatchInstructionModal(true);
+    };
+    
 
-        // 선택된 출고 건들에 창고 배정이 되어 있는지 확인
-       const selectedDispatchesHaveWarehouse = selectedDispatchIndices.every(index => {
-            const dispatch = filteredDispatches[index];
-            return dispatch.warehouseName && dispatch.warehouseName.trim() !== '';
-        });
+    // 출고증 버튼 클릭 핸들러 (헤더용)
+    const handleShowDispatchNoteModalHeader = () => {
+        const selectedDispatchIndices = filteredDispatches
+            .map((_, index) => selectedDispatches[index] ? index : -1)
+            .filter(index => index !== -1);
 
-        if (!selectedDispatchesHaveWarehouse) {
-            window.showToast("창고 배정이 필요합니다.", 'error');
+        if (selectedDispatchIndices.length === 0) {
+            window.showToast("출고증을 볼 항목을 선택해주세요.", 'error');
             return;
         }
 
-        setSelectedDispatchData(filteredDispatches[selectedDispatchIndices[0]]); //모달이 열릴 때, 선택된 출고 데이터가 출고지시 모달에 표시
-        setDispatchInstructionModal(true); //출고지시 모달 on
+        if (selectedDispatchIndices.length > 1) {
+            window.showToast("출고증은 하나의 항목만 선택해주세요.", 'error');
+            return;
+        }
+
+        const dispatch = filteredDispatches[selectedDispatchIndices[0]];
+        setSelectedDispatchData(dispatch);
+        setShowDispatchButton(false); // 출고 버튼 숨기기
+        setDispatchInstructionModal(true); // 모달 열기
     };
 
+
+
+    //출고증 버튼 클릭 핸들러
+    const handleShowDispatchNoteModal = (dispatch) => {
+    setSelectedDispatchData(dispatch);
+    setShowDispatchButton(false);
+    setDispatchInstructionModal(true);
+    };
+      
+      
     // 창고배정 버튼 클릭 핸들러
     const handleWarehouseAssignmentClick = () => {
         setWarehouseAssignmentModal(true);
     };
+
+    // 출고 요청 버튼 클릭 핸들러
+    const handleDispatchRequest = (dispatch) => {
+        const warehouseName = dispatch.warehouseName || '-';
+        const dispatchStartDate = dispatch.dispatchStartDate ? formatDateTime(dispatch.dispatchStartDate) : '-';
+        window.showToast(`${warehouseName}로 출고 요청이 확정되었습니다. (요청일시 : ${dispatchStartDate})`);
+    };
+  
+
+    // 출고완료 버튼 클릭 핸들러
+    const handleDispatchComplete = (dispatch) => {
+        const warehouseName = dispatch.warehouseName || '-';
+        const productNm = dispatch.productNm || '-';
+        const dispatchEndDate = dispatch.dispatchEndDate ? formatDateTime(dispatch.dispatchEndDate) : '-';
+        window.showToast(`${warehouseName}에서 ${productNm}이 정상적으로 출고 완료 되었습니다. (완료일시 : ${dispatchEndDate})`);
+    };
+  
 
     // 창고 배정 후 dispatches 상태 업데이트
     const handleWarehouseAssignmentSave = (warehouseData) => {
@@ -816,6 +878,10 @@ function OrderDispatch() { //주문번호1-출고1
         // 필터 타입을 'inProgress'로 변경하여 출고요청 탭으로 이동
         setFilterType('inProgress');
       };
+
+      // 출고증 버튼 
+      const [showDispatchButton, setShowDispatchButton] = useState(false);
+
 
 
     // Pagination
@@ -918,11 +984,24 @@ function OrderDispatch() { //주문번호1-출고1
                             <label htmlFor="complete">출고완료</label>
                         </div>
                     </div>
-                    <div className="right"> {/* 출고지시 */}
+                    {/* 출고지시 버튼 */}
+                    {filterType === 'pending' && (
+                    <div className="right">
                         <button className="box color" onClick={handleDispatchInstructionClick}>
                         출고지시
                         </button>
                     </div>
+                    )}
+
+                    {/* 출고증 버튼 */}
+                    {(filterType === 'inProgress' || filterType === 'complete') && (
+                    <div className="right">
+                        <button className="box color" onClick={handleShowDispatchNoteModalHeader}>
+                        출고증
+                        </button>
+                    </div>
+                    )}
+
                 </div>
 
                     {/* 테이블 영역 */}
@@ -945,6 +1024,17 @@ function OrderDispatch() { //주문번호1-출고1
                                         </label>
                                     </th>
                                     <th>
+                                        <div className={`dispatch_wrap ${sortColumn === 'employeeName' ? 'pending' : ''}`}>
+                                            <span>담당자명</span>
+                                            <button className="btn_order" onClick={() => sortDispatches('employeeName')}>
+                                                <i className={`bi ${sortColumn === 'employeeName' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            </button>
+
+                                        </div>
+                                    </th>
+
+
+                                    <th>
                                         <div className={`dispatch_wrap ${sortColumn === 'customerName' ? 'pending' : ''}`}>
                                             <span>고객사</span>
                                             <button className="btn_order" onClick={() => sortDispatches('customerName')}>
@@ -962,10 +1052,10 @@ function OrderDispatch() { //주문번호1-출고1
                                         </div>
                                     </th>
                                     <th>
-                                        <div className={`dispatch_wrap ${sortColumn === 'deliveryRequestDate' ? 'pending' : ''}`}>
+                                        <div className={`dispatch_wrap ${sortColumn === 'orderDDeliveryRequestDate' ? 'pending' : ''}`}>
                                             <span>납품 요청일</span>
-                                            <button className="btn_order" onClick={() => sortDispatches('deliveryRequestDate')}>
-                                                <i className={`bi ${sortColumn === 'deliveryRequestDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
+                                            <button className="btn_order" onClick={() => sortDispatches('orderDDeliveryRequestDate')}>
+                                                <i className={`bi ${sortColumn === 'orderDDeliveryRequestDate' ? (sortOrder === 'desc' ? 'bi-arrow-down' : 'bi-arrow-up') : 'bi-arrow-up'}`}></i>
                                             </button>
                                         </div>
                                     </th>
@@ -1006,9 +1096,9 @@ function OrderDispatch() { //주문번호1-출고1
                                     <tr className="tr_empty">
                                         <td colSpan={10}>
                                             <div className="loading">
-                                                <span></span>
-                                                <span></span>
-                                                <span></span>
+                                                <span></span> {/* 첫 번째 원 */}
+                                                <span></span> {/* 두 번째 원 */}
+                                                <span></span> {/* 세 번째 원 */}
                                             </div>
                                         </td>
                                     </tr>
@@ -1016,11 +1106,13 @@ function OrderDispatch() { //주문번호1-출고1
                                     <tr className="tr_empty">
                                         <td colSpan={10}>
                                             <div className="no_data">
-                                                <i className="bi bi-exclamation-triangle"></i>조회된 결과가 없습니다.
+                                                <i className="bi bi-exclamation-triangle"></i>
+                                                조회된 결과가 없습니다.
                                             </div>
                                         </td>
                                     </tr>
                                 ) : (
+                                    //출고 리스트 표시
                                     filteredDispatches.slice((page - 1) * itemsPerPage, page * itemsPerPage).map((dispatch, index) => (
                                         <tr key={dispatch.dispatchNo}>
                                             <td>
@@ -1036,17 +1128,32 @@ function OrderDispatch() { //주문번호1-출고1
                                                     </i>
                                                 </label>
                                             </td>
+                                            <td>{dispatch.employeeName || '-'}</td>
                                             <td>{dispatch.customerName || '-'}</td>
                                             <td>{dispatch.productNm || '-'}</td>
                                             <td>{formatDateTime(dispatch.orderDDeliveryRequestDate)}</td>
-                                            <td>{mapDispatchStatus(dispatch.orderHStatus, dispatch.dispatchStatus)}</td>
+                                            <td className={`dispatch-status ${dispatch.dispatchStatus}`}>
+                                                {mapDispatchStatus(dispatch.orderHStatus, dispatch.dispatchStatus)}
+                                            </td>
                                             <td>{dispatch.dispatchStartDate ? formatDateTime(dispatch.dispatchStartDate) : '-'}</td>
                                             <td>{dispatch.dispatchEndDate ? formatDateTime(dispatch.dispatchEndDate) : '-'}</td>
                                             <td>{dispatch.warehouseName && dispatch.warehouseName.trim() !== '' ? dispatch.warehouseName : '-'}</td>
                                             <td>
-                                                <button className="box color" onClick={handleWarehouseAssignmentClick}>
-                                                    창고배정
+                                            {filterType === 'pending' && (
+                                                <button className="box small" onClick={handleWarehouseAssignmentClick}>
+                                                창고배정
                                                 </button>
+                                            )}
+                                            {filterType === 'inProgress' && (
+                                                <button className="box small" onClick={() => handleDispatchRequest(dispatch)}>
+                                                출고요청
+                                                </button>
+                                            )}
+                                            {filterType === 'complete' && (
+                                                <button className="box small" onClick={() => handleDispatchComplete(dispatch)}>
+                                                출고완료
+                                                </button>
+                                            )}
                                             </td>
                                         </tr>
                                     ))
@@ -1120,10 +1227,10 @@ function OrderDispatch() { //주문번호1-출고1
                   <DispatchInstructionModal
                       show={dispatchInstructionModal}
                       onClose={() => setDispatchInstructionModal(false)}
-                      onSave={handleDispatchInstructionSave}
                       assignedWarehouse={assignedWarehouse}
                       dispatchData={selectedDispatchData}
                       onStatusChange={handleStatusChange} // 상태 변경 콜백 전달
+                      showDispatchButton={showDispatchButton} // 출고 버튼 표시 여부 전달
                   />
               )}
 

@@ -26,6 +26,7 @@ public class DispatchDTO {
     private Integer customerNo; // 출고 납품 고객사
 
     // 추가 필드
+    private String employeeName; // 담당자 이름
     private String customerName; // 고객사 이름
     private String customerAddr; // 납품지 주소
     private String warehouseName; // 창고명

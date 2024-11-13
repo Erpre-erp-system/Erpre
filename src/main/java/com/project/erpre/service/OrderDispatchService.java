@@ -1,12 +1,12 @@
 package com.project.erpre.service;
 
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
 import com.project.erpre.model.dto.DispatchDTO;
 import com.project.erpre.model.entity.*;
 import com.project.erpre.repository.*;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.RegionUtil;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,7 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 //pdf import
-import com.itextpdf.text.pdf.PdfWriter;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 
 //excel import
 import org.apache.poi.ss.usermodel.*;
@@ -23,6 +27,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -111,6 +116,7 @@ public class OrderDispatchService {
                 .orderDQty(orderDQty)
                 .orderDTotalPrice(orderDTotalPrice)
                 .orderDDeliveryRequestDate(orderDDeliveryRequestDate)
+                .employeeName(dispatch.getOrder().getEmployee() != null ? dispatch.getOrder().getEmployee().getEmployeeName() : null) // 담당자 이름 추가
                 .build();
     }
 
@@ -277,81 +283,157 @@ public class OrderDispatchService {
     // PDF 생성 메서드
     public byte[] generatePdf(int dispatchNo) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try {
-            Document document = new Document();
-            PdfWriter.getInstance(document, byteArrayOutputStream);
-            document.open();
+        PDDocument document = new PDDocument();
 
-            // dispatchNo를 사용하여 필요한 데이터 조회
+        try {
             Dispatch dispatch = orderDispatchRepository.findById(dispatchNo)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid dispatchNo"));
 
-            // PDF 제목
-            Paragraph title = new Paragraph("출고증", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16));
-            title.setAlignment(Element.ALIGN_CENTER);
-            document.add(title);
-            document.add(Chunk.NEWLINE);  // 빈 줄 추가
+            PDPage page = new PDPage(PDRectangle.A4);
+            document.addPage(page);
 
-            // 테이블 생성 - 2열, 100% 너비로 설정
-            PdfPTable table = new PdfPTable(2);
-            table.setWidthPercentage(100);
-            table.setSpacingBefore(10f);
-            table.setSpacingAfter(10f);
+            String fontPath = "src/main/resources/fonts/malgun.ttf";
+            PDType0Font font = PDType0Font.load(document, new File(fontPath));
 
-            // 테이블에 항목과 데이터를 추가
-            addTableRow(table, "고객사 이름", dispatch.getOrderDetail().getOrder().getCustomer().getCustomerName());
-            addTableRow(table, "납품지 주소", dispatch.getOrderDetail().getOrder().getCustomer().getCustomerAddr());
+            PDPageContentStream contentStream = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.OVERWRITE, true);
 
-            // 공급자 정보
-            addTableRow(table, "공급자 상호", "이케아");
-            addTableRow(table, "공급자 주소", "이케아");
-            addTableRow(table, "공급자 대표성명", "박인욱");
-            addTableRow(table, "공급자 전화번호", "02-111-5555");
-            addTableRow(table, "공급자 사업자 등록번호", "123-456-7890");
+            float margin = 50;
+            float tableWidth = 500;
+            float centerX = (page.getMediaBox().getWidth() - tableWidth) / 2;
+            float yStart = page.getMediaBox().getHeight() - margin;
+            float yPosition = yStart;
 
-            // 출하관련 정보
-            addTableRow(table, "납품 요청일", formatDate(dispatch.getOrderDetail().getOrderDDeliveryRequestDate()));
-            addTableRow(table, "출하창고", dispatch.getWarehouse().getWarehouseName());
+            // Title
+            contentStream.beginText();
+            contentStream.setFont(font, 25);
+            float titleWidth = font.getStringWidth("출고증") / 1000 * 25;
+            contentStream.newLineAtOffset((page.getMediaBox().getWidth() - titleWidth) / 2, yPosition);
+            contentStream.showText("출고증");
+            contentStream.endText();
 
-            // 상품관련 정보
-            addTableRow(table, "품목명", dispatch.getOrderDetail().getProduct().getProductNm());
-            addTableRow(table, "수량", dispatch.getOrderDetail().getOrderDQty() + "EA");
-            addTableRow(table, "출고단가", formatCurrency(dispatch.getOrderDetail().getOrderDPrice()));
-            addTableRow(table, "총금액", formatCurrency(dispatch.getOrderDetail().getOrderDTotalPrice()));
+            // Title underline
+            contentStream.moveTo((page.getMediaBox().getWidth() - titleWidth) / 2, yPosition - 5);
+            contentStream.lineTo((page.getMediaBox().getWidth() + titleWidth) / 2, yPosition - 5);
+            contentStream.stroke();
 
-            // 테이블을 문서에 추가
-            document.add(table);
-            document.close();
-        } catch (DocumentException e) {
+            yPosition -= 30;
+
+            // Table data
+            String[][] tableData = {
+                    {"고객사 이름", dispatch.getOrderDetail().getOrder().getCustomer().getCustomerName()},
+                    {"납품지 주소", dispatch.getOrderDetail().getOrder().getCustomer().getCustomerAddr()},
+                    {"공급자 상호", "이케아"},
+                    {"공급자 주소", "이케아"},
+                    {"공급자 대표성명", "박인욱"},
+                    {"공급자 전화번호", "02-111-5555"},
+                    {"공급자 사업자 등록번호", "123-456-7890"},
+                    {"납품 요청일", formatDate(dispatch.getOrderDetail().getOrderDDeliveryRequestDate())},
+                    {"출하창고", dispatch.getWarehouse().getWarehouseName()},
+                    {"품목명", dispatch.getOrderDetail().getProduct().getProductNm()},
+                    {"수량", dispatch.getOrderDetail().getOrderDQty() + "EA"},
+                    {"출고단가", formatCurrency(dispatch.getOrderDetail().getOrderDPrice())},
+                    {"총금액", formatCurrency(dispatch.getOrderDetail().getOrderDTotalPrice())}
+            };
+
+            float[] colWidths = {200, 300};
+            float cellHeight = 25;
+            float cellMargin = 5;
+
+            for (int i = 0; i < tableData.length; i++) {
+                String[] row = tableData[i];
+                boolean isFirstRow = (i == 0);
+                boolean isLastRow = (i == tableData.length - 1);
+
+                addTableRow(contentStream, font, row[0], row[1] != null ? row[1] : "-", centerX, yPosition, colWidths, cellHeight, cellMargin, isFirstRow, isLastRow);
+                yPosition -= cellHeight;
+
+                if (yPosition < margin) {
+                    contentStream.close();
+                    page = new PDPage(PDRectangle.A4);
+                    document.addPage(page);
+                    contentStream = new PDPageContentStream(document, page);
+                    yPosition = page.getMediaBox().getHeight() - margin;
+                }
+            }
+
+            contentStream.close();
+            document.save(byteArrayOutputStream);
+        } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                document.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         return byteArrayOutputStream.toByteArray();
     }
 
-    // 테이블에 행을 추가하는 유틸리티 메서드
-    private void addTableRow(PdfPTable table, String label, String value) {
-        PdfPCell labelCell = new PdfPCell(new Phrase(label, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
-        PdfPCell valueCell = new PdfPCell(new Phrase(value != null ? value : "-", FontFactory.getFont(FontFactory.HELVETICA, 12)));
+    // 테이블 행 추가 메서드
+    private void addTableRow(PDPageContentStream contentStream, PDType0Font font, String label, String value,
+                             float x, float y, float[] colWidths, float rowHeight, float cellMargin, boolean isFirstRow, boolean isLastRow) throws IOException {
 
-        // 셀 테두리 및 정렬 설정
-        labelCell.setBorder(Rectangle.BOX);
-        labelCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        labelCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        labelCell.setPadding(8);
+        // 바깥 테두리를 위한 두꺼운 선 두께
+        float thickLineWidth = 1.5f;
+        float normalLineWidth = 1f;
 
-        valueCell.setBorder(Rectangle.BOX);
-        valueCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        valueCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        valueCell.setPadding(8);
+        // 왼쪽 셀 (라벨 셀)
+        contentStream.setLineWidth(isFirstRow ? thickLineWidth : normalLineWidth); // 첫 행 위쪽 테두리 두껍게
+        contentStream.moveTo(x, y);
+        contentStream.lineTo(x + colWidths[0], y);
+        contentStream.stroke();
 
-        // 테이블에 셀 추가
-        table.addCell(labelCell);
-        table.addCell(valueCell);
+        contentStream.setLineWidth(isLastRow ? thickLineWidth : normalLineWidth); // 마지막 행 아래쪽 테두리 두껍게
+        contentStream.moveTo(x, y - rowHeight);
+        contentStream.lineTo(x + colWidths[0], y - rowHeight);
+        contentStream.stroke();
+
+        contentStream.setLineWidth(thickLineWidth); // 왼쪽 테두리 두껍게
+        contentStream.moveTo(x, y);
+        contentStream.lineTo(x, y - rowHeight);
+        contentStream.stroke();
+
+        contentStream.setLineWidth(normalLineWidth); // 오른쪽 테두리는 기본 두께로
+        contentStream.addRect(x, y - rowHeight, colWidths[0], rowHeight);
+        contentStream.stroke();
+
+        // 라벨 텍스트
+        contentStream.beginText();
+        contentStream.setFont(font, 12);
+        contentStream.newLineAtOffset(x + cellMargin, y - rowHeight / 2 - 6);
+        contentStream.showText(label);
+        contentStream.endText();
+
+        // 오른쪽 셀 (값 셀)
+        contentStream.setLineWidth(isFirstRow ? thickLineWidth : normalLineWidth); // 첫 행 위쪽 테두리 두껍게
+        contentStream.moveTo(x + colWidths[0], y);
+        contentStream.lineTo(x + colWidths[0] + colWidths[1], y);
+        contentStream.stroke();
+
+        contentStream.setLineWidth(isLastRow ? thickLineWidth : normalLineWidth); // 마지막 행 아래쪽 테두리 두껍게
+        contentStream.moveTo(x + colWidths[0], y - rowHeight);
+        contentStream.lineTo(x + colWidths[0] + colWidths[1], y - rowHeight);
+        contentStream.stroke();
+
+        contentStream.setLineWidth(normalLineWidth); // 왼쪽 테두리는 기본 두께로
+        contentStream.addRect(x + colWidths[0], y - rowHeight, colWidths[1], rowHeight);
+        contentStream.stroke();
+
+        contentStream.setLineWidth(thickLineWidth); // 오른쪽 테두리 두껍게
+        contentStream.moveTo(x + colWidths[0] + colWidths[1], y);
+        contentStream.lineTo(x + colWidths[0] + colWidths[1], y - rowHeight);
+        contentStream.stroke();
+
+        // 값 텍스트 (오른쪽 정렬)
+        contentStream.beginText();
+        contentStream.setFont(font, 12);
+        float textWidth = font.getStringWidth(value) / 1000 * 12;
+        contentStream.newLineAtOffset(x + colWidths[0] + colWidths[1] - textWidth - cellMargin, y - rowHeight / 2 - 6);
+        contentStream.showText(value);
+        contentStream.endText();
     }
-
-
-
 
     // Excel 생성 메서드
     public byte[] generateExcel(int dispatchNo) {
@@ -360,81 +442,104 @@ public class OrderDispatchService {
             Workbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("출고증");
 
-            // dispatchNo를 사용하여 필요한 데이터 조회
             Dispatch dispatch = orderDispatchRepository.findById(dispatchNo)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid dispatchNo"));
 
-            // 데이터 작성
-            int rowNum = 0;
+            int rowNum = 1;
 
-            // 제목
+            // 제목 스타일 설정
+            CellStyle titleStyle = workbook.createCellStyle();
+            Font titleFont = workbook.createFont();
+            titleFont.setFontHeightInPoints((short) 16);
+            titleFont.setBold(true);
+            titleFont.setUnderline(Font.U_SINGLE);
+            titleStyle.setFont(titleFont);
+            titleStyle.setAlignment(HorizontalAlignment.CENTER);
+            titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
             Row titleRow = sheet.createRow(rowNum++);
-            titleRow.createCell(0).setCellValue("출고증");
+            titleRow.setHeightInPoints(30);
+            Cell titleCell = titleRow.createCell(1);
+            titleCell.setCellValue("출고증");
+            titleCell.setCellStyle(titleStyle);
+            sheet.addMergedRegion(new CellRangeAddress(1, 1, 1, 2));
 
-            // 고객사 정보
-            Row row1 = sheet.createRow(rowNum++);
-            row1.createCell(0).setCellValue("고객사 이름");
-            row1.createCell(1).setCellValue(dispatch.getOrderDetail().getOrder().getCustomer().getCustomerName());
+            CellStyle labelStyle = workbook.createCellStyle();
+            labelStyle.setAlignment(HorizontalAlignment.LEFT);
+            labelStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            labelStyle.setBorderTop(BorderStyle.THIN);
+            labelStyle.setBorderBottom(BorderStyle.THIN);
+            labelStyle.setBorderLeft(BorderStyle.THIN);
+            labelStyle.setBorderRight(BorderStyle.THIN);
 
-            Row row2 = sheet.createRow(rowNum++);
-            row2.createCell(0).setCellValue("납품지 주소");
-            row2.createCell(1).setCellValue(dispatch.getOrderDetail().getOrder().getCustomer().getCustomerAddr());
+            CellStyle valueStyle = workbook.createCellStyle();
+            valueStyle.setAlignment(HorizontalAlignment.RIGHT);
+            valueStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            valueStyle.setBorderTop(BorderStyle.THIN);
+            valueStyle.setBorderBottom(BorderStyle.THIN);
+            valueStyle.setBorderLeft(BorderStyle.THIN);
+            valueStyle.setBorderRight(BorderStyle.THIN);
 
-            // 공급자 정보
-            Row row3 = sheet.createRow(rowNum++);
-            row3.createCell(0).setCellValue("공급자 상호");
-            row3.createCell(1).setCellValue("이케아");
-
-            Row row4 = sheet.createRow(rowNum++);
-            row4.createCell(0).setCellValue("공급자 주소");
-            row4.createCell(1).setCellValue("이케아");
-
-            Row row5 = sheet.createRow(rowNum++);
-            row5.createCell(0).setCellValue("공급자 대표성명");
-            row5.createCell(1).setCellValue("박인욱");
-
-            Row row6 = sheet.createRow(rowNum++);
-            row6.createCell(0).setCellValue("공급자 전화번호");
-            row6.createCell(1).setCellValue("02-111-5555");
-
-            Row row7 = sheet.createRow(rowNum++);
-            row7.createCell(0).setCellValue("공급자 사업자 등록번호");
-            row7.createCell(1).setCellValue("123-456-7890");
-
-            // 출하관련 정보
-            Row row8 = sheet.createRow(rowNum++);
-            row8.createCell(0).setCellValue("납품 요청일");
-            row8.createCell(1).setCellValue(formatDate(dispatch.getOrderDetail().getOrderDDeliveryRequestDate()));
-
-            Row row9 = sheet.createRow(rowNum++);
-            row9.createCell(0).setCellValue("출하창고");
-            row9.createCell(1).setCellValue(dispatch.getWarehouse().getWarehouseName());
-
-            // 상품관련 정보
-            Row row10 = sheet.createRow(rowNum++);
-            row10.createCell(0).setCellValue("품목명");
-            row10.createCell(1).setCellValue(dispatch.getOrderDetail().getProduct().getProductNm());
-
-            Row row11 = sheet.createRow(rowNum++);
-            row11.createCell(0).setCellValue("수량");
-            row11.createCell(1).setCellValue(dispatch.getOrderDetail().getOrderDQty() + "EA");
-
-            Row row12 = sheet.createRow(rowNum++);
-            row12.createCell(0).setCellValue("출고단가");
-            Cell priceCell = row12.createCell(1);
-            priceCell.setCellValue(dispatch.getOrderDetail().getOrderDPrice().doubleValue()); // 숫자로 셀에 추가
-
-            Row row13 = sheet.createRow(rowNum++);
-            row13.createCell(0).setCellValue("총금액");
-            Cell totalCell = row13.createCell(1);
-            totalCell.setCellValue(dispatch.getOrderDetail().getOrderDTotalPrice().doubleValue()); // 숫자로 셀에 추가
-
-            // 숫자 형식 지정
             CellStyle currencyStyle = workbook.createCellStyle();
             DataFormat format = workbook.createDataFormat();
             currencyStyle.setDataFormat(format.getFormat("#,##0.00"));
+            currencyStyle.setAlignment(HorizontalAlignment.RIGHT);
+            currencyStyle.setBorderTop(BorderStyle.THIN);
+            currencyStyle.setBorderBottom(BorderStyle.THIN);
+            currencyStyle.setBorderLeft(BorderStyle.THIN);
+            currencyStyle.setBorderRight(BorderStyle.THIN);
+
+            String[][] data = {
+                    {"고객사 이름", dispatch.getOrderDetail().getOrder().getCustomer().getCustomerName()},
+                    {"납품지 주소", dispatch.getOrderDetail().getOrder().getCustomer().getCustomerAddr()},
+                    {"공급자 상호", "이케아"},
+                    {"공급자 주소", "이케아"},
+                    {"공급자 대표성명", "박인욱"},
+                    {"공급자 전화번호", "02-111-5555"},
+                    {"공급자 사업자 등록번호", "123-456-7890"},
+                    {"납품 요청일", formatDate(dispatch.getOrderDetail().getOrderDDeliveryRequestDate())},
+                    {"출하창고", dispatch.getWarehouse().getWarehouseName()},
+                    {"품목명", dispatch.getOrderDetail().getProduct().getProductNm()},
+                    {"수량", dispatch.getOrderDetail().getOrderDQty() + "EA"},
+            };
+
+            for (String[] item : data) {
+                Row row = sheet.createRow(rowNum++);
+                Cell labelCell = row.createCell(1);
+                Cell valueCell = row.createCell(2);
+                labelCell.setCellValue(item[0]);
+                valueCell.setCellValue(item[1]);
+                labelCell.setCellStyle(labelStyle);
+                valueCell.setCellStyle(valueStyle);
+            }
+
+            Row row12 = sheet.createRow(rowNum++);
+            Cell labelCell12 = row12.createCell(1);
+            labelCell12.setCellValue("출고단가");
+            labelCell12.setCellStyle(labelStyle);
+            Cell priceCell = row12.createCell(2);
+            priceCell.setCellValue(dispatch.getOrderDetail().getOrderDPrice().doubleValue());
             priceCell.setCellStyle(currencyStyle);
+
+            Row row13 = sheet.createRow(rowNum++);
+            Cell labelCell13 = row13.createCell(1);
+            labelCell13.setCellValue("총금액");
+            labelCell13.setCellStyle(labelStyle);
+            Cell totalCell = row13.createCell(2);
+            totalCell.setCellValue(dispatch.getOrderDetail().getOrderDTotalPrice().doubleValue());
             totalCell.setCellStyle(currencyStyle);
+
+            RegionUtil.setBorderTop(BorderStyle.MEDIUM, new CellRangeAddress(2, 2, 1, 2), sheet);
+
+            CellRangeAddress entireTableRange = new CellRangeAddress(1, rowNum - 1, 1, 2);
+            RegionUtil.setBorderTop(BorderStyle.MEDIUM, entireTableRange, sheet);
+            RegionUtil.setBorderBottom(BorderStyle.MEDIUM, entireTableRange, sheet);
+            RegionUtil.setBorderLeft(BorderStyle.MEDIUM, entireTableRange, sheet);
+            RegionUtil.setBorderRight(BorderStyle.MEDIUM, entireTableRange, sheet);
+
+            sheet.setColumnWidth(0, 500);
+            sheet.setColumnWidth(1, 7000);
+            sheet.setColumnWidth(2, 7000);
 
             workbook.write(byteArrayOutputStream);
             workbook.close();
@@ -444,6 +549,11 @@ public class OrderDispatchService {
 
         return byteArrayOutputStream.toByteArray();
     }
+
+
+
+
+
 
 
 

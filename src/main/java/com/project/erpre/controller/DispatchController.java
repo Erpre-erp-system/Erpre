@@ -24,17 +24,6 @@ public class DispatchController {
         return dispatchService.getInProgressDispatches(warehouseNo);
     }
 
-//    @CrossOrigin(origins = "")
-//    @PostMapping("/update/dispatch/complete/{dispatchNo}")
-//    public ResponseEntity<?> updateDispatchStatus(@PathVariable Integer dispatchNo) {
-//        boolean updated = dispatchService.updateDispatchStatus(dispatchNo);
-//        if (updated) {
-//            return ResponseEntity.ok().build();
-//        } else {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Dispatch not found");
-//        }
-//    }
-
     @CrossOrigin(origins = "")
     @PostMapping("/update/dispatch/complete/{dispatchNo}")
     public ResponseEntity<?> updateDispatchStatus(@PathVariable Integer dispatchNo) {
@@ -45,8 +34,6 @@ public class DispatchController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Dispatch not found");
         }
     }
-
-
 
     @CrossOrigin(origins = "")
     @GetMapping("/get/dispatch/completed/{warehouseNo}/{daysAgo}")
