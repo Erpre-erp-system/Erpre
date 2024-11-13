@@ -24,7 +24,7 @@ function EmployeeSalary() {
     }, [currentView]);
 
     const fetchSalaries = () => {
-        fetch(`/api/salaries?filter=${currentView}`)  // currentView에 따라 필터링된 데이터를 서버에서 가져옴
+        fetch(`/api/salary/salaries?filter=${currentView}`)  // currentView에 따라 필터링된 데이터를 서버에서 가져옴
             .then(response => {
                 if (!response.ok) {
                     throw new Error('데이터를 가져오는 중 오류가 발생했습니다.');
@@ -90,7 +90,7 @@ function EmployeeSalary() {
         }
 
         if (window.confirm("선택한 항목을 삭제하시겠습니까?")) {
-            fetch('/api/salaries/delete', {
+            fetch('/api/salary/salaries/delete', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(selectedIds),

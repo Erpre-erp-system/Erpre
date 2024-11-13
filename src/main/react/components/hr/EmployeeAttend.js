@@ -37,7 +37,7 @@ function EmployeeAttend() {
 
     const fetchAttendances = (page, view) => {
         const adjustedPage = page - 1;
-        const url = `/api/${view}?page=${adjustedPage}&size=${ITEMS_PER_PAGE}&date=${selectedDate}`;
+        const url = `/api/attendance/${view}?page=${adjustedPage}&size=${ITEMS_PER_PAGE}&date=${selectedDate}`;
         axios.get(url)
             .then(response => {
                 console.log("API 응답 데이터:", response.data);
@@ -108,7 +108,7 @@ function EmployeeAttend() {
             return;
         }
 
-        axios.put('/api/deleteAttendances', selectedIds)
+        axios.put('/api/attendance/deleteAttendances', selectedIds)
             .then(() => {
                 fetchAttendances(page, currentView);
                 setSelectedAttendances(new Array(attendanceData.length).fill(false));
