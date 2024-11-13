@@ -810,7 +810,7 @@ function OrderDispatch() { //주문번호1-출고1
     };
   
 
-    // 출고완료 버튼 클릭 핸들러
+    /// 출고완료 버튼 클릭 핸들러
     const handleDispatchComplete = (dispatch) => {
         const warehouseName = dispatch.warehouseName || '-';
         const productNm = dispatch.productNm || '-';
