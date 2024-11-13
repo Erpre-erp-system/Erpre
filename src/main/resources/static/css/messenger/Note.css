@@ -178,8 +178,8 @@
     position: fixed;
     top: 20%;
     left: 35%;
-    z-index: 1000;
-    width: 600px;
+    z-index: 1020;
+    width: 550px;
     padding: 20px;
     background-color: white;
     border: 1px solid #ccc;
@@ -300,18 +300,16 @@
     color: black;
     border: none;
     font-weight: 400;
-    padding: 10px 15px;
+    padding: 8px 13px;
     cursor: pointer;
-    border-radius: 4px;
 }
 
 .cancel-button {
     background-color: #9fa7ad;
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 8px 13px;
     cursor: pointer;
-    border-radius: 4px;
 }
 
 .close-button {
@@ -419,7 +417,6 @@
     background-color: #9fa7ad;
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 8px 13px;
     cursor: pointer;
-    border-radius: 4px;
 }

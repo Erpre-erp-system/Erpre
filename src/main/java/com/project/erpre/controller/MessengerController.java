@@ -85,6 +85,13 @@ public class MessengerController {
         return ResponseEntity.ok(employeeDTO);
     }
 
+    // 유저 정보 상세조회 API
+    @GetMapping("/info/{employeeId}")
+    public ResponseEntity<EmployeeDTO> getUserInfo(@PathVariable String employeeId) {
+        EmployeeDTO employeeDTO = messengerService.getUserInfo(employeeId);
+        return ResponseEntity.ok(employeeDTO);
+    }
+    
     // 유저 프로필 사진 URL 업데이트 API
     @PutMapping("/profile/update")
     public ResponseEntity<String> updateProfileImage(@RequestBody Map<String, String> request) {

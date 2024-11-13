@@ -87,6 +87,12 @@ public class MessengerService {
         return new EmployeeDTO(employee);
     }
 
+    public EmployeeDTO getUserInfo(String employeeId) {
+        Employee employee = employeeRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new RuntimeException("해당 직원을 찾을 수 없습니다"));
+        return new EmployeeDTO(employee);
+    }
+
     // 유저 프로필 사진 URL 업데이트
     @Transactional
     public void updateProfileImage(String fileName) {

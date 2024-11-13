@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import Select from "react-select";
 import Tree from "rc-tree";
 import {UserContext} from "../../context/UserContext";
@@ -13,6 +13,7 @@ import NewNoteModal from "./NewNoteModal";
 import SockJS from "sockjs-client";
 import {Stomp} from "@stomp/stompjs";
 import {useMessengerHooks} from "./useMessengerHooks";
+import ChatRoomModal from "./ChatRoomModal";
 
 // Option 컴포넌트
 const Option = (props) => {
@@ -47,20 +48,23 @@ const userIcon = [
 
 const MessengerHome = ({homeSearchKeyword}) => {
 
-    const [isNewNoteModalOpen, setNewNoteModalOpen] = useState(false);
+    const [isModalOpen, setModalOpen] = useState({chat: false, note: false, info: false});
     const {user, setUser} = useContext(UserContext);
     const [searchKeyword, setSearchKeyword] = useState(homeSearchKeyword);
     const [expandedKeys, setExpandedKeys] = useState([]);
     const [treeData, setTreeData] = useState([]);
     const [contextMenu, setContextMenu] = useState({visible: false, x: 0, y: 0, node: null});
     const [selectedEmployees, setSelectedEmployees] = useState([]); // 선택된 직원 정보 저장
+    const stompClientRef = useRef(null);
+    const [selectedChatNo, setSelectedChatNo] = useState(null);
 
-    const openNewNoteModal = () => {
-        setNewNoteModalOpen(true);
+    // 모달 열기 및 닫기 함수
+    const openModal = (type) => {
+        setModalOpen(prev => ({...prev, [type]: true}));
     };
 
-    const closeNewNoteModal = () => {
-        setNewNoteModalOpen(false);
+    const closeModal = (type) => {
+        setModalOpen(prev => ({...prev, [type]: false}));
     };
 
     // 메뉴 관련 state
@@ -104,18 +108,31 @@ const MessengerHome = ({homeSearchKeyword}) => {
         }]);
     };
 
+
+
     // 메뉴 클릭 핸들러
-    const handleMenuClick = (action) => {
+    const handleMenuClick = async (action) => {
         setMenuVisible(false);
 
-        if (action === 'viewDetail') {
-            // 상세 정보 보기 로직 추가
+        if (action === 'startChat') {
+            try {
+                // 선택된 직원과의 채팅방 생성 요청
+                const response = await axios.post('/api/messengers/chat/create', selectedEmployees.map(emp => emp.employeeId));
 
+
+                console.log('채팅방 데이터:', response.data);
+                const chatNo = response.data.chatNo;
+
+                // 채팅방 번호를 상태에 저장하고 모달 열기
+                setSelectedChatNo(chatNo);
+                openModal("chat");
+            } catch (error) {
+                console.error("채팅방 생성 중 오류 발생:", error);
+            }
         } else if (action === 'sendMessage') {
-            openNewNoteModal();
-        } else if (action === 'startChat') {
-            // 채팅 시작 로직 추가
-
+            openModal("note");
+        } else if (action === 'viewDetail') {
+            openModal("info");
         }
     };
 
@@ -210,25 +227,23 @@ const MessengerHome = ({homeSearchKeyword}) => {
     useEffect(() => {
         const socket = new SockJS('http://localhost:8787/talk');
         const stompClient = Stomp.over(socket);
+        stompClientRef.current = stompClient; // stompClientRef에 stompClient 저장
 
         stompClient.connect(
             {},
             () => {
                 console.log("WebSocket 연결 성공");
 
-                // 상태 업데이트 구독 - /topic/status
                 stompClient.subscribe('/topic/status', (statusResponse) => {
                     const statusUpdate = JSON.parse(statusResponse.body);
                     setTreeData((prevData) => updateTreeWithNewStatus(prevData, statusUpdate));
                     console.log("상태 업데이트:", statusUpdate);
                 });
 
-                // 상태 메시지 업데이트 구독 - /topic/statusMessage
                 stompClient.subscribe('/topic/statusMessage', (statusMessageResponse) => {
                     const statusMessageUpdate = statusMessageResponse.body;
                     console.log("상태 메시지 업데이트:", statusMessageUpdate);
                 });
-
             },
             (error) => {
                 console.log("WebSocket 연결 오류:", error);
@@ -317,19 +332,17 @@ const MessengerHome = ({homeSearchKeyword}) => {
     // 상태 변경 함수
     const handleStatusChange = async (selectedOption) => {
         const newStatus = selectedOption.value;
-
         setUser((prevUser) => ({
             ...prevUser,
             employeeStatus: newStatus
         }));
 
         try {
-            // 상태를 업데이트하고 서버에 전송
-            await axios.put('/api/messengers/info/update', {employeeStatus: newStatus});
+            await axios.put('/api/messengers/info/update', { employeeStatus: newStatus });
             window.showToast("상태가 변경되었습니다");
 
-            // 상태가 변경되었으므로, WebSocket을 통해 이 정보를 실시간으로 반영하도록 처리
-            stompClient.send('/app/status', {}, JSON.stringify({
+            // stompClientRef.current를 사용하여 stompClient에 접근
+            stompClientRef.current.send('/app/status', {}, JSON.stringify({
                 employeeId: user.employeeId,
                 newStatus
             }));
@@ -554,12 +567,12 @@ const MessengerHome = ({homeSearchKeyword}) => {
                     }}
                 >
                     <ul style={{margin: 0, padding: 0, listStyleType: 'none'}}>
-                        <li
-                            onClick={() => handleMenuClick('viewDetail')}
-                            style={{padding: '4px 8px', cursor: 'pointer'}}
-                        >
-                            상세정보
-                        </li>
+                        {/*<li*/}
+                        {/*    onClick={() => handleMenuClick('viewDetail')}*/}
+                        {/*    style={{padding: '4px 8px', cursor: 'pointer'}}*/}
+                        {/*>*/}
+                        {/*    상세정보*/}
+                        {/*</li>*/}
                         <li
                             onClick={() => handleMenuClick('sendMessage')}
                             style={{padding: '4px 8px', cursor: 'pointer'}}
@@ -576,13 +589,31 @@ const MessengerHome = ({homeSearchKeyword}) => {
                 </div>
             )}
 
+            {/* 상세정보 모달 */}
+            {isModalOpen.info && (
+                <InfoDetailModal
+                    employeeId={selectedEmployees[0]?.employeeId}
+                    closeInfoModal={() => closeModal('info')}
+                />
+            )}
+
             {/* 쪽지보내기 모달 */}
-            {isNewNoteModalOpen && (
+            {isModalOpen.note && (
                 <NewNoteModal
-                    closeNewNoteModal={closeNewNoteModal}
+                    closeNewNoteModal={() => closeModal('note')}
                     initialRecipients={selectedEmployees}
                 />
             )}
+
+            {/* 채팅방 모달 */}
+            {isModalOpen.chat && selectedChatNo && (
+                <ChatRoomModal
+                    chatNo={selectedChatNo}
+                    closeChatModal={() => closeModal('chat')}
+                    chatTitle={selectedEmployees[0]?.employeeName + (selectedEmployees.length > 1 ? ` 외 ${selectedEmployees.length - 1}인` : "")}
+                />
+            )}
+
 
         </div>
     );

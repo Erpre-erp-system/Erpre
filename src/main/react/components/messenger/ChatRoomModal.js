@@ -9,7 +9,7 @@ import {UserContext} from "../../context/UserContext";
 import {AiFillPicture} from "react-icons/ai";
 import Picker from "emoji-picker-react";
 
-const ChatRoomModal = ({chatList, setChatList, chatNo, closeChatModal, fetchChatList}) => {
+const ChatRoomModal = ({chatTitle, chatList, setChatList, chatNo, closeChatModal, fetchChatList}) => {
     const [isLoading, setIsLoading] = useState(false); // 로딩 state
     const {user} = useContext(UserContext); // 현재 로그인한 유저 state
     const [messages, setMessages] = useState([]); // 채팅방 메시지 목록 state
@@ -283,7 +283,7 @@ const ChatRoomModal = ({chatList, setChatList, chatNo, closeChatModal, fetchChat
             <Draggable handle=".chat-room-header">
                 <div className="chat-room">
                     <div className="chat-room-header">
-                        <h2>{messages?.[0]?.chatTitle || ''}</h2>
+                        <h2>{chatTitle || ''}</h2>
                         <IoClose className="close-button" title="닫기" onClick={closeChatModal}/>
                     </div>
                     <div className="chat-room-body" ref={chatBodyRef}>

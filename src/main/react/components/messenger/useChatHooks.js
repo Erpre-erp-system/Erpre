@@ -133,7 +133,10 @@ export const useChatHooks = ( chatList,fetchChatList ) => {
             showCancelButton: true,
             confirmButtonText: '나가기',
             cancelButtonText: '취소',
-            reverseButtons: true
+            reverseButtons: true,
+            customClass: {
+                icon: 'custom-icon-size'
+            }
         }).then((result) => {
             if (result.isConfirmed) {
                 console.log("채팅방에서 나갑니다: 채팅방 ID =", chat.chatNo);

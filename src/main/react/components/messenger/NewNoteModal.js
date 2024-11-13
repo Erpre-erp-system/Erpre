@@ -153,9 +153,6 @@ const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
         <>
             <Draggable handle=".note-modal-header">
                 <div className="new-note-modal">
-                    <div className="note-modal-header">
-                        <h2>쪽지 보내기</h2>
-                    </div>
                     <div className="note-modal-body">
                         <div className="recipient-section">
                             <label>받는사람</label>
