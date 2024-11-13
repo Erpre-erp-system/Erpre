@@ -121,6 +121,7 @@ const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
 
             // 노트 생성 API 호출
             const newNote = {
+                employeeName: user.employeeName,
                 messageReceiverIds: receiverIds,
                 messageContent: messageContent,
                 messageSendDate: scheduledSend ? scheduledDate : null,

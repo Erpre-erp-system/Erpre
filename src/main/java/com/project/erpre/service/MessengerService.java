@@ -228,6 +228,10 @@ public class MessengerService {
 
         MessageDTO messageDTO = new MessageDTO(message);
         messageDTO.setMessageReceiverIds(savedReceiverIds);
+        messageDTO.setEmployeeName(sender.getEmployeeName());
+        messageDTO.setEmployeeJobName(sender.getJob().getJobName());
+        messageDTO.setEmployeeDepartmentName(sender.getDepartment().getDepartmentName());
+        messageDTO.setBookmarkedYn("N");
 
         return messageDTO;
     }

@@ -77,13 +77,17 @@ public class MessageRepositoryImpl implements MessageRepositoryCustom {
         // 2-1. 쪽지 상세 정보 조회 및 읽음 여부 업데이트
         MessageDTO messageDetail = queryFactory
                 .select(Projections.constructor(MessageDTO.class,
+                        message.messageNo,
                         message.employee.employeeName.as("senderName"), // 발신자 이름
+                        message.employee.job.jobName,
+                        message.employee.department.departmentName,
                         message.messageContent,
                         message.messageSendDate,
                         message.messageRecallYn,
                         message.messageRecallDate,
                         messageRecipient.recipientReadYn, // 수신자 읽음 여부
                         messageRecipient.recipientReadDate, // 수신자 읽은 날짜
+                        messageRecipient.bookmarkedYn,
                         messageFile.messageFileName,
                         messageFile.messageFileUrl,
                         messageFile.messageFileSize,

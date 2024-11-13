@@ -15,8 +15,10 @@ public class MessageDTO {
 
     private Long messageNo;
     private String messageSenderId;
-    private String employeeName;
-    private String messageContent;
+    private String employeeName; // 발신자
+    private String employeeJobName; // 발신자 직급
+    private String employeeDepartmentName; // 발신자 부서
+    private String messageContent; // 쪽지 내용
     private LocalDateTime messageSendDate;
     private LocalDateTime messageUpdateDate;
     private String messageDeleteYn;
@@ -67,27 +69,34 @@ public class MessageDTO {
     }
 
     // 쪽지 개별 조회 생성자
-    public MessageDTO(String senderName, String messageContent, LocalDateTime messageSendDate,
+    public MessageDTO(Long messageNo, String senderName, String employeeJobName, String employeeDepartmentName, String messageContent, LocalDateTime messageSendDate,
                       String messageRecallYn, LocalDateTime messageRecallDate, String recipientReadYn,
-                      LocalDateTime recipientReadDate, String messageFileName, String messageFileUrl,
+                      LocalDateTime recipientReadDate, String bookmarkedYn, String messageFileName, String messageFileUrl,
                       BigInteger messageFileSize, String messageFileType) {
+        this.messageNo = messageNo;
         this.employeeName = senderName;
+        this.employeeJobName = employeeJobName;
+        this.employeeDepartmentName = employeeDepartmentName;
         this.messageContent = messageContent;
         this.messageSendDate = messageSendDate;
         this.messageRecallYn = messageRecallYn;
         this.messageRecallDate = messageRecallDate;
         this.recipientReadYn = recipientReadYn;
         this.recipientReadDate = recipientReadDate;
+        this.bookmarkedYn = bookmarkedYn;
         this.messageFileName = messageFileName;
         this.messageFileUrl = messageFileUrl;
         this.messageFileSize = messageFileSize;
         this.messageFileType = messageFileType;
     }
 
-
     // 새 쪽지 저장 DTO
     @Data
     public static class NoteRequestDTO {
+        private String employeeName;
+        private String employeeJobName;
+        private String employeeDepartmentName;
+        private String bookmarkedYn;
         private String messageContent;
         private LocalDateTime messageSendDate;
         private List<String> messageReceiverIds;

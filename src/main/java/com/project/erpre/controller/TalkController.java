@@ -39,11 +39,14 @@ public class TalkController {
         }
 
         String senderId = principal.getName();
-
         Optional<LocalDateTime> scheduledDate = Optional.ofNullable(message.getMessageSendDate());
 
         // 메시지 저장 처리
-        MessageDTO savedNote = messengerService.createNote(senderId, message.getMessageContent(), scheduledDate, message.getMessageReceiverIds());
+        MessageDTO savedNote = messengerService.createNote(
+                senderId,
+                message.getMessageContent(),
+                scheduledDate,
+                message.getMessageReceiverIds());
 
         // 각 수신자에게 메시지 전송
         for (String receiverId : message.getMessageReceiverIds()) {

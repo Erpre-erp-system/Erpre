@@ -332,6 +332,8 @@ const Note = ({ noteStatus, isNewNoteModalOpen, openNewNoteModal, closeNewNoteMo
                 <ReceivedNoteModal
                     note={noteDetail}
                     onClose={handleCloseNote}
+                    handleBookmark={handleBookmark}
+                    deletenote={deleteNote}
                 />
             )}
         </div>

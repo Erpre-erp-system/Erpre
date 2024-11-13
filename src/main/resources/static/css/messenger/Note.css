@@ -363,57 +363,33 @@
 }
 
 /* 받은 쪽지 */
-.received-note-modal { color: #333; position: fixed; top: 20%; left: 35%; z-index: 1000;
-    width: 600px;
+.received-note-modal {
+    color: #333;
+    position: fixed;
+    top: 5%;
+    left: 5%;
+    z-index: 1000;
+    width: 550px;
     padding: 20px;
     background-color: white;
     border: 1px solid #ccc;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
 }
 
-.received-note-modal.react-draggable.react-draggable-dragged {
-    transform: translate(20px, -11px);
-}
+.note-modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; padding-bottom: 6px; border-bottom: 1px solid #e1e0e0; }
+.note-actions { left: 10px; top: 10px; justify-content: flex-start;  *gap: 10px; margin-left: 4px; }
+.note-action-button { border: none; color: #555; cursor: pointer; font-size: 19px; border-radius: 4px; transition: color 0.3s; padding: 4px; width: 30px; height: 30px; line-height: 100%; }
+.note-action-button:hover { color: #007BFF; }
 
-.note-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 18px;
-    font-weight: bold;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.close-button {
-    background: none;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    color: #888;
-}
+.received-date { font-size: 14px; color: #979797; font-weight: 500; }
+.close-button { background: none; border: none; font-size: 24px; cursor: pointer; color: #888; }
 
 .note-modal-body { margin-top: 15px; }
-
-.recipient-section {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.recipient-section label {
-    flex: 0 0 80px;
-    font-weight: bold;
-}
-
-.readonly-field {
-    flex: 1;
-    background-color: #f9f9f9;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-}
+.note-meta-section { font-size: 14px; color: #333; line-height: 1.6; margin-bottom: 15px; margin-left: 8px;}
+.meta-row { display: flex; align-items: center; margin-bottom: 8px; }
+.meta-row label { flex: 0 0 69px; font-weight: 700; color: #333; }
+.meta-row span { flex: 1; padding: 3px; }
+.note-divider { height: 1px; background-color: #e0e0e0; margin: 15px 0; }
 
 .message-content-section {
     margin-top: 20px;
@@ -422,14 +398,15 @@
 .message-content {
     background-color: #f9f9f9;
     padding: 10px;
-    border-radius: 4px;
+    border-radius: 2px;
     border: 1px solid #ddd;
     font-size: 14px;
     color: #333;
-    white-space: pre-wrap; /* 줄바꿈을 유지 */
+    white-space: pre-wrap;
     overflow-y: auto;
+    max-height: 300px;
+    min-height: 85px;
 }
-
 
 .note-footer {
     display: flex;
