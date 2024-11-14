@@ -9,6 +9,17 @@ function Login() {
     const [pw, setPw] = useState('');
     const [error, setError] = useState('');
 
+    const fetchEmployeeStatus = async (employeeStatus) => {
+
+        try {
+            await axios.put('/api/messengers/info/update', {
+                employeeStatus: employeeStatus
+            });
+        } catch (error) {
+            console.error('직원 상태를 업데이트 하는 데 오류 발생', error);
+        }
+    };
+
     // 로그인 요청시 병렬 요청 처리 (검증, 메신저)
     const handleLogin = async (e) => {
         e.preventDefault(); // 폼 제출 방지
@@ -32,6 +43,7 @@ function Login() {
 
             if (loginResponse.status === 200) {
                 const result = loginResponse.data;
+                await fetchEmployeeStatus("online");
                 console.log('로그인 성공:', result);
                 console.log('사용자 권한', result.role);
 
