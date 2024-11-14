@@ -1,6 +1,7 @@
 /* 모달 공통 레이아웃 */
-.modal_container.dispatch { width: 400px;}
-.modal_container.dispatch .modal-actions { margin-top: 5px; }
+.modal_container.dispatch { width: 552px;}
+.modal_container.dispatch .modal-actions { margin-top: 15px; }
+.modal_container.dispatch .modal_confirm { width: 219px;  }
 .modal_container .header {
     display: flex;
     justify-content: center;
@@ -220,18 +221,18 @@
 }
 
 .customer-info {
-    width: 30%;
     border: 1px solid #ccc;
-    padding: 10px 10px 10px 10px;
+    padding: 15px 10px 10px 2px;
     box-sizing: border-box;
     text-align: center;
+    height: 278px;
 
 }
 
 .supplier-info {
     width: 70%;
     border: 1px solid #ccc;
-    padding: 20px 10px 10px 10px;
+    padding: 11px 7px 10px 7px;
     box-sizing: border-box;
 }
 
@@ -357,8 +358,8 @@
 /* 드롭다운 메뉴 기본 숨김 */
 .download-section .dropdown-content {
     position: absolute;
-    top: 99%;
-    left: -104px;
+    top: 97%;
+    left: -93px;
     transform: translateY(-100%);
     background-color: #59a1ca;
     color: white;
@@ -366,8 +367,8 @@
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     z-index: 1;
     font-size: 14px;
+    width: 95px;
 }
-
 /* 드롭다운 메뉴 표시 */
 .download-section.show .dropdown-content {
     display: block;
@@ -434,4 +435,9 @@
 
 .dispatch-status.complete {
     background-color: #5cb85c;
+}
+.modal-actions button.box.blue {
+    color: #007CC1;
+    background-color: #e4f1f7a3;
+    margin-bottom: 15px;
 }

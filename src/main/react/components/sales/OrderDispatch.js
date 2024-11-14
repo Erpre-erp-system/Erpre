@@ -813,9 +813,8 @@ function OrderDispatch() { //주문번호1-출고1
     /// 출고완료 버튼 클릭 핸들러
     const handleDispatchComplete = (dispatch) => {
         const warehouseName = dispatch.warehouseName || '-';
-        const productNm = dispatch.productNm || '-';
         const dispatchEndDate = dispatch.dispatchEndDate ? formatDateTime(dispatch.dispatchEndDate) : '-';
-        window.showToast(`${warehouseName}에서 ${productNm}이 정상적으로 출고 완료 되었습니다. (완료일시 : ${dispatchEndDate})`);
+        window.showToast(`${warehouseName}에서 상품이 정상적으로 출고 완료 되었습니다. (완료일시 : ${dispatchEndDate})`);
     };
   
 
