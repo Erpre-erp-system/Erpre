@@ -24,7 +24,7 @@ function EmployeeSalary() {
     }, [currentView]);
 
     const fetchSalaries = () => {
-        fetch(`/api/salary/salaries?filter=${currentView}`)  // currentView에 따라 필터링된 데이터를 서버에서 가져옴
+        fetch(`/api/salary/salaries?filter=${currentView}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('데이터를 가져오는 중 오류가 발생했습니다.');
@@ -32,16 +32,27 @@ function EmployeeSalary() {
                 return response.json();
             })
             .then(data => {
-                setSalaryData(data);
-                setFilteredData(Array.isArray(data) ? data : []); // 데이터가 배열인지 확인 후 설정
-                setTotalPages(Math.ceil(data.length / ITEMS_PER_PAGE));
+                // employeeId 기준으로 오름차순 정렬
+                const sortedData = data.sort((a, b) => {
+                    const idA = a.employee?.employeeId || '';
+                    const idB = b.employee?.employeeId || '';
+                    if (idA < idB) return -1;
+                    if (idA > idB) return 1;
+                    return 0;
+                });
+
+                setSalaryData(sortedData);
+                setFilteredData(sortedData);
+                setTotalPages(Math.ceil(sortedData.length / ITEMS_PER_PAGE));
                 setSelectedSalaries(new Set());
             })
             .catch(error => {
                 console.error('급여 데이터를 가져오는 중 오류 발생:', error);
-                setFilteredData([]); // 에러 발생 시 빈 배열로 초기화
+                setFilteredData([]);
             });
     };
+
+
 
     useEffect(() => {
         if (debouncedSearchSalary === '') {
@@ -128,18 +139,18 @@ function EmployeeSalary() {
 
             switch (field) {
                 case 'employeeName': {
-                    valueA = a.employee && a.employee.employeeName ? a.employee.employeeName.toLowerCase() : '';
-                    valueB = b.employee && b.employee.employeeName ? b.employee.employeeName.toLowerCase() : '';
+                    valueA = a.employee?.employeeName?.toLowerCase() || '';
+                    valueB = b.employee?.employeeName?.toLowerCase() || '';
                     break;
                 }
                 case 'departmentName': {
-                    valueA = a.department && a.department.departmentName ? a.department.departmentName.toLowerCase() : '';
-                    valueB = b.department && b.department.departmentName ? b.department.departmentName.toLowerCase() : '';
+                    valueA = a.department?.departmentName?.toLowerCase() || '';
+                    valueB = b.department?.departmentName?.toLowerCase() || '';
                     break;
                 }
-                case 'jobId ': {
-                    valueA = a.job && a.job.jobId ? a.job.jobId.toLowerCase() : '';
-                    valueB = b.job && b.job.jobId ? b.job.jobId.toLowerCase() : '';
+                case 'jobName': {
+                    valueA = a.job?.jobName?.toLowerCase() || '';
+                    valueB = b.job?.jobName?.toLowerCase() || '';
                     break;
                 }
                 case 'baseSalary': {
@@ -147,14 +158,14 @@ function EmployeeSalary() {
                     valueB = b.baseSalary || 0;
                     break;
                 }
-                case 'performanceIncentive': {
-                    valueA = a.performanceIncentiveRate ? parseFloat(a.performanceIncentiveRate) : 0;
-                    valueB = b.performanceIncentiveRate ? parseFloat(b.performanceIncentiveRate) : 0;
+                case 'performanceIncentiveRate': {
+                    valueA = parseFloat(a.performanceIncentiveRate) || 0;
+                    valueB = parseFloat(b.performanceIncentiveRate) || 0;
                     break;
                 }
-                case 'gradeIncentive': {
-                    valueA = a.gradeIncentiveRate ? parseFloat(a.gradeIncentiveRate) : 0;
-                    valueB = b.gradeIncentiveRate ? parseFloat(b.gradeIncentiveRate) : 0;
+                case 'gradeIncentiveRate': {
+                    valueA = parseFloat(a.gradeIncentiveRate) || 0;
+                    valueB = parseFloat(b.gradeIncentiveRate) || 0;
                     break;
                 }
                 case 'bonus': {
@@ -163,8 +174,9 @@ function EmployeeSalary() {
                     break;
                 }
                 case 'expectedTotalPayment': {
-                    valueA = a.totalPayment || 0;
-                    valueB = b.totalPayment || 0;
+                    // 계산된 값이므로 비교를 위해 다시 계산
+                    valueA = calculateExpectedTotalPayment(a);
+                    valueB = calculateExpectedTotalPayment(b);
                     break;
                 }
                 case 'deleteDate': {
@@ -201,6 +213,7 @@ function EmployeeSalary() {
 
         setFilteredData(sortedData);
     };
+
 
     return (
         <Layout currentMenu="employeeSalary">
