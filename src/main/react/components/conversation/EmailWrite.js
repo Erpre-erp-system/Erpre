@@ -396,6 +396,15 @@ function EmailWrite() {
         </div>
 
       </div>
+
+      {/* 로딩 오버레이 */}
+      {loading && (
+        <div className="loading_overlay">
+          <div className="spinner"></div>
+          <div className="loading_text">메일 전송 중...</div>
+        </div>
+      )}
+
     </Layout>
   );
 }

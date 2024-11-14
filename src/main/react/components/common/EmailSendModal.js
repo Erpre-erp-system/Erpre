@@ -92,7 +92,7 @@ function EmailSendModal({ selectedEmailData, closeModal }) {
         <div className="email-actions">
           {/* <a href="#" className="action-link">답장</a>
           <a href="#" className="action-link">전달</a> */}
-          <a href="#" className="action-link delete">삭제</a>
+          {/* <a href="#" className="action-link delete">삭제</a> */}
 
           <button className="btn_close" onClick={handleClose}><i className="bi bi-x-lg"></i></button> {/* 모달 닫기 버튼 */}
         </div>
@@ -106,7 +106,7 @@ function EmailSendModal({ selectedEmailData, closeModal }) {
 
         <div className="email-info">
           <p>보낸 사람: {senderName} <span className="email-address"><a href="#">{senderEmail}</a></span> </p>
-          <p>받는 사람: 이순신 <span className="email-address"><a href="#">{emailData?.emailAddrReceiveS || '이메일주소 없음'}</a></span></p>
+          <p>받는 사람: <span className="email-address"><a href="#">{emailData?.emailAddrReceiveS || '이메일주소 없음'}</a></span></p>
 
 
         </div>

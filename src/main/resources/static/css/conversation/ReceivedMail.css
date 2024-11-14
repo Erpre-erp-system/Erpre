@@ -23,3 +23,7 @@
 .table_border { border: 1px solid #ddd; height: 90.5%; overflow-y: auto; border-radius: 3px; } 
 
 .sub_title { margin-left: 7px; } 
+
+input[type="checkbox"] { visibility: hidden; } 
+
+.chkbox { visibility: hidden; } 

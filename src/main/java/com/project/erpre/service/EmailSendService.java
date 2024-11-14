@@ -3,6 +3,8 @@ package com.project.erpre.service;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
+
 import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
 
@@ -26,7 +28,7 @@ public class EmailSendService {
     private JavaMailSender mailSender;
 
     @Autowired
-    private EmailSendRepository emailRepository;
+    private EmailSendRepository emailSendRepository;
 
     @Autowired
     private EmailSendFileRepository emailFileRepository;
@@ -65,7 +67,7 @@ public class EmailSendService {
             emailSend.setEmailStatusS("nr");
             emailSend.setEmailDateS(new Timestamp(System.currentTimeMillis()));
 
-            EmailSend savedEmailSend = emailRepository.save(emailSend); // JPA save를 통해 DB에 전송내역 저장
+            EmailSend savedEmailSend = emailSendRepository.save(emailSend); // JPA save를 통해 DB에 전송내역 저장
 
             if (files != null && !files.isEmpty()) {
                 for (MultipartFile file : files) { // 첨부파일과 같은 업로드된 파일을 처리하는데 사용됨
@@ -100,12 +102,12 @@ public class EmailSendService {
 
     // 보낸메일 전체 조회
     public List<EmailSend> getEmailSendByEmployeeId(String employeeId) {
-        return emailRepository.findByEmployeeId(employeeId);
+        return emailSendRepository.findByEmployeeIdAndEmailStatusSNot(employeeId, "d");
     }
 
     // 이메일 뷰어
     public EmailSend findEmailById(Integer emailNmS) {
-        return emailRepository.findById(emailNmS).orElse(null);
+        return emailSendRepository.findById(emailNmS).orElse(null);
     }
 
     // 보낸메일 첨부파일
@@ -115,6 +117,36 @@ public class EmailSendService {
             throw new RuntimeException("이메일을 찾을 수 없습니다.");
         }
         return emailFileRepository.findByEmailNmS(email); // 이메일 기준으로 첨부파일 목록을 조회
+    }
+
+
+    //// 이메일 삭제 메서드 추가
+    public void deleteSentEmails(List<Integer> emailIds) {
+        for (Integer emailId : emailIds) {
+            Optional<EmailSend> optionalEmail = emailSendRepository.findById(emailId);
+            if (optionalEmail.isPresent()) {
+                EmailSend email = optionalEmail.get();
+                email.setEmailStatusS("d"); // 이메일 상태를 삭제 d 로 변경
+                emailSendRepository.save(email);
+            }
+        }
+    }
+
+    // 휴지통 메일 조회
+    public List<EmailSend> getTrashEmails(String employeeId) {
+        return emailSendRepository.findByEmployeeIdAndEmailStatusS(employeeId, "d");
+    }
+
+    // 휴지통 메일 복구
+    public void restoreTrashEmails(List<Integer> emailIds) {
+        for (Integer emailId : emailIds) {
+            Optional<EmailSend> optionalEmail = emailSendRepository.findById(emailId);
+            if (optionalEmail.isPresent()) {
+                EmailSend email = optionalEmail.get();
+                email.setEmailStatusS("nd"); // 이메일 상태를 'nd'로 변경
+                emailSendRepository.save(email);
+            }
+        }
     }
 
 }

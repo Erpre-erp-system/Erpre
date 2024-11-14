@@ -83,3 +83,44 @@
 .field_error_msg { color: #f90000f7; font-weight: 500; font-size: 13px; margin: 2px 0 0 2px; display: block; position: absolute; top: 94%; left: 7%; user-select: none; } 
 
 .field_error_msg i { margin-right: 3px; } 
+
+
+/* 전송 중 로딩 */
+/* src/main/react/resources/static/css/conversation/EmailWrite.css */
+
+/* 로딩 오버레이 */
+.loading_overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); /* 반투명 검정 배경 */
+ display: flex; align-items: center; justify-content: center; z-index: 1000; /* 다른 요소들보다 위에 표시 */ } 
+
+/* 스피너 */
+.spinner { border: 12px solid #f3f3f3; /* Light grey */
+ border-top: 12px solid #3498db; /* Blue */
+ border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; } 
+
+/* 스피너 애니메이션 */
+@keyframes spin { 
+ 0% { transform: rotate(0deg); } 
+ 100% { transform: rotate(360deg); } 
+ }
+
+/* 추가 스타일링 (선택사항) */
+
+
+.loading_overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; } 
+
+.spinner { border: 12px solid #f3f3f3; border-top: 12px solid #3498db; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-bottom: 20px; } 
+
+.loading_text { color: #fff; font-size: 20px; } 
+
+@keyframes spin { 
+ 0% { transform: rotate(0deg); } 
+ 100% { transform: rotate(360deg); } 
+ }
+
+
+/* 반응형 디자인을 고려하여 스피너 크기 조절 */
+@media (max-width: 600px){
+ .spinner { width: 40px; height: 40px; border-width: 8px; } 
+ }
+
+ .loading_text { color: #fff; font-size: 20px; margin-top: 20px; } 
