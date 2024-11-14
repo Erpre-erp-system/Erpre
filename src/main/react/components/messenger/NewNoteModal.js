@@ -151,7 +151,7 @@ const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
 
     return (
         <>
-            <Draggable handle=".note-modal-header">
+            <Draggable>
                 <div className="new-note-modal">
                     <div className="note-modal-header">
                         <h2></h2>

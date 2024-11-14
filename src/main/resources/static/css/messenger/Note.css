@@ -1,34 +1,25 @@
 /* 드롭 다운 */
-.dropdown-header {
-    position: relative;
-    cursor: pointer;
-}
-
-.dropdown-title {
-    display: flex;
-    align-items: center;
-    font-size: 26px;
-}
-
+.dropdown-header { position: relative; cursor: pointer;  display: flex;  align-items: center; }
+.dropdown-title { display: flex; align-items: center; font-size: 23px; }
 .dropdown-content {
     position: absolute;
     top: 100%;
     left: 0;
     background-color: white;
     border: 1px solid #ddd;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
     margin-top: 5px;
     z-index: 10;
-    width: 150px;
+    width: 117px;
     overflow: hidden;
     font-size: 26px;
 }
 
 .dropdown-item {
-    padding: 8px 12px;
+    padding: 5px 7px;
     cursor: pointer;
-    font-size: 26px;
+    font-size: 22px;
     color: #333;
     transition: background-color 0.2s ease;
 }
@@ -249,6 +240,9 @@
     width: 100%;
 }
 
+button.note-employee-search {
+    margin-left: 4px;
+}
 
 .note-employee-search {
     cursor: pointer;
@@ -375,7 +369,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.note-modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; padding-bottom: 6px; }
+.note-modal-header, .note-modal-header-re { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; padding-bottom: 6px; }
 .note-actions { left: 10px; top: 10px; justify-content: flex-start;  *gap: 10px; margin-left: 4px; }
 .note-action-button { border: none; color: #555; cursor: pointer; font-size: 19px; border-radius: 4px; transition: color 0.3s; padding: 4px; width: 30px; height: 30px; line-height: 100%; }
 .note-action-button:hover { color: #007BFF; }

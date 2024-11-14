@@ -1,15 +1,43 @@
-import React, { useContext } from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Draggable from "react-draggable";
 import DOMPurify from 'dompurify';
 import { UserContext } from "../../context/UserContext";
 import {FaReply, FaStar, FaTrashAlt} from "react-icons/fa";
+import Swal from "sweetalert2";
+import NewNoteModal from "./NewNoteModal";
 
 const ReceivedNoteModal = ({ note, onClose, handleBookmark, deleteNote }) => {
     if (!note) return null;
 
+    // const [selectedNoteNo, setSelectedNoteNo] = useState('');
     const { user } = useContext(UserContext);
+    const [replyModalOpen, setReplyModalOpen] = useState(false);
     console.log("ReceivedNoteModal 열린 쪽지:", note); // 확인용 로그
+    //
+    // useEffect(() => {
+    //     if (note && note.messageNo) {
+    //         setSelectedNoteNo(note.messageNo);
+    //     }
+    // }, [note]);
+
     const cleanHTML = DOMPurify.sanitize(note.messageContent);
+
+    // 삭제 경고창 및 요청
+    const showDeleteAlert = () => {
+        Swal.fire({
+            title: `쪽지 삭제`,
+            html: '해당 쪽지를 정말 삭제하시겠습니까?<br/>삭제된 쪽지는 복구할 수 없습니다.<br/>※ 나에게 보낸 쪽지인 경우, 받은 쪽지함과 보낸 쪽지함에서 모두 삭제됩니다.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '삭제',
+            cancelButtonText: '취소',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deleteNote(null, note.messageNo);
+            }
+        });
+    };
 
     // 날짜 형식 포맷 함수
     const formatDate = (dateString) => {
@@ -28,13 +56,14 @@ const ReceivedNoteModal = ({ note, onClose, handleBookmark, deleteNote }) => {
     };
 
     return (
-        <Draggable handle=".note-modal-header">
+        <div>
+        <Draggable>
             <div className="received-note-modal">
-                <div className="note-modal-header">
+                <div className="note-modal-header-re">
                     <div className="note-actions">
                         <button
                             className="note-action-button del"
-                            onClick={() => deleteNote(note.messageNo)} // deleteNote 호출
+                            onClick={() => deleteNote(null, note?.messageNo)} // deleteNote 호출
                         >
                             <FaTrashAlt/>
                         </button>
@@ -50,8 +79,11 @@ const ReceivedNoteModal = ({ note, onClose, handleBookmark, deleteNote }) => {
                                 <FaStar className="star-icon"/>
                             )}
                         </button>
-                        <button className="note-action-button reply">
-                            <FaReply/>
+                        <button
+                            className="note-action-button reply"
+                            onClick={() => setReplyModalOpen(true)}
+                        >
+                            <FaReply />
                         </button>
                     </div>
                     <div className="received-date">
@@ -82,7 +114,20 @@ const ReceivedNoteModal = ({ note, onClose, handleBookmark, deleteNote }) => {
                     </div>
                 </div>
             </div>
+
         </Draggable>
+
+            {/* 답장 모달 */}
+            {replyModalOpen && (
+                <NewNoteModal
+                    closeNewNoteModal={() => setReplyModalOpen(false)}
+                    initialRecipients={[{
+                        employeeId: note.employeeId,
+                        employeeName: note.employeeName
+                    }]}
+                />
+            )}
+        </div>
     );
 };
 

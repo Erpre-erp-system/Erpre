@@ -136,7 +136,7 @@ const Note = ({ noteStatus, isNewNoteModalOpen, openNewNoteModal, closeNewNoteMo
             showCancelButton: true,
             confirmButtonText: '삭제',
             cancelButtonText: '취소',
-            reverseButtons: true
+            reverseButtons: true,
         }).then((result) => {
             if (result.isConfirmed) {
                 console.log("쪽지를 삭제합니다:", note.messageNo);

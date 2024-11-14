@@ -312,3 +312,7 @@ img.profile-image { width: 60px; height: 60px; border-radius: 50%; object-fit: c
 /* sweetalert2 커스텀 */
 div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) { background-color: #C9DAEC; }
 div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm):focus-visible { box-shadow: 0 0 0 3px #F1F1F1; }
+div:where(.swal2-icon).swal2-warning {
+    border-color: rgb(237 156 156);
+    color: rgb(237 156 156);
+}
