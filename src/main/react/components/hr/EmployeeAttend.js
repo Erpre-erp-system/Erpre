@@ -41,13 +41,27 @@ function EmployeeAttend() {
         axios.get(url)
             .then(response => {
                 console.log("API 응답 데이터:", response.data);
-                setAttendanceData(response.data.content);
-                setFilteredData(response.data.content);
+
+                // employeeId 기준으로 오름차순 정렬
+                const sortedData = response.data.content.sort((a, b) => {
+                    // employeeId가 숫자인 경우
+                    //return Number(a.employee.employeeId) - Number(b.employee.employeeId);
+
+                    // 또는 employeeId가 문자열인 경우
+                     if (a.employee.employeeId < b.employee.employeeId) return -1;
+                     if (a.employee.employeeId > b.employee.employeeId) return 1;
+                     return 0;
+                });
+
+                setAttendanceData(sortedData);
+                setFilteredData(sortedData);
                 setTotalPages(response.data.totalPages);
-                setSelectedAttendances(new Array(response.data.content.length).fill(false));
+                setSelectedAttendances(new Array(sortedData.length).fill(false));
             })
             .catch(error => console.error('근태 데이터 조회 에러:', error));
     };
+
+
 
     function calculateWorkingHours(checkInTime, checkOutTime) {
         if (!checkInTime || !checkOutTime) return 0;

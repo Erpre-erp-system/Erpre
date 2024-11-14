@@ -6,7 +6,9 @@ import com.project.erpre.model.entity.EmailSend;
 
 public interface EmailSendRepository extends JpaRepository<EmailSend, Integer> {
 
-  // 보낸메일 내역 조회 (보낸메일함)
-  List<EmailSend> findByEmployeeId(String employeeId);
+  //삭제상태 d 가 아닌 이메일들만 조회하는 메서드 추가
+  List<EmailSend> findByEmployeeIdAndEmailStatusSNot(String employeeId, String emailStatusS);
 
+  // 삭제상태가 d인 이메일 조회(휴지통)
+  List<EmailSend> findByEmployeeIdAndEmailStatusS(String employeeId, String emailStatusS);
 }

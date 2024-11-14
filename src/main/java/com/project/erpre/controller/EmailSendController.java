@@ -1,6 +1,7 @@
 package com.project.erpre.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -81,6 +84,31 @@ public class EmailSendController {
         List<EmailFileSend> files = emailSendService.getFilesByEmailId(emailFileNmS);
         return ResponseEntity.ok(files);
     }
+
+    // 이메일 삭제
+    @PutMapping("/sent/delete")
+    public ResponseEntity<String> deleteSentEmails(@RequestBody Map<String, List<Integer>> request) {
+        List<Integer> emailIds = request.get("emailIds");
+        emailSendService.deleteSentEmails(emailIds);
+        return ResponseEntity.ok("삭제 완료");
+    }
+
+    // 휴지통 메일 조회
+    @GetMapping("/trash/{employeeId}")
+    public List<EmailSend> getTrashEmails(@PathVariable String employeeId) {
+        return emailSendService.getTrashEmails(employeeId);
+    }
+
+    // 휴지통 메일 복구
+    @PutMapping("/trash/restore")
+    public ResponseEntity<String> restoreTrashEmails(@RequestBody Map<String, List<Integer>> request) {
+        List<Integer> emailIds = request.get("emailIds");
+        emailSendService.restoreTrashEmails(emailIds);
+        return ResponseEntity.ok("복구 완료");
+    }
+
+
+
 
     // // 이메일 뷰어 첨부파일 다운로드
     // @GetMapping("/files/download/{emailFileNmS}")

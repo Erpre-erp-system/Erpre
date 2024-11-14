@@ -23,3 +23,7 @@
 .table_border { border: 1px solid #ddd; height: 90.5%; overflow-y: auto; border-radius: 3px; } 
 
 .sub_title { margin-left: 7px; } 
+
+.trash_btn { position: fixed; right: 4.6%; top: 11.5%; font-size: 23px; } 
+
+.checkbox_map { display: inline-block; width: 16px; height: 16px; border: 1px solid #888; border-radius: 4px; background-color: white; position: relative; cursor: pointer; } 

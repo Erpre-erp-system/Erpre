@@ -29,7 +29,7 @@ function ReceivedMail() {
           }
         });
 
-        const sortedData = response.data.sort((a, b) => new Date(b.emailDateR) - new Date(a.emailDateR));  //가장 최근 날짜가 위로 오도록 정렬
+        // const sortedData = response.data.sort((a, b) => new Date(b.emailDateR) - new Date(a.emailDateR));  //가장 최근 날짜가 위로 오도록 정렬
 
         setReceiveData(response.data);
         setLoading(false);
@@ -91,9 +91,9 @@ function ReceivedMail() {
                  <th>
                     <label className="chkbox_label">
                       <input type="checkbox" className="chkbox" />
-                      <i className="chkbox_icon">
+                      {/* <i className="chkbox_icon">
                         <i className="bi bi-check-lg"></i>
-                      </i>
+                      </i> */}
                     </label> 
                   </th> 
                   <th>

@@ -18,6 +18,60 @@ function SentMail() {
   const navigate = useNavigate(); // useNavigate 훅 초기화
   const [selectedEmail, setSelectedEmail] = useState('')
 
+  // 체크박스 상태 관리
+  const [selectedItems, setSelectedItems] = useState([]);
+  // 전체 선택 상태 계산
+  const selectAll = sendData.length > 0 && selectedItems.length === sendData.length;
+
+  // 🟢 개별 체크박스 선택
+  const handleCheckboxChange = (id) => {
+    if (selectedItems.includes(id)) {
+      setSelectedItems(selectedItems.filter(item => item !== id));
+    } else {
+      setSelectedItems([...selectedItems, id]);
+    }
+  };
+
+  // 🟢 전체 선택/해제
+  const handleSelectAllChange = () => {
+    if (selectAll) {
+      // 전체 해제
+      setSelectedItems([]);
+    } else {
+      // 전체 선택
+      const allIds = sendData.map(email => email.emailNmS);
+      setSelectedItems(allIds);
+    }
+  };
+
+  // 삭제 기능 구현
+  const handleDelete = async () => {
+    if (selectedItems.length === 0) {
+       window.showToast('삭제할 메일을 선택하세요.', 'error', 3000);
+      return;
+    }
+
+    const confirmDelete = window.confirm('선택한 메일을 삭제하시겠습니까?');
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      // 서버에 삭제 요청 보내기
+      await axios.put('/api/email/sent/delete', {
+        emailIds: selectedItems,
+      });
+
+      // 삭제 후 로컬 상태 업데이트
+      const newSendData = sendData.filter(email => !selectedItems.includes(email.emailNmS));
+      setSendData(newSendData);
+      setSelectedItems([]);
+    } catch (error) {
+      console.error('메일 삭제 중 오류가 발생했습니다.', error);
+      alert('메일 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
   // 보낸 메일 조회
   useEffect(() => {
     const fetchSentEmail = async () => {
@@ -26,13 +80,13 @@ function SentMail() {
 
         const sortedData = response.data.sort((a, b) => new Date(b.emailDateS) - new Date(a.emailDateS));
 
-        setSendData(response.data);
+        setSendData(sortedData);
         setLoading(false); // 로딩 완료 후 false로 설정
       } catch (error) {
         console.error('보낸메일을 불러오지 못하였습니다.', error);
       }
     };
-    
+
     if (employeeId) {
       fetchSentEmail();
     }
@@ -65,6 +119,11 @@ function SentMail() {
           <div className="sub_title">보낸 메일함</div>
         </div>
 
+        {/* 삭제 버튼 */}
+        <button onClick={handleDelete} disabled={selectedItems.length === 0}>
+          <i className="bi bi-trash trash_btn"></i>
+        </button>
+
         {/* 검색어 입력 */}
         {/* <div className="mail-search search_box">
           <label className="label_floating">메일 검색</label>
@@ -78,7 +137,7 @@ function SentMail() {
           <div className="search_wrap">
             <div className="left">
               <div className="checkbox_box">
-                <input type="checkbox" id="currentMail" name="status" />
+                <input type="checkbox" id="currentMail" name="status" onChange={handleSelectAllChange} checked={selectAll} />
               </div>
             </div>
           </div>
@@ -88,11 +147,11 @@ function SentMail() {
                 <tr>
                   <th>
                     <label className="chkbox_label">
-                      <input type="checkbox" className="chkbox" />
+                      <input type="checkbox" className="chkbox" onChange={handleSelectAllChange} checked={selectAll} />
                       <i className="chkbox_icon">
                         <i className="bi bi-check-lg"></i>
                       </i>
-                    </label> 
+                    </label>
                   </th>
                   <th>
                     <div className="order_wrap">
@@ -136,7 +195,13 @@ function SentMail() {
                   sendData.length > 0 ? (
                     sendData.map((email, index) => (
                       <tr key={index} onClick={() => openModal(email)} className='send_tr'>
-                        <td><input type="checkbox" /></td>
+                        <td>
+                          <input type="checkbox"
+                            className='checkbox_map'
+                            checked={selectedItems.includes(email.emailNmS)}
+                            onChange={() => handleCheckboxChange(email.emailNmS)}
+                            onClick={(e) => e.stopPropagation()} />
+                        </td>
                         <td>{email.emailAddrReceiveS}</td>
                         <td>{email.emailSubjectS}</td>
                         <td>{new Date(email.emailDateS).toLocaleString()}</td>
