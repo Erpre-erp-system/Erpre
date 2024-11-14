@@ -154,11 +154,11 @@ const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
             <Draggable handle=".note-modal-header">
                 <div className="new-note-modal">
                     <div className="note-modal-header">
-                        <h2>쪽지 보내기</h2>
+                        <h2></h2>
                     </div>
                     <div className="note-modal-body">
                         <div className="recipient-section">
-                            <label>받는사람</label>
+                            <label>받는 사람</label>
                             <button
                                 className="note-employee-search"
                                 onClick={openEmployeeSearchModal}
@@ -177,7 +177,7 @@ const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
                                     ))}
                                     <input
                                         type="text"
-                                        placeholder={recipients.length === 0 ? "받는 사람의 이름을 입력하거나, + 버튼을 눌러 검색하세요" : ''}
+                                        placeholder={recipients.length === 0 ? "+ 버튼을 눌러 직원을 검색하세요" : ''}
                                         value={employeeSearchText}
                                         onChange={(e) => setEmployeeSearchText(e.target.value)}
                                         className="recipient-input"
@@ -212,7 +212,7 @@ const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
                                     checked={scheduledSend}
                                     onChange={() => setScheduledSend(!scheduledSend)}
                                 />
-                                예약전송
+                                예약 전송
                             </label>
                             {scheduledSend && (
                                 <input
@@ -230,7 +230,6 @@ const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
                             value={messageContent}
                             onChange={setMessageContent}
                             modules={quillModules}
-                            placeholder="메시지를 입력하세요"
                             className="message-textarea"
                         />
                         { /* 이미지 및 파일 */}

@@ -12,10 +12,10 @@ function Sidebar({ currentMenu }) {
     const [employee, setEmployee] = useState(null);
     const location = useLocation();
 
-    useEffect(() => {
-        const storedLoginTime = localStorage.getItem('loginTime');
-        setLoginTime(storedLoginTime || '시간 정보 없음');
-    }, []);
+    // useEffect(() => {
+    //     const storedLoginTime = localStorage.getItem('loginTime');
+    //     setLoginTime(storedLoginTime || '시간 정보 없음');
+    // }, []);
 
 
 
@@ -88,7 +88,7 @@ function Sidebar({ currentMenu }) {
                             'LOADING'
                         )}
                     </div>
-                    <div className="login-time">{loginTime}</div>
+                    {/*<div className="login-time">{loginTime}</div>*/}
                     <button onClick={handleLogout} className="box small">로그아웃</button>
                 </div>
             </div>

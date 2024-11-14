@@ -67,11 +67,11 @@ const ReceivedNoteModal = ({ note, onClose, handleBookmark, deleteNote }) => {
                         </div>
                         <div className="meta-row">
                             <label>받는 사람</label>
-                            <span>{user.employeeName}</span>
+                            <span className="note-name">{user.employeeName} {user.jobName} ({user.departmentName})</span>
                         </div>
                     </div>
 
-                    <div className="note-divider" />
+                    <div className="note-divider"/>
 
                     <div className="message-content-section">
                         <div className="message-content" dangerouslySetInnerHTML={{ __html: cleanHTML }} />

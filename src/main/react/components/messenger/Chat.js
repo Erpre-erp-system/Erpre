@@ -167,6 +167,7 @@ const Chat = ({
                         closeChatModal={closeChatModal}
                         formatDate={formatDate}
                         fetchChatList={fetchChatList}
+                        chatTitle={chatList.find(chat => chat.chatNo === selectedChat)?.chatTitle}
                     />
                 </div>
             )}

@@ -149,13 +149,13 @@ img.profile-image { width: 60px; height: 60px; border-radius: 50%; object-fit: c
     position: relative;
 }
 
-.chat-input { flex-grow: 1; padding: 14px; border: 1px solid #ddd; outline: none; height: 55px; }
+.chat-input { flex-grow: 1; padding: 14px; border: 1px solid #ddd; outline: none; height: 55px; margin-right: 12px; }
 .chat-room-footer button.chat-room-submit-btn {
     background-color: #606060;
     border: none;
     width: 47px;
     color: white;
-    border-radius: 5px;
+    border-radius: 1px;
     cursor: pointer;
     font-size: 16px;
     height: 55px;
