@@ -21,6 +21,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -86,7 +87,6 @@ public class MessengerService {
                 .orElseThrow(() -> new RuntimeException("해당 직원을 찾을 수 없습니다"));
         return new EmployeeDTO(employee);
     }
-
     public EmployeeDTO getUserInfo(String employeeId) {
         Employee employee = employeeRepository.findByEmployeeId(employeeId)
                 .orElseThrow(() -> new RuntimeException("해당 직원을 찾을 수 없습니다"));
@@ -127,6 +127,7 @@ public class MessengerService {
         }
         if (requests.containsKey("employeeStatus")) {
             employee.setEmployeeStatus(requests.get("employeeStatus"));
+            employee.setEmployeeStatusUpdateTime(Timestamp.valueOf(LocalDateTime.now()));
         }
         if (requests.containsKey("employeeStatusMessage")) {
             employee.setEmployeeStatusMessage(requests.get("employeeStatusMessage"));
@@ -317,7 +318,6 @@ public class MessengerService {
 
         if ("Y".equals(message.getMessageDeleteYn()) && allRecipientsDeleted) {
             messageRepository.deleteById(messageNo);
-            logger.info("모든 수신자와 발신자가 삭제 상태이므로 Message 테이블에서 완전 삭제되었습니다: {}", messageNo);
         }
     }
 
