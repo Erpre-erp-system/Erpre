@@ -487,23 +487,23 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
                                 <tbody>
                                     <tr>
                                         <th>공급자 상호</th>
-                                        <td>이케아</td>
+                                        <td>이케아코리아 유한회사</td>
                                     </tr>
                                     <tr>
                                         <th>공급자 주소</th>
-                                        <td>이케아</td>
+                                        <td>경기도 광명시 일직로 17,<br />1층 (일직동) 이케아 광명점</td>
                                     </tr>
                                     <tr>
                                         <th>공급자 대표성명</th>
-                                        <td>박인욱</td>
+                                        <td>이사벨 푸치(Isabel Puig)</td>
                                     </tr>
                                     <tr>
                                         <th>공급자 전화번호</th>
-                                        <td>02-111-5555</td>
+                                        <td>1670-4532</td>
                                     </tr>
                                     <tr>
                                         <th>공급자 사업자 등록번호</th>
-                                        <td>123-456-7890</td>
+                                        <td>106-86-82871</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1047,7 +1047,7 @@ function OrderDispatch() { //주문번호1-출고1
                     {filterType === 'pending' && (
                     <div className="right">
                         <button className="box color" onClick={handleDispatchInstructionClick}>
-                        출고지시
+                            <i className="bi bi-plus-circle"></i> 출고지시
                         </button>
                     </div>
                     )}
