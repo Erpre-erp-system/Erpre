@@ -410,7 +410,7 @@ function EmployeeList() {
             <main className="main-content menu_employee">
                 <div className="menu_title">
                     <div className="sub_title">인사 관리</div>
-                    <div className="main_title">직원 목록</div>
+                    <div className="main_title">직원 관리</div>
                 </div>
                 <div className="menu_content">
                     {/* 검색 및 필터 영역 */}

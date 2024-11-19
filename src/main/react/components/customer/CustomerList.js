@@ -1066,6 +1066,7 @@ function CustomerList() {
                                             </i>
                                         </label>
                                     </th>
+                                    <th>번호</th>
                                     <th>
                                         <div className={`order_wrap ${sortColumn === 'customerName' ? 'active' : ''}`}>
                                             <span>고객사</span>
@@ -1176,7 +1177,7 @@ function CustomerList() {
                                                         <span className="label_del">삭제</span>
                                                     )}
                                                 </td>
-                                                {/* <td>{(currentPage - 1) * itemsPerPage + index + 1}</td> */}
+                                                <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                                                 <td>{customer.customerName || ''}</td>
                                                 <td>{customer.customerBusinessRegNo || ''}</td>
                                                 <td>{customer.customerCountryCode || ''}</td>

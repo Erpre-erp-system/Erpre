@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../resources/static/css/common/Sidebar.css';
-import {useLocation} from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import axios from "axios";
 
-function Sidebar({currentMenu}) {
+function Sidebar({ currentMenu }) {
     const [activeSubMenu, setActiveSubMenu] = useState(() => {
         const path = window.location.pathname;
         return path.split('/').pop();
@@ -11,8 +11,15 @@ function Sidebar({currentMenu}) {
     const [employee, setEmployee] = useState(null);
     const location = useLocation();
 
-    const fetchEmployeeStatus = async (employeeStatus) => {
+    const [expandedMenu, setExpandedMenu] = useState(() => {
+        if (currentMenu.startsWith('order')) return 'order';
+        if (currentMenu.startsWith('product')) return 'product';
+        if (currentMenu.startsWith('customer')) return 'customer';
+        if (currentMenu.startsWith('employee')) return 'employee';
+        return null;
+    });
 
+    const fetchEmployeeStatus = async (employeeStatus) => {
         try {
             await axios.put('/api/messengers/info/update', {
                 employeeStatus: employeeStatus
@@ -21,7 +28,6 @@ function Sidebar({currentMenu}) {
             console.error('직원 상태를 업데이트 하는 데 오류 발생', error);
         }
     };
-
 
     useEffect(() => {
         const fetchEmployee = async () => {
@@ -51,8 +57,8 @@ function Sidebar({currentMenu}) {
     }, [location.pathname]);
 
     function formatDate(dateString) {
-        if (!dateString) return '정보 없음'; // dateString이 null 또는 undefined일 경우 안전하게 처리
-        const date = new Date(dateString); // 문자열을 Date 객체로 변환
+        if (!dateString) return '정보 없음';
+        const date = new Date(dateString);
         if (isNaN(date.getTime())) {
             return '잘못된 날짜 형식';
         }
@@ -60,16 +66,18 @@ function Sidebar({currentMenu}) {
         const hours = date.getHours();
         const minutes = date.getMinutes();
         const amPm = hours < 12 ? '오전' : '오후';
-
-        // 12시간 형식으로 변환 (0시는 12시로 표현)
         const formattedHours = hours % 12 || 12;
         const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
 
         return `${amPm} ${formattedHours}:${formattedMinutes}`;
     }
 
-    const handleMenuClick = (menu) => {
-        setActiveSubMenu(null);
+    const handleMainMenuClick = (menu) => {
+        if (expandedMenu === menu) {
+            setExpandedMenu(null);
+        } else {
+            setExpandedMenu(menu);
+        }
     };
 
     const handleSubMenuClick = (subMenu, path) => {
@@ -79,21 +87,18 @@ function Sidebar({currentMenu}) {
 
     const handleLogout = async () => {
         try {
-            const response = await axios.post('/api/logout', {}, {withCredentials: true});
+            const response = await axios.post('/api/logout', {}, { withCredentials: true });
             if (response.status === 200) {
                 await fetchEmployeeStatus("offline");
                 console.log('로그아웃 성공:', response.data.message);
-                // 필요하면 클라이언트 상태 초기화
                 localStorage.clear();
-                window.location.href = '/login'; // 로그아웃 후 로그인 페이지로 이동
+                window.location.href = '/login';
             } else {
                 console.error('로그아웃 실패:', response.data.message);
-                // 오류 메시지 표시
                 alert('로그아웃에 실패했습니다.');
             }
         } catch (error) {
             console.error('로그아웃 중 오류 발생:', error);
-            // 오류 메시지 표시
             alert('로그아웃 중 오류가 발생했습니다.');
         }
     };
@@ -106,7 +111,7 @@ function Sidebar({currentMenu}) {
                         {employee ? (
                             <>
                                 {employee.jobName === 'Admin' ? '관리자' : ''}
-                                {employee.employeeName} {" "} {employee.jobName} {" "} ({employee.departmentName})
+                                {employee.employeeName}{" "}{employee.jobName}{" "}({employee.departmentName})
                             </>
                         ) : (
                             'LOADING'
@@ -122,78 +127,91 @@ function Sidebar({currentMenu}) {
             </div>
             <ul className={`menu ${currentMenu}`}>
                 <li>
-                    <span className={currentMenu.startsWith('order') ? 'active' : ''}>
+                    <span
+                        className={currentMenu.startsWith('order') ? 'active' : ''}
+                        onClick={() => handleMainMenuClick('order')}
+                    >
                         <i className="bi bi-piggy-bank"></i>영업 관리
                     </span>
-                    <ul className="submenu">
-                        <li className={currentMenu === 'order' ? 'active' : ''}>
-                            <a href="#" onClick={() => handleSubMenuClick('order', '/order')}>주문 등록</a>
-                        </li>
-                        <li className={currentMenu === 'orderList' ? 'active' : ''}>
-                            <a href="#"
-                               onClick={() => handleSubMenuClick('orderList', '/orderList')}>
-                                주문 목록
-                            </a>
-                        </li>
-                        {employee && employee.jobId >= 1 && employee.jobId <= 4 && (
-                            <li className={currentMenu === 'orderReport' ? 'active' : ''}>
-                                <a href="#" onClick={() => handleSubMenuClick('orderReport', '/orderReport')}>주문 현황
-                                    보고서</a>
+                    {expandedMenu === 'order' && (
+                        <ul className="submenu">
+                            <li className={currentMenu === 'order' ? 'active' : ''}>
+                                <a href="#" onClick={() => handleSubMenuClick('order', '/order')}>주문 등록</a>
                             </li>
-                        )}
-                        <li className={currentMenu === 'orderDispatch' ? 'active' : ''}>
-                            <a href="#" onClick={() => handleSubMenuClick('orderDispatch', '/orderDispatch')}>주문 출고</a>
-                        </li>
-                    </ul>
+                            <li className={currentMenu === 'orderList' ? 'active' : ''}>
+                                <a href="#" onClick={() => handleSubMenuClick('orderList', '/orderList')}>주문 목록</a>
+                            </li>
+                            {employee && employee.jobId >= 1 && employee.jobId <= 4 && (
+                                <li className={currentMenu === 'orderReport' ? 'active' : ''}>
+                                    <a href="#" onClick={() => handleSubMenuClick('orderReport', '/orderReport')}>주문 현황 보고서</a>
+                                </li>
+                            )}
+                            <li className={currentMenu === 'orderDispatch' ? 'active' : ''}>
+                                <a href="#" onClick={() => handleSubMenuClick('orderDispatch', '/orderDispatch')}>주문 출고</a>
+                            </li>
+                        </ul>
+                    )}
                 </li>
                 <li>
-                    <span className={currentMenu.startsWith('product') ? 'active' : ''}>
+                    <span
+                        className={currentMenu.startsWith('product') ? 'active' : ''}
+                        onClick={() => handleMainMenuClick('product')}
+                    >
                         <i className="bi bi-cart-check"></i>상품 관리
                     </span>
-                    <ul className="submenu">
-                        <li className={currentMenu === 'productCategory' ? 'active' : ''}>
-                            <a href="#" onClick={() => handleSubMenuClick('productCategory', '/productCategory')}>상품
-                                카테고리</a>
-                        </li>
-                        <li className={currentMenu === 'productList' ? 'active' : ''}>
-                            <a href="#" onClick={() => handleSubMenuClick('productList', '/productList')}>전체 상품 목록</a>
-                        </li>
-                        <li className={currentMenu === 'productPrice' ? 'active' : ''}>
-                            <a href="#" onClick={() => handleSubMenuClick('productPrice', '/productPrice')}>고객사별 상품
-                                가격</a>
-                        </li>
-                    </ul>
+                    {expandedMenu === 'product' && (
+                        <ul className="submenu">
+                            <li className={currentMenu === 'productCategory' ? 'active' : ''}>
+                                <a href="#" onClick={() => handleSubMenuClick('productCategory', '/productCategory')}>상품 카테고리</a>
+                            </li>
+                            <li className={currentMenu === 'productList' ? 'active' : ''}>
+                                <a href="#" onClick={() => handleSubMenuClick('productList', '/productList')}>전체 상품 목록</a>
+                            </li>
+                            <li className={currentMenu === 'productPrice' ? 'active' : ''}>
+                                <a href="#" onClick={() => handleSubMenuClick('productPrice', '/productPrice')}>고객사별 상품 가격</a>
+                            </li>
+                        </ul>
+                    )}
                 </li>
                 <li>
-                    <ul className="submenu one">
-                        <li className={currentMenu === 'customer' ? 'active' : ''}>
-                            <a href="#" onClick={() => handleSubMenuClick('customerList', '/customerList')}>
-                                <i className="bi bi-people-fill"></i>고객 관리
-                            </a>
-                        </li>
-                    </ul>
+                    <span
+                        className={currentMenu.startsWith('customer') ? 'active' : ''}
+                        onClick={() => handleMainMenuClick('customer')}
+                    >
+                        <i className="bi bi-people-fill"></i>고객 관리
+                    </span>
+                    {expandedMenu === 'customer' && (
+                        <ul className="submenu">
+                            <li className={currentMenu === 'customerList' ? 'active' : ''}>
+                                <a href="#" onClick={() => handleSubMenuClick('customerList', '/customerList')}>고객사 목록</a>
+                            </li>
+                        </ul>
+                    )}
                 </li>
                 <li>
-                    <span className={currentMenu.startsWith('employee') ? 'active' : ''}>
+                    <span
+                        className={currentMenu.startsWith('employee') ? 'active' : ''}
+                        onClick={() => handleMainMenuClick('employee')}
+                    >
                         <i className="bi bi-cart-check"></i>인사 관리
                     </span>
-                    <ul className="submenu">
-                        <li className={currentMenu === 'employeeList' ? 'active' : ''}>
-                            <a href="#" onClick={() => handleSubMenuClick('employeeList', '/employeeList')}>직원 관리</a>
-                        </li>
-                        {employee && employee.jobId >= 1 && employee.jobId <= 4 && (
-                            <>
-                                <li className={currentMenu === 'employeeAttend' ? 'active' : ''}>
-                                    <a href="#" onClick={() => handleSubMenuClick('employeeAttend', '/employeeAttend')}>근태
-                                        관리</a>
-                                </li>
-                                <li className={currentMenu === 'employeeSalary' ? 'active' : ''}>
-                                    <a href="#" onClick={() => handleSubMenuClick('employeeSalary', '/employeeSalary')}>급여
-                                        관리</a>
-                                </li>
-                            </>
-                        )}
-                    </ul>
+                    {expandedMenu === 'employee' && (
+                        <ul className="submenu">
+                            <li className={currentMenu === 'employeeList' ? 'active' : ''}>
+                                <a href="#" onClick={() => handleSubMenuClick('employeeList', '/employeeList')}>직원 관리</a>
+                            </li>
+                            {employee && employee.jobId >= 1 && employee.jobId <= 4 && (
+                                <>
+                                    <li className={currentMenu === 'employeeAttend' ? 'active' : ''}>
+                                        <a href="#" onClick={() => handleSubMenuClick('employeeAttend', '/employeeAttend')}>근태 관리</a>
+                                    </li>
+                                    <li className={currentMenu === 'employeeSalary' ? 'active' : ''}>
+                                        <a href="#" onClick={() => handleSubMenuClick('employeeSalary', '/employeeSalary')}>급여 관리</a>
+                                    </li>
+                                </>
+                            )}
+                        </ul>
+                    )}
                 </li>
             </ul>
         </aside>
