@@ -97,5 +97,11 @@ public class OrderDispatchController {
         return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
     }
 
+    // 상품 정보
+    @GetMapping("/details/{dispatchNo}")
+    public Dispatch getDispatchDetails(@PathVariable Integer dispatchNo) {
+        return orderDispatchService.getDispatchDetails(dispatchNo);
+    }
+
 
 }

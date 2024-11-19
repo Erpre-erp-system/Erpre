@@ -35,7 +35,20 @@ create table m_product (
     primary key (product_cd) -- 기본 키 설정
 );
 
--- 3. 고객사별 상품 가격
+-- 3. 상품 상세
+CREATE TABLE m_product_details (
+    product_detail_cd SERIAL PRIMARY KEY,  -- 자동 증가 PK
+    product_cd VARCHAR(10) UNIQUE,        -- 제품 코드 (m_product와 매핑)
+    product_model_name VARCHAR(30) NOT NULL,
+    product_manufacturer VARCHAR(30),
+    product_specifications VARCHAR(200),
+    product_weight VARCHAR(30),
+    product_warranty_period VARCHAR(30),
+    product_description TEXT
+);
+
+
+-- 4. 고객사별 상품 가격
 create table m_price (
     price_no               serial           not null, -- 가격 번호
     customer_no            int              not null, -- 고객 번호 (m_customer 테이블 참조)
@@ -50,7 +63,7 @@ create table m_price (
     primary key (price_no) -- 기본 키 설정
 );
 
--- 4. 상품 카테고리
+-- 5. 상품 카테고리
 create table m_category (
     category_no            serial           not null, -- 카테고리 번호
     category_level         int              not null, -- 카테고리 레벨
@@ -63,7 +76,7 @@ create table m_category (
     primary key (category_no) -- 기본 키 설정
 );
 
--- 5. 주문
+-- 6. 주문
 create table m_order_h (
     order_h_no             serial           not null, -- 주문 헤더 번호
     customer_no            int              not null, -- 고객 번호 (m_customer 테이블 참조)
@@ -77,7 +90,7 @@ create table m_order_h (
     primary key (order_h_no) -- 기본 키 설정
 );
 
--- 6. 주문 상세
+-- 7. 주문 상세
 create table m_order_d (
     order_d_no             serial           not null, -- 주문 상세 번호
     order_h_no             int              not null, -- 주문 헤더 번호 (m_order_h 테이블 참조)
@@ -93,7 +106,7 @@ create table m_order_d (
     primary key (order_d_no) -- 기본 키 설정
 );
 
--- 7. 직원
+-- 8. 직원
 create table m_employee (
     employee_id            varchar(50)      not null, -- 직원 ID
     employee_pw            varchar(50)      not null, -- 직원 비밀번호
@@ -113,7 +126,7 @@ create table m_employee (
     primary key (employee_id) -- 기본 키 설정
 );
 
--- 8. 쪽지 (발신)
+-- 9. 쪽지 (발신)
 CREATE TABLE m_message (
     message_no SERIAL PRIMARY KEY,
     message_sender_id VARCHAR(50) NOT NULL REFERENCES m_employee (employee_id),
@@ -126,7 +139,7 @@ CREATE TABLE m_message (
     message_recall_date TIMESTAMP
 );
 
--- 9. 쪽지 수신
+-- 10. 쪽지 수신
 CREATE TABLE m_message_recipient (
     message_no INT NOT NULL REFERENCES m_message (message_no),
     recipient_id VARCHAR(50) NOT NULL REFERENCES m_employee (employee_id),
@@ -138,7 +151,7 @@ CREATE TABLE m_message_recipient (
     PRIMARY KEY (message_no, recipient_id)
 );
 
--- 10. 쪽지 첨부파일
+-- 11. 쪽지 첨부파일
 CREATE TABLE m_message_file (
     message_attachment_id SERIAL PRIMARY KEY,
     message_no INTEGER NOT NULL,
@@ -195,7 +208,7 @@ CREATE TABLE M_CHAT_FILE (
 );
 
 
--- 18. 직급
+-- 17. 직급
 CREATE TABLE m_job (
     job_id               serial PRIMARY KEY,       -- 직급 ID (자동 증가)
     job_name             varchar(50) NOT NULL,     -- 직급 이름 (CEO(대표이사), Executive(임원), Director(부장), Manager(팀장), Assistant Manager(대리), Senior Staff(계장), Staff(사원))
@@ -209,7 +222,7 @@ CREATE TABLE m_job (
     job_delete_date      timestamp NULL            -- 직급 삭제 일시
 );
 
--- 19. 부서
+-- 18. 부서
 CREATE TABLE m_department (
     department_id         serial PRIMARY KEY,       -- 부서 ID (자동 증가)
     department_name       varchar(50) NOT NULL,     -- 부서 이름 (Business Support(경영지원부), Strategic Planning(전략기획부), HR(인사부), Sales(영업부), IT(전산부), Legal(법무부), Marketing(마케팅부), Accounting(회계부), Dispatch(출고부))
@@ -221,7 +234,7 @@ CREATE TABLE m_department (
     department_delete_date timestamp NULL           -- 부서 삭제 일시
 );
 
--- 20. 이메일
+-- 19. 이메일
 --발신
 create table "m_email_send" (
     "email_nm_s" serial not null,
@@ -243,7 +256,7 @@ create table "m_email_receive" (
     "email_status_r" varchar(10) default 'nr' not null
 );
 
--- 21. 이메일 첨부파일
+-- 20. 이메일 첨부파일
 --발신
 create table "m_email_file_send" (
     "email_file_nm_s" serial not null,
@@ -267,39 +280,7 @@ create table "m_email_file_receive" (
 	"email_file_del_date_r" timestamp null
 );
 
--- 22. 출고창고
-CREATE TABLE m_warehouse (
-    warehouse_no SERIAL PRIMARY KEY,
-    warehouse_name VARCHAR(30) NOT NULL,
-    warehouse_tel VARCHAR(30) NULL,
-    warehouse_addr VARCHAR(200) NULL,
-    warehouse_manager_name VARCHAR(30) NULL
-);
-
--- 23. QR코드
-create extension if not exists "uuid-ossp"; -- uuid 확장 모듈 설치 (한 번만 실행)
-
-CREATE TABLE m_qr_code (
-    qr_code_id UUID NOT NULL PRIMARY KEY,
-    qr_code_data VARCHAR(300) NOT NULL,
-    qr_code_status VARCHAR(20) NULL DEFAULT 'active',
-    qr_code_insert_date TIMESTAMP NULL DEFAULT current_timestamp,
-    qr_code_expiration_date TIMESTAMP NULL,
-    qr_code_last_scanned TIMESTAMP NULL,
-    qr_code_usage_count INTEGER NOT NULL DEFAULT 0,
-    qr_code_delete_yn CHAR(1) NULL DEFAULT 'N',
-    qr_code_delete_date TIMESTAMP NULL,
-    employee_id VARCHAR(50) NULL,
-    warehouse_no INTEGER NULL
-);
-
---uuid 확장 모듈 안될시
---create extension if not exists pgcrypto;
---create table m_qr_code (
---      qr_code_id uuid primary key default gen_random_uuid(),
-
-
--- 24. 급여
+-- 21. 급여
 CREATE TABLE m_salary (
     salary_id            serial PRIMARY KEY,      -- 급여 ID (자동 증가)
     employee_id          varchar(50) NOT NULL,    -- 직원 ID (외래키)
@@ -315,7 +296,7 @@ CREATE TABLE m_salary (
     salary_delete_date timestamp null
 );
 
--- 25. 근태
+-- 22. 근태
 CREATE TABLE m_attendance (
     attendance_id        serial PRIMARY KEY,      -- 근태 ID (자동 증가)
     employee_id          varchar(50) NOT NULL,    -- 직원 ID (외래키)
@@ -335,7 +316,7 @@ CREATE TABLE m_attendance (
     attendance_delete_date timestamp null
 );
 
--- 26. 출고
+-- 23. 출고
 CREATE TABLE m_dispatch (
     dispatch_no SERIAL PRIMARY KEY,
     dispatch_status VARCHAR(100) NULL DEFAULT 'pending',
@@ -345,4 +326,13 @@ CREATE TABLE m_dispatch (
     warehouse_no INTEGER NOT NULL,
     qr_code_id UUID NOT NULL,
     order_d_no INTEGER NOT NULL
+);
+
+-- 24. 출고창고
+CREATE TABLE m_warehouse (
+    warehouse_no SERIAL PRIMARY KEY,
+    warehouse_name VARCHAR(30) NOT NULL,
+    warehouse_tel VARCHAR(30) NULL,
+    warehouse_addr VARCHAR(200) NULL,
+    warehouse_manager_name VARCHAR(30) NULL
 );

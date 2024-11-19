@@ -231,31 +231,77 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
         warehouseName: '',
         warehouseManagerName: '',
         orderDDeliveryRequestDate: '',
-        // 상품(orderH)
-        productNm: '',
+
+        // 주문
         orderDPrice: '',
         orderDQty: '',
         orderDTotalPrice: '',
+
+        // 상품
+        productNm: '',
+        productCd: '',
+        productDetailCd: '',
+        productModelName: '',
+        productManufacturer: '',
+        productSpecifications: '',
+        productWeight: '',
+        productWarrantyPeriod: '',
+        productDescription: '',
     });
 
     // 모달 알림창 2번 뜨는 거 방지
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
+        useEffect(() => {
+            if (show && dispatchData) {
+                setForm({
+                    customerName: dispatchData.customerName,
+                    customerAddr: dispatchData.customerAddr,
+
+                    warehouseName: dispatchData.warehouseName || '',
+                    warehouseManagerName: dispatchData.warehouseManagerName || '',
+
+                    orderDPrice: dispatchData.orderDPrice,
+                    orderDQty: dispatchData.orderDQty,
+                    orderDTotalPrice: dispatchData.orderDTotalPrice,
+                    orderDDeliveryRequestDate: formatDateTime(dispatchData.orderDDeliveryRequestDate),
+
+                    productNm: dispatchData.productNm,
+                    productCd: dispatchData.productCd,
+                    productDetailCd: dispatchData.productDetailCd,
+                    productModelName: dispatchData.productModelName,
+                    productManufacturer: dispatchData.productManufacturer,
+                    productSpecifications: dispatchData.productSpecifications,
+                    productWeight: dispatchData.productWeight,
+                    productWarrantyPeriod: dispatchData.productWarrantyPeriod,
+                    productDescription: dispatchData.productDescription,
+                });
+            }
+        }, [show, dispatchData]);
+
     useEffect(() => {
         if (show && dispatchData) {
-            setForm({
-                customerName: dispatchData.customerName,
-                customerAddr: dispatchData.customerAddr,
-                warehouseName: dispatchData.warehouseName || '',
-                warehouseManagerName: dispatchData.warehouseManagerName || '',
-                orderDDeliveryRequestDate: formatDateTime(dispatchData.orderDDeliveryRequestDate),
-                productNm: dispatchData.productNm,
-                orderDPrice: dispatchData.orderDPrice,
-                orderDQty: dispatchData.orderDQty,
-                orderDTotalPrice: dispatchData.orderDTotalPrice,
-            });
+            axios.get(`/api/orderDispatch/details/${dispatchData.dispatchNo}`)
+                .then(response => {
+                    const data = response.data;
+                    setForm({
+                        productNm: data.orderDetail.product.productNm,
+                        productCd: data.orderDetail.product.productCd,
+                        productDetailCd: data.orderDetail.product.productDetails.productDetailCd,
+                        productModelName: data.orderDetail.product.productDetails.productModelName,
+                        productManufacturer: data.orderDetail.product.productDetails.productManufacturer,
+                        productSpecifications: data.orderDetail.product.productDetails.productSpecifications,
+                        productWeight: data.orderDetail.product.productDetails.productWeight,
+                        productWarrantyPeriod: data.orderDetail.product.productDetails.productWarrantyPeriod,
+                        productDescription: data.orderDetail.product.productDetails.productDescription,
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching dispatch details:', error);
+                });
         }
     }, [show, dispatchData]);
+
 
     // 창고 배정 모달 열림 상태 관리
     const [showWarehouseModal, setShowWarehouseModal] = useState(false);
@@ -362,8 +408,19 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
     const qrCodeTitle = `상품상세(${dispatchData ? dispatchData.dispatchNo : ''})`;
     
     // QR 코드에 표시할 데이터 생성
-    const qrCodeValue = `상품상세(${dispatchData ? dispatchData.dispatchNo : ''})\n품목명: ${dispatchData ? dispatchData.productNm : ''}, 수량: ${dispatchData ? dispatchData.orderDQty + 'EA' : ''}`;
+    const qrCodeValue = dispatchData ? `
+    출고번호(${dispatchData.dispatchNo})
 
+    품목명: ${dispatchData.productNm}
+    모델명: ${dispatchData.productModelName}
+    상품코드: ${dispatchData.productCd}
+    상품상세번호: ${dispatchData.productDetailCd}
+    제조사: ${dispatchData.productManufacturer}
+    상세스펙: ${dispatchData.productSpecifications}
+    무게: ${dispatchData.productWeight}
+    보증기간: ${dispatchData.productWarrantyPeriod}
+    상품 설명: ${dispatchData.productDescription}
+    ` : '';
 
     // QR url 연결
     const qrCodeUrl = `http://localhost:8787/dispatch/${dispatchData ? dispatchData.dispatchNo : ''}`;
@@ -413,7 +470,11 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
                                     <tr>
                                         <td colSpan="2" className="qr-modal-content">
                                             <h3>{qrCodeTitle}</h3>
-                                            <QRCodeCanvas value={qrCodeValue} />
+                                            {qrCodeValue ? (
+                                                <QRCodeCanvas value={qrCodeValue} />
+                                            ) : (
+                                                <p>상품 상세 정보가 없습니다.</p>
+                                            )}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -547,7 +608,6 @@ function DispatchInstructionModal ({ show, onClose, assignedWarehouse, dispatchD
         </div>
     );
 }
-
 
 //모달창 확인 컴포넌트
 function ConfirmationModal({ message, onConfirm, onCancel }) {

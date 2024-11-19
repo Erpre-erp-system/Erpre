@@ -61,7 +61,7 @@ public class OrderDispatchService {
         dispatch.setDispatchEndDate(dispatchDTO.getDispatchEndDate());
         dispatch.setDispatchDeleteYn(dispatchDTO.getDispatchDeleteYn());
 
-        // 주문 상세 (OrderDetail), 창고 (Warehouse), QR코드 정보 설정
+        // 주문 상세 (OrderDetail), 창고 (Warehouse)
         OrderDetail orderDetail = orderDetailRepository.findById(dispatchDTO.getOrderDNo()).orElse(null);
         Warehouse warehouse = warehouseRepository.findById(dispatchDTO.getWarehouseNo()).orElse(null);
 
@@ -82,13 +82,25 @@ public class OrderDispatchService {
 
         // OrderDetail 및 Order 관련 정보 추출
         OrderDetail orderDetail = dispatch.getOrderDetail();
-        Order order = dispatch.getOrder(); // Dispatch에서 Order를 직접 가져옴
+        Order order = dispatch.getOrder();
         Customer customer = order != null ? order.getCustomer() : null;
         Product product = orderDetail != null ? orderDetail.getProduct() : null;
 
+        // 상품 상세 정보 추출
+        ProductDetails productDetails = product != null ? product.getProductDetails() : null;
+
+        // 각 필드 추출
         String customerName = customer != null ? customer.getCustomerName() : null;
         String customerAddr = customer != null ? customer.getCustomerAddr() : null;
         String productNm = product != null ? product.getProductNm() : null;
+        String productCd = product != null ? product.getProductCd() : null;
+        Long productDetailCd = productDetails != null ? productDetails.getProductDetailCd() : null;
+        String productModelName = productDetails != null ? productDetails.getProductModelName() : null;
+        String productManufacturer = productDetails != null ? productDetails.getProductManufacturer() : null;
+        String productSpecifications = productDetails != null ? productDetails.getProductSpecifications() : null;
+        String productWeight = productDetails != null ? productDetails.getProductWeight() : null;
+        String productWarrantyPeriod = productDetails != null ? productDetails.getProductWarrantyPeriod() : null;
+        String productDescription = productDetails != null ? productDetails.getProductDescription() : null;
         Timestamp orderDDeliveryRequestDate = orderDetail != null ? orderDetail.getOrderDDeliveryRequestDate() : null;
 
         BigDecimal orderDPrice = orderDetail != null ? orderDetail.getOrderDPrice() : BigDecimal.ZERO;
@@ -96,6 +108,9 @@ public class OrderDispatchService {
         BigDecimal orderDTotalPrice = orderDetail != null ? orderDetail.getOrderDTotalPrice() : BigDecimal.ZERO;
 
         String orderHStatus = order != null ? order.getOrderHStatus() : null;
+
+        // 담당자 이름 추출
+        String employeeName = (order != null && order.getEmployee() != null) ? order.getEmployee().getEmployeeName() : null;
 
         // DispatchDTO 생성
         return DispatchDTO.builder()
@@ -111,12 +126,20 @@ public class OrderDispatchService {
                 .customerName(customerName)
                 .customerAddr(customerAddr)
                 .productNm(productNm)
+                .productCd(productCd)
+                .productDetailCd(productDetailCd)
+                .productModelName(productModelName)
+                .productManufacturer(productManufacturer)
+                .productSpecifications(productSpecifications)
+                .productWeight(productWeight)
+                .productWarrantyPeriod(productWarrantyPeriod)
+                .productDescription(productDescription)
                 .orderHStatus(orderHStatus)
                 .orderDPrice(orderDPrice)
                 .orderDQty(orderDQty)
                 .orderDTotalPrice(orderDTotalPrice)
                 .orderDDeliveryRequestDate(orderDDeliveryRequestDate)
-                .employeeName(dispatch.getOrder().getEmployee() != null ? dispatch.getOrder().getEmployee().getEmployeeName() : null) // 담당자 이름 추가
+                .employeeName(employeeName)
                 .build();
     }
 
@@ -548,6 +571,11 @@ public class OrderDispatchService {
         }
 
         return byteArrayOutputStream.toByteArray();
+    }
+
+    // 상품정보
+    public Dispatch getDispatchDetails(Integer dispatchNo) {
+        return orderDispatchRepository.findByDispatchDetails(dispatchNo);
     }
 
 

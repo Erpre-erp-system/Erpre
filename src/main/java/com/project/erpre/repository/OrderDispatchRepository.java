@@ -43,5 +43,12 @@ public interface OrderDispatchRepository extends JpaRepository<Dispatch, Integer
                     "AND d.dispatchDeleteYn = 'N'")
     Page<Dispatch> findByDispatchStatus(@Param("dispatchStatus") String dispatchStatus, Pageable pageable);
 
+    @Query("SELECT d FROM Dispatch d " +
+            "JOIN FETCH d.orderDetail od " +
+            "JOIN FETCH od.product p " +
+            "LEFT JOIN FETCH p.productDetails pd " +
+            "LEFT JOIN FETCH p.category c " +
+            "WHERE d.dispatchNo = :dispatchNo")
+    Dispatch findByDispatchDetails(@Param("dispatchNo") Integer dispatchNo);
 
 }

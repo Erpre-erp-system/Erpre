@@ -3,6 +3,24 @@ ALTER TABLE m_product
 ADD CONSTRAINT fk_category_no
 FOREIGN KEY (category_no) REFERENCES m_category(category_no);
 
+-- version 2.0 추가
+-- m_product에 product_detail_cd 컬럼 추가
+ALTER TABLE m_product
+ADD COLUMN product_detail_cd INTEGER UNIQUE;
+
+--product_cd를 기준으로 두 테이블을 연결하여 m_product.product_detail_cd를 업데이트
+UPDATE m_product
+SET product_detail_cd = m_product_details.product_detail_cd
+FROM m_product_details
+WHERE m_product.product_cd = m_product_details.product_cd;
+
+-- 외래 키 설정
+ALTER TABLE m_product
+ADD CONSTRAINT fk_product_detail
+FOREIGN KEY (product_detail_cd)
+REFERENCES m_product_details(product_detail_cd);
+
+
 ALTER TABLE m_price
 ADD CONSTRAINT fk_customer_no
 FOREIGN KEY (customer_no) REFERENCES m_customer(customer_no);
@@ -125,10 +143,6 @@ ALTER TABLE m_dispatch
     REFERENCES m_order_h (order_h_no);
 
 ALTER TABLE m_dispatch
-    ADD CONSTRAINT fk_dispatch_qrcode FOREIGN KEY (qr_code_id)
-    REFERENCES m_qr_code (qr_code_id);
-
-ALTER TABLE m_dispatch
     ADD CONSTRAINT fk_dispatch_warehouse FOREIGN KEY (warehouse_no)
     REFERENCES m_warehouse (warehouse_no);
 
@@ -136,21 +150,6 @@ ALTER TABLE m_dispatch
 ADD CONSTRAINT chk_dispatch_status
 CHECK (dispatch_status IN ('pending', 'in progress', 'complete')); -- dispatch_status CHECK 제약 조건 설정
 
-
--- QR코드 테이블 외래키 설정
-ALTER TABLE m_qr_code
-ADD CONSTRAINT FK_QRCODE_WAREHOUSE
-FOREIGN KEY (warehouse_no)
-REFERENCES m_warehouse (warehouse_no);
-
-ALTER TABLE m_qr_code
-ADD CONSTRAINT FK_QRCODE_EMPLOYEE
-FOREIGN KEY (employee_id)
-REFERENCES m_employee (employee_id);
-
-ALTER TABLE m_qr_code
-ADD CONSTRAINT chk_qr_code_status
-CHECK (qr_code_status IN ('active', 'inactive', 'expired')); -- qr_code_status CHECK 제약 조건 설정
 
 --  메신저 관련 테이블 외래 키 설정
 ALTER TABLE m_chat_message_read

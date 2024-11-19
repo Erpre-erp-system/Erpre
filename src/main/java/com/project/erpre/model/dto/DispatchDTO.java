@@ -31,12 +31,22 @@ public class DispatchDTO {
     private String customerAddr; // 납품지 주소
     private String warehouseName; // 창고명
     private String orderHStatus; // 주문상태
-    private String productNm; // 상품명
+
     private BigDecimal orderDPrice; // 출고 단가
-    private int orderDQty; // 수량
+    private int orderDQty; // 출고 수량
     private BigDecimal orderDTotalPrice; // 총 금액
     private Timestamp orderDDeliveryRequestDate; // 납품 요청일
     private List<Integer> dispatchNos; // 선택된 출고 번호 목록
 
+    // 추가 필드 - 상품 정보
+    private String productNm;
+    private String productCd;
+    private Long productDetailCd;
+    private String productModelName;
+    private String productManufacturer;
+    private String productSpecifications;
+    private String productWeight;
+    private String productWarrantyPeriod;
+    private String productDescription;
 
 }

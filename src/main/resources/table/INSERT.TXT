@@ -86,28 +86,49 @@ VALUES
 ('P002', 3, 'Smartphone', 800000.00),
 ('P003', 2, 'Tablet', 600000.00);
 
--- 7. 고객사별 상품 가격 (m_price 테이블에 데이터 삽입)
+-- 7. 상품 상세 (m_product_details 테이블에 데이터 삽입)
+INSERT INTO m_product_details (
+    product_cd,
+    product_model_name,
+    product_manufacturer,
+    product_specifications,
+    product_weight,
+    product_warranty_period,
+    product_description
+)
+VALUES
+('P001', '갤럭시북 프로 360', '삼성전자', 'Intel i7, 16GB RAM, 512GB SSD', '1.5kg', '2년', '고성능 노트북'),
+('P002', '아이폰 15 프로', 'LG전자', 'Snapdragon 888, 8GB RAM, 128GB', '0.2kg', '1년', '최신 스마트폰'),
+('P003', '갤럭시 탭 S9', '한성컴퓨터', 'Exynos 2100, 8GB RAM, 256GB', '0.8kg', '1년', '고화질 태블릿'),
+('P004', '말름 퀸 침대', '한샘', '퀸사이즈, 우드 프레임', '30kg', '5년', '퀸사이즈 침대'),
+('P005', '팍스 옷장', '퍼시스', '높이 2m, 화이트', '50kg', '3년', '옷을 정리하기 좋은 옷장'),
+('P006', '엑토르프 소파', '에이스침대', '3인용, 회색 패브릭', '40kg', '2년', '편안한 3인용 소파'),
+('P007', '잉가토르프 테이블', '퍼시스', '원목 테이블, 직사각형', '25kg', '3년', '다용도로 사용 가능한 테이블'),
+('P008', '칼락스 서랍장', '퍼시스', '4단 서랍장, 화이트', '20kg', '3년', '다용도 수납장'),
+('P009', '쇠데르함 쿠션', '에이스침대', '메모리폼, 블랙', '2kg', '1년', '소파와 함께 사용 가능한 쿠션');
+
+-- 8. 고객사별 상품 가격 (m_price 테이블에 데이터 삽입)
 INSERT INTO m_price (customer_no, product_cd, price_customer, price_start_date, price_end_date)
 VALUES 
 (1, 'P001', 1450000.00, '2023-01-01', NULL),
 (2, 'P002', 780000.00, '2022-06-01', NULL),
 (3, 'P003', 580000.00, '2021-11-01', '2023-09-30');
 
--- 8. 주문 (직원과 고객사 데이터가 있는 후에 삽입)
+-- 9. 주문 (직원과 고객사 데이터가 있는 후에 삽입)
 INSERT INTO m_order_h (order_h_no, customer_no, employee_id, order_h_total_price, order_h_status)
 VALUES 
 (1, 1, 'E001', 3000000.00, 'approved'),
 (2, 2, 'E002', 1600000.00, 'ing'),
 (3, 3, 'E003', 580000.00, 'denied');
 
--- 9. 주문 상세 (m_order_d 테이블에 데이터 삽입)
+-- 10. 주문 상세 (m_order_d 테이블에 데이터 삽입)
 INSERT INTO m_order_d (order_d_no, order_h_no, product_cd, order_d_price, order_d_qty, order_d_total_price, order_d_delivery_request_date)
 VALUES 
 (1, 1, 'P001', 1450000.00, 2, 2900000.00, '2023-02-01'),
 (2, 2, 'P002', 800000.00, 1, 800000.00, '2023-03-01'),
 (3, 3, 'P003', 600000.00, 1, 600000.00, '2023-04-01');
 
--- 10. 출고 창고 (m_warehouse 테이블에 데이터 삽입)
+-- 11. 출고 창고 (m_warehouse 테이블에 데이터 삽입)
 INSERT INTO m_warehouse (warehouse_no, warehouse_name, warehouse_tel, warehouse_addr, warehouse_manager_name)
 VALUES 
 (1, 'Seoul Warehouse', '02-7654-3210', '123 Seoul Street, Korea', 'Warehouse Manager A'),
@@ -124,13 +145,6 @@ VALUES
 --(9, '충청 창고', '043-4567-8901', '충청북도 청주시 상당구 상당로 606', '창고 관리자 I'),
 --(10, '제주 창고', '064-5678-9012', '제주특별자치도 제주시 연북로 707', '창고 관리자 J');
 
-
--- 11. QR 코드 (m_qr_code 테이블에 데이터 삽입)
-INSERT INTO m_qr_code (qr_code_id, qr_code_data, qr_code_status, warehouse_no, employee_id)
-VALUES 
-(uuid_generate_v4(), 'QR123456', 'active', 1, 'E001'),
-(uuid_generate_v4(), 'QR789012', 'inactive', 2, 'E002'),
-(uuid_generate_v4(), 'QR345678', 'expired', 3, 'E003');
 
 -- 12. 출고 (m_dispatch 테이블에 데이터 삽입)
 INSERT INTO m_dispatch (dispatch_status, warehouse_no, qr_code_id, order_d_no)

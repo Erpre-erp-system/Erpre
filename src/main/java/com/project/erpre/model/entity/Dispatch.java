@@ -43,9 +43,9 @@ public class Dispatch {
     private OrderDetail orderDetail;
 
      //주문
-     @OneToOne(fetch = FetchType.LAZY)
+     @OneToOne(fetch = FetchType.EAGER)
      @JoinColumn(name = "order_h_no")
-    private Order order;
+     private Order order;
 
 
 }
