@@ -139,7 +139,7 @@ CREATE TABLE m_message (
     message_recall_date TIMESTAMP
 );
 
--- 10. 쪽지 수신
+-- 10. 쪽지 (수신)
 CREATE TABLE m_message_recipient (
     message_no INT NOT NULL REFERENCES m_message (message_no),
     recipient_id VARCHAR(50) NOT NULL REFERENCES m_employee (employee_id),

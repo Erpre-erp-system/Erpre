@@ -1,17 +1,17 @@
 import React, {useContext, useEffect, useRef, useState} from 'react';
+import axios from "axios";
 import Select from "react-select";
 import Tree from "rc-tree";
 import {UserContext} from "../../context/UserContext";
-import useSearch from "./UseSearch";
-import axios from "axios";
-import {FaUserAlt, FaUserAltSlash, FaUserCircle, FaUtensils} from "react-icons/fa";
+import SockJS from "sockjs-client";
+import {Stomp} from "@stomp/stompjs";
 import MySwal from "sweetalert2";
+import {FaUserAlt, FaUserAltSlash, FaUserCircle, FaUtensils} from "react-icons/fa";
 import {MdMeetingRoom, MdWork} from "react-icons/md";
 import {PiOfficeChairFill} from "react-icons/pi";
 import InfoDetailModal from "./InfoDetailModal";
 import NewNoteModal from "./NewNoteModal";
-import SockJS from "sockjs-client";
-import {Stomp} from "@stomp/stompjs";
+import useSearch from "./useSearch";
 import {useMessengerHooks} from "./useMessengerHooks";
 import ChatRoomModal from "./ChatRoomModal";
 
@@ -46,32 +46,50 @@ const userIcon = [
 ];
 
 
+// MessengerHome: 조직도와 유저 상태를 관리하는 메신저 홈 컴포넌트
 const MessengerHome = ({homeSearchKeyword}) => {
 
-    const [isModalOpen, setModalOpen] = useState({chat: false, note: false, info: false});
+    // Context: 전역 유저 정보 관리
     const {user, setUser} = useContext(UserContext);
-    const [searchKeyword, setSearchKeyword] = useState(homeSearchKeyword);
-    const [expandedKeys, setExpandedKeys] = useState([]);
-    const [treeData, setTreeData] = useState([]);
-    const [contextMenu, setContextMenu] = useState({visible: false, x: 0, y: 0, node: null});
-    const [selectedEmployees, setSelectedEmployees] = useState([]); // 선택된 직원 정보 저장
-    const stompClientRef = useRef(null);
-    const [selectedChatNo, setSelectedChatNo] = useState(null);
+
+    // 상태 관리
+    const [isModalOpen, setModalOpen] = useState({ info: false, note: false, chat: false }); // 모달 열림 상태
+    const [searchKeyword, setSearchKeyword] = useState(homeSearchKeyword); // 검색어 상태
+    const [orgStatus, setOrgStatus] = useState('all'); // 조직도 상태 필터링
+    const [treeData, setTreeData] = useState([]); // 트리 데이터 상태
+    const [expandedKeys, setExpandedKeys] = useState([]); // 확장된 트리 키 상태
+    const [selectedEmployees, setSelectedEmployees] = useState([]); // 선택된 직원 상태
+    const [selectedChatNo, setSelectedChatNo] = useState(null); // 선택된 채팅방 번호
+    const [menuVisible, setMenuVisible] = useState(false); // 우클릭 메뉴 표시 상태
+    const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 }); // 우클릭 메뉴 위치
+    const stompClientRef = useRef(null); // WebSocket 클라이언트 레퍼런스
+
+    // 우클릭 컨텍스트 메뉴 상태
+    const [contextMenu, setContextMenu] = useState({ visible: false,  x: 0,  y: 0,  node: null });
 
     // 모달 열기 및 닫기 함수
-    const openModal = (type) => {
-        setModalOpen(prev => ({...prev, [type]: true}));
-    };
+    const openModal = (type) => { setModalOpen(prev => ({...prev, [type]: true})); };
+    const closeModal = (type) => { setModalOpen(prev => ({...prev, [type]: false})); };
 
-    const closeModal = (type) => {
-        setModalOpen(prev => ({...prev, [type]: false}));
-    };
+    // 조직도 상태 선택 옵션
+    const orgStatusOptions = [
+        { value: 'all', label: '전체'},
+        { value: 'online', label: '접속 중'},
+    ];
 
-    // 메뉴 관련 state
-    const [menuVisible, setMenuVisible] = useState(false);
-    const [menuPosition, setMenuPosition] = useState({x: 0, y: 0});
+    // {/* 상태 필터링 셀렉트 */}
+    // <Select
+    //     options={statusOptions}
+    //     value={statusOptions.find(option => option.value === filterStatus)}
+    //     onChange={(selectedOption) => setFilterStatus(selectedOption.value)}
+    // />
 
-    // 우클릭 핸들러
+    // 공통 검색 훅: 검색 키워드 및 상태 기반으로 조직도 데이터 가져오기
+    const {data: employeeData} = useSearch('/api/messengers/organization',  searchKeyword, orgStatus );
+
+
+
+    // 우클릭 이벤트 핸들러: 컨텍스트 메뉴 표시
     const handleRightClick = (info) => {
         console.log("우클릭 이벤트 발생:", info);
         console.log("선택된 직원 아이디", info.node.key);
@@ -107,7 +125,6 @@ const MessengerHome = ({homeSearchKeyword}) => {
             employeeName: info.node.title.props.children[1].props.children[0]
         }]);
     };
-
 
 
     // 메뉴 클릭 핸들러
@@ -149,11 +166,11 @@ const MessengerHome = ({homeSearchKeyword}) => {
     };
 
 
-    const {data: employeeData} = useSearch('/api/messengers/organization', searchKeyword);
 
-// 상태별 아이콘 가져오기 함수
+    // 상태별 아이콘 가져오기 함수
     const getStatusIcon = (status) => {
-        const iconObj = userIcon.find((icon) => icon.value === status);
+        const validStatus = status || 'offline';
+        const iconObj = userIcon.find((icon) => icon.value === validStatus);
         return iconObj ? (
             <span style={{
                 width: "20px",
@@ -396,8 +413,8 @@ const MessengerHome = ({homeSearchKeyword}) => {
             });
     };
 
-    // 조직도 트리 구조 생성
-    const buildTreeData = (data) => {
+    // 직원 데이터 기반의 조직도 트리 구조 생성
+    const createOrgTree = (data) => {
         const departmentMap = {};
         const tree = [
             {
@@ -438,7 +455,7 @@ const MessengerHome = ({homeSearchKeyword}) => {
                                 }}
                                 title={employee.employeeStatusMessage}
                             >
-                            ({employee.employeeStatusMessage || ''})
+                            {employee.employeeStatusMessage ? (employee.employeeStatusMessage) : ''}
                         </span>
                     </span>
                     </div>
@@ -462,7 +479,7 @@ const MessengerHome = ({homeSearchKeyword}) => {
         return tree;
     };
 
-    // 전체 노드 확장용 키 추출
+    // 트리 구조의 모든 노드에서 키를 추출하여 초기 확장 상태에 사용
     const extractKeys = (nodes) => {
         let keys = [];
         nodes.forEach(node => {
@@ -474,10 +491,11 @@ const MessengerHome = ({homeSearchKeyword}) => {
         return keys;
     };
 
+
     // 트리 구조 생성 및 업데이트
     useEffect(() => {
         if (employeeData.length > 0) {
-            const structuredData = buildTreeData(employeeData);
+            const structuredData = createOrgTree(employeeData);
             setTreeData(structuredData);
             setExpandedKeys(extractKeys(structuredData));
         } else {
@@ -535,7 +553,7 @@ const MessengerHome = ({homeSearchKeyword}) => {
                             </div>
                         </div>
                     </div>
-                    <button className="status-message" onClick={handleStatusMessage}>
+                    <button className="status-note" onClick={handleStatusMessage}>
                         {user?.employeeStatusMessage || '상태 메시지를 입력해주세요.'}
                     </button>
                 </div>
@@ -544,13 +562,14 @@ const MessengerHome = ({homeSearchKeyword}) => {
             {/* 직원 조직도 */}
             <Tree
                 treeData={treeData}
-                expandedKeys={expandedKeys}
-                onExpand={(keys) => setExpandedKeys(keys)}
+                expandedKeys={expandedKeys} // 현재 확장된 키
+                onExpand={(keys) => setExpandedKeys(keys)} // 확장/축소 이벤트 콜백 함수
                 // checkable
                 showIcon={false}
                 showLine={true}
                 onCheck={handleCheck}
                 onRightClick={handleRightClick}
+                virtual={false}
             />
 
             {/* 우클릭 메뉴 */}

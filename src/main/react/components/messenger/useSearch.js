@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const useSearch = (endpoint, searchKeyword = '', noteStatus = '', initialParams = {})=> {
+// 공통 검색 훅: 검색 키워드, 상태, 기타 파라미터를 기반으로 데이터 조회
+const useSearch = (endpoint, searchKeyword = '', status = '', initialParams = {})=> {
 
     const [data, setData] = useState([]);
     const [searchLoading, setSearchLoading] = useState(false);
@@ -17,7 +18,7 @@ const useSearch = (endpoint, searchKeyword = '', noteStatus = '', initialParams 
             const response = await axios.get(endpoint, {
                 params: {
                     searchKeyword: searchKeyword || '',
-                    noteStatus: noteStatus || '',
+                    status: status || '',
                     ...initialParams,
                 },
             });
@@ -31,7 +32,7 @@ const useSearch = (endpoint, searchKeyword = '', noteStatus = '', initialParams 
 
     useEffect(() => {
         fetchData();
-    }, [endpoint, searchKeyword, noteStatus, initialParams.page, initialParams.size]);
+    }, [endpoint, searchKeyword, status, initialParams.page, initialParams.size]);
 
     return {
         data,

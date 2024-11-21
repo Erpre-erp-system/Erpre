@@ -3,8 +3,8 @@ import Draggable from "react-draggable";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import {FaRegPlusSquare} from "react-icons/fa";
-import UseEmployeeSearchModal from "./UseEmployeeSearchModal";
-import UseSearch from "./UseSearch";
+import EmployeeSearchModal from "./EmployeeSearchModal";
+import UseSearch from "./useSearch";
 import { UserContext} from "../../context/UserContext";
 import { CustomToolbar } from "./CustomToolbar";
 import axios from "axios";
@@ -230,7 +230,7 @@ const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
                             value={messageContent}
                             onChange={setMessageContent}
                             modules={quillModules}
-                            className="message-textarea"
+                            className="note-textarea"
                         />
                         { /* 이미지 및 파일 */}
                         <div className="note-footer">
@@ -243,7 +243,7 @@ const NewNoteModal = ({closeNewNoteModal, initialRecipients = [] }) => {
 
             {/* 직원 검색 모달 */}
             {isEmployeeSearchModalOpen && (
-                <UseEmployeeSearchModal
+                <EmployeeSearchModal
                     closeEmployeeSearchModal={closeEmployeeSearchModal}
                     onSelectedEmployees={onSelectedEmployees}
                     createUrl=""

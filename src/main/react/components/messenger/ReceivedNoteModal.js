@@ -105,8 +105,8 @@ const ReceivedNoteModal = ({ note, onClose, handleBookmark, deleteNote }) => {
 
                     <div className="note-divider"/>
 
-                    <div className="message-content-section">
-                        <div className="message-content" dangerouslySetInnerHTML={{ __html: cleanHTML }} />
+                    <div className="note-content-section">
+                        <div className="note-content" dangerouslySetInnerHTML={{ __html: cleanHTML }} />
                     </div>
 
                     <div className="note-footer">

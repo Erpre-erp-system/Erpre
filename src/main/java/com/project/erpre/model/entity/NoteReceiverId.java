@@ -4,7 +4,6 @@ import lombok.*;
 
 import javax.persistence.Embeddable;
 import java.io.Serializable;
-import java.util.Objects;
 
 // 복합키 정의
 @Embeddable
@@ -12,9 +11,9 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class MessageRecipientId implements Serializable {
+public class NoteReceiverId implements Serializable {
 
-    private Long messageNo;
-    private String recipientId;
+    private Long noteNo;
+    private String noteReceiverId;
 
 }

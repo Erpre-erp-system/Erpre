@@ -267,7 +267,8 @@ button.note-employee-search {
     margin-right: 5px;
 }
 
-.new-note-modal button.box.active  {
+.new-note-modal button.box.active tch
+{
     background-color: #f0f0f0 !important;
     border-color: #f0f0f0 !important;
     color: #333 !important;

@@ -543,7 +543,7 @@ function OrderList() {
                             )}
                         </div>
                     </div>
-                    {error && <div className="error-message">{error}</div>}
+                    {error && <div className="error-note">{error}</div>}
                     <div className="table_wrap">
                         <table>
                             <thead>

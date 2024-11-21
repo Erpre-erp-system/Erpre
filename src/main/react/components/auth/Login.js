@@ -76,7 +76,7 @@ function Login() {
 
             } else {
                 console.log('로그인 실패', loginResponse.data)
-                setError(loginResponse.data.message || '로그인에 실패했습니다.');
+                setError(loginResponse.data.note || '로그인에 실패했습니다.');
             }
 
         } catch (err) {
@@ -117,7 +117,7 @@ function Login() {
                         />
                     </div>
 
-                    {error && <p className="error-message">{error}</p>}
+                    {error && <p className="error-note">{error}</p>}
 
                         <button type="submit" className="login-btn">로그인</button>
                 </form>

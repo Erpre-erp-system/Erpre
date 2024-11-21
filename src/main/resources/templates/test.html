@@ -19,8 +19,8 @@
     stompClient.connect({}, () => {
         console.log("WebSocket 연결 성공");
         // 연결 후 메시지 전송 예시
-        stompClient.subscribe('/topic/chat/1', (message) => {
-            console.log("새로운 메시지 수신:", message.body);
+        stompClient.subscribe('/topic/chat/1', (note) => {
+            console.log("새로운 메시지 수신:", note.body);
         });
     }, (error) => {
         console.error("WebSocket 연결 오류:", error);

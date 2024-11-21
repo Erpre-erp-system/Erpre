@@ -172,7 +172,7 @@ function EmailReceiveModal({ selectedEmailData, closeModal }) {
                   </tbody>
                 </table>
               ) : (
-                <div className='no-files-message'>
+                <div className='no-files-note'>
                   첨부파일 없음
                 </div>
               )}

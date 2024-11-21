@@ -2,7 +2,6 @@ package com.project.erpre.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -110,12 +109,12 @@ public class Employee {
     @ToString.Exclude
     @OneToMany(mappedBy = "employee")
     @JsonIgnore
-    private List<MessageRecipient> messageRecipients;
+    private List<NoteReceiver> noteReceivers;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "employee")
     @JsonIgnore
-    private List<Message> Messages;
+    private List<Note> notes;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "employee")

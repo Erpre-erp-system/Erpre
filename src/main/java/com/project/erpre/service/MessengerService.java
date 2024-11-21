@@ -13,20 +13,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.io.IOException;
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,11 +42,11 @@ public class MessengerService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatMessageReadRepository chatMessageReadRepository;
     private final ChatFileRepository chatFileRepository;
-    private final MessageRepository messageRepository;
-    private final MessageRecipientRepository messageRecipientRepository;
+    private final NoteRepository noteRepository;
+    private final NoteReceiverRepository noteReceiverRepository;
 
     @Autowired
-    public MessengerService(FileService fileService, ChatRepository chatRepository, ChatParticipantRepository chatParticipantRepository, EmployeeRepository employeeRepository, ChatMessageRepository chatMessageRepository, ChatMessageReadRepository chatMessageReadRepository, ChatFileRepository chatFileRepository, MessageRepository messageRepository, MessageRecipientRepository messageRecipentRepository) {
+    public MessengerService(FileService fileService, ChatRepository chatRepository, ChatParticipantRepository chatParticipantRepository, EmployeeRepository employeeRepository, ChatMessageRepository chatMessageRepository, ChatMessageReadRepository chatMessageReadRepository, ChatFileRepository chatFileRepository, NoteRepository noteRepository, NoteReceiverRepository messageRecipentRepository) {
         this.fileService = fileService;
         this.chatRepository = chatRepository;
         this.chatParticipantRepository = chatParticipantRepository;
@@ -59,8 +54,8 @@ public class MessengerService {
         this.chatMessageRepository = chatMessageRepository;
         this.chatMessageReadRepository = chatMessageReadRepository;
         this.chatFileRepository = chatFileRepository;
-        this.messageRepository = messageRepository;
-        this.messageRecipientRepository = messageRecipentRepository;
+        this.noteRepository = noteRepository;
+        this.noteReceiverRepository = messageRecipentRepository;
     }
 
     /////////////////////////////////////////////////////////////////////// 🟢 공통
@@ -142,106 +137,106 @@ public class MessengerService {
 
 
     // 상태에 따른 쪽지 목록 조회 및 검색
-    public List<MessageDTO> getNoteListByUser(String searchKeyword, String noteStatus) {
+    public List<NoteDTO> getNoteListByUser(String searchKeyword, String noteStatus) {
         logger.error("쪽지 목록 서비스 층에서 조회 중 로그 오류 발생");
         String employeeId = getEmployeeIdFromAuthentication();
-        return messageRepository.getNoteListByUser(employeeId, searchKeyword, noteStatus);
+        return noteRepository.getNoteListByUser(employeeId, searchKeyword, noteStatus);
     }
 
     // 쪽지 상세 정보 조회 및 읽음 여부 업데이트
     @Transactional
-    public MessageDTO getNoteByNo(Long messageNo) {
+    public NoteDTO getNoteByNo(Long noteNo) {
         String employeeId = getEmployeeIdFromAuthentication();
-        return messageRepository.getNoteByNo(messageNo, employeeId);
+        return noteRepository.getNoteByNo(noteNo, employeeId);
     }
 
     // 쪽지 북마크 상태 업데이트
-    public void updateBookmark(Long messageNo) {
+    public void updateBookmark(Long noteNo) {
         String employeeId = getEmployeeIdFromAuthentication();
 
         // 사용자 아이디와 메시지 넘버로 수신자 테이블에서 행 조회하고 해당 북마크 여부를 'Y'로 업데이트 후 저장하기
-        MessageRecipientId recipientId = new MessageRecipientId();
-        recipientId.setMessageNo(messageNo);
-        recipientId.setRecipientId(employeeId);
+        NoteReceiverId noteReceiverId = new NoteReceiverId();
+        noteReceiverId.setNoteNo(noteNo);
+        noteReceiverId.setNoteReceiverId(employeeId);
 
-        MessageRecipient recipient = messageRecipientRepository.findById(recipientId)
+        NoteReceiver noteReceiver = noteReceiverRepository.findById(noteReceiverId)
                 .orElseThrow(() -> new NoSuchElementException("해당 쪽지를 찾을 수 없습니다."));
 
-        recipient.setBookmarkedYn("Y");
-        messageRecipientRepository.save(recipient);
+        noteReceiver.setNoteReceiverBookmarkedYn("Y");
+        noteReceiverRepository.save(noteReceiver);
     }
 
     // 쪽지 회수 (수신자의 읽음 상태가 모두 N인 경우)
     @Transactional
-    public void recallNote(Long messageNo) {
+    public void recallNote(Long noteNo) {
 
-        Message message = messageRepository.findById(messageNo)
-                .orElseThrow(() -> new NoSuchElementException("해당 메시지를 찾을 수 없습니다: " + messageNo));
+        Note note = noteRepository.findById(noteNo)
+                .orElseThrow(() -> new NoSuchElementException("해당 메시지를 찾을 수 없습니다: " + noteNo));
 
         // 1. 수신자 목록 조회
-        List<MessageRecipient> recipients = messageRecipientRepository.findByMessageRecipientIdMessageNo(messageNo);
+        List<NoteReceiver> noteReceivers = noteReceiverRepository.findByNoteReceiverIdNoteNo(noteNo);
 
         // 2. 수신자들 중 읽음 상태가 'Y'인 경우 회수 불가 처리
-        boolean anyRead = recipients.stream().anyMatch(recipient -> "Y".equals(recipient.getRecipientReadYn()));
+        boolean anyRead = noteReceivers.stream().anyMatch(receiver -> "Y".equals(receiver.getNoteReceiverReadYn()));
         if (anyRead) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수신자가 이미 쪽지를 읽었기 때문에 회수할 수 없습니다.");
         }
 
         // 3. 수신자들에 대해 수신 상태를 '회수됨'으로 표시 (삭제 상태로 업데이트)
-        for (MessageRecipient recipient : recipients) {
-            recipient.setRecipientDeleteYn("Y");
-            messageRecipientRepository.save(recipient);
+        for (NoteReceiver noteReceiver : noteReceivers) {
+            noteReceiver.setNoteReceiverDeleteYn("Y");
+            noteReceiverRepository.save(noteReceiver);
         }
 
         // 4. 발신자에 대해서도 메시지 회수 상태를 'Y'로 설정
-        message.setMessageRecallYn("Y");
-        messageRepository.save(message);
+        note.setNoteRecallYn("Y");
+        noteRepository.save(note);
     }
 
     // 새 쪽지 생성
     @Transactional
-    public MessageDTO createNote(String senderId, String messageContent, Optional<LocalDateTime> scheduledDate, List<String> receiverIds) {
+    public NoteDTO createNote(String senderId, String noteContent, Optional<LocalDateTime> scheduledDate, List<String> noteReceiverIds) {
 
         // 발신자 조회
         Employee sender = employeeRepository.findById(senderId)
                 .orElseThrow(() -> new RuntimeException("발신자를 찾을 수 없습니다: " + senderId));
 
         // 수신자 목록이 null 이거나 비어 있는지 확인
-        if (receiverIds == null || receiverIds.isEmpty()) {
-            receiverIds.add(senderId);
+        if (noteReceiverIds == null || noteReceiverIds.isEmpty()) {
+            noteReceiverIds.add(senderId);
         }
 
         // 1. 메시지 생성 및 발신자 설정
-        Message message = new Message();
-        message.setEmployee(sender);
-        message.setMessageContent(messageContent);
-        message.setMessageSendDate(scheduledDate.orElse(LocalDateTime.now()));
+        Note note = new Note();
+        note.setEmployee(sender);
+        note.setNoteContent(noteContent);
+        note.setNoteSendDate(scheduledDate.orElse(LocalDateTime.now()));
 
         // 메시지 저장
-        messageRepository.save(message);
+        noteRepository.save(note);
 
-        Message newMessage = messageRepository.findById(message.getMessageNo())
+        Note newNote = noteRepository.findById(note.getNoteNo())
                 .orElseThrow(() -> new RuntimeException("쪽지를 찾을 수 없습니다"));
 
         // 2. 수신자에 대한 처리 (내부용으로만 사용, 반환 데이터에 포함되지 않음)
         List<String> savedReceiverIds = new ArrayList<>();
-        for (String receiverId : receiverIds) {
-            Employee recipient = employeeRepository.findById(receiverId)
+        for (String receiverId : noteReceiverIds) {
+            Employee receiver = employeeRepository.findById(receiverId)
                     .orElseThrow(() -> new RuntimeException("수신자를 찾을 수 없습니다: " + receiverId));
 
-            MessageRecipient messageRecipient = new MessageRecipient(newMessage, recipient);
-            messageRecipientRepository.save(messageRecipient);
+            NoteReceiver noteReceiver = new NoteReceiver(newNote, receiver);
+            noteReceiverRepository.save(noteReceiver);
             savedReceiverIds.add(receiverId);
         }
 
-        MessageDTO messageDTO = new MessageDTO(message);
-        messageDTO.setMessageReceiverIds(savedReceiverIds);
-        messageDTO.setEmployeeName(sender.getEmployeeName());
-        messageDTO.setEmployeeJobName(sender.getJob().getJobName());
-        messageDTO.setEmployeeDepartmentName(sender.getDepartment().getDepartmentName());
-        messageDTO.setBookmarkedYn("N");
+        NoteDTO noteDTO = new NoteDTO(note);
+        noteDTO.setNoteReceiverIds(savedReceiverIds);
+        noteDTO.setEmployeeName(sender.getEmployeeName());
+        noteDTO.setEmployeeJobName(sender.getJob().getJobName());
+        noteDTO.setEmployeeDepartmentName(sender.getDepartment().getDepartmentName());
+        noteDTO.setNoteReceiverBookmarkedYn("N");
 
-        return messageDTO;
+        return noteDTO;
     }
 
     // 쪽지 전체 삭제 (상태별)
@@ -252,22 +247,22 @@ public class MessengerService {
         switch (noteStatus) {
             case "sent":
                 // 본인이 보낸 모든 쪽지 삭제 여부를 'Y'로 업데이트
-                messageRepository.updateMessageDeleteYnByEmployeeId(employeeId, "Y");
+                noteRepository.updateNoteDeleteYnByEmployeeId(employeeId, "Y");
                 break;
 
             case "received":
                 // 수신한 모든 쪽지 삭제 여부를 'Y'로 업데이트
-                messageRecipientRepository.updateRecipientDeleteYnByRecipientId(employeeId, "Y");
+                noteReceiverRepository.updateReceiverDeleteYnByReceiverId(employeeId, "Y");
                 break;
 
             case "new":
                 // 읽지 않은 모든 쪽지 삭제 여부를 'Y'로 업데이트
-                messageRecipientRepository.updateRecipientDeleteYnByRecipientIdAndRecipientReadYn(employeeId, "N", "Y");
+                noteReceiverRepository.updateReceiverDeleteYnByReceiverIdAndReceiverReadYn(employeeId, "N", "Y");
                 break;
 
             case "bookmarked":
                 // 북마크된 모든 쪽지 삭제 여부를 'Y'로 업데이트
-                messageRecipientRepository.updateRecipientDeleteYnByRecipientIdAndBookmarkedYn(employeeId, "Y", "Y");
+                noteReceiverRepository.updateReceiverDeleteYnByReceiverIdAndBookmarkedYn(employeeId, "Y", "Y");
                 break;
 
             default:
@@ -275,73 +270,73 @@ public class MessengerService {
         }
 
         // Message 테이블의 쪽지를 완전 삭제하기 위한 조건 확인 및 삭제
-        List<Message> messagesToCheck = messageRepository.findAllByMessageDeleteYn("Y");
-        for (Message message : messagesToCheck) {
-            boolean allRecipientsDeleted = messageRecipientRepository
-                    .countByMessageMessageNoAndRecipientDeleteYn(message.getMessageNo(), "N") == 0;
+        List<Note> messagesToCheck = noteRepository.findAllByNoteDeleteYn("Y");
+        for (Note note : messagesToCheck) {
+            boolean allReceiversDeleted = noteReceiverRepository
+                    .countByNoteNoteNoAndReceiverDeleteYn(note.getNoteNo(), "N") == 0;
 
-            if (allRecipientsDeleted) {
-                messageRepository.deleteById(message.getMessageNo());
+            if (allReceiversDeleted) {
+                noteRepository.deleteById(note.getNoteNo());
             }
         }
     }
 
     // 쪽지 개별 삭제
     @Transactional
-    public void deleteNoteById(Long messageNo) {
+    public void deleteNoteById(Long noteNo) {
         String employeeId = getEmployeeIdFromAuthentication();
 
         // 현재 사용자가 발신자인 경우
-        boolean isSender = messageRepository.existsByMessageNoAndEmployeeEmployeeIdAndMessageDeleteYn(messageNo, employeeId, "N");
+        boolean isSender = noteRepository.existsByNoteNoAndEmployeeEmployeeIdAndNoteDeleteYn(noteNo, employeeId, "N");
         if (isSender) {
             // 발신자가 메시지를 삭제하는 경우, 삭제 여부를 'Y'로 업데이트
-            messageRepository.updateMessageDeleteYnByMessageNo(messageNo, "Y");
+            noteRepository.updateNoteDeleteYnByNoteNo(noteNo, "Y");
         } else {
             // 현재 사용자가 수신자인 경우
-            MessageRecipientId recipientId = new MessageRecipientId();
-            recipientId.setMessageNo(messageNo);
-            recipientId.setRecipientId(employeeId);
+            NoteReceiverId receiverId = new NoteReceiverId();
+            receiverId.setNoteNo(noteNo);
+            receiverId.setNoteReceiverId(employeeId);
 
-            MessageRecipient recipient = messageRecipientRepository.findById(recipientId)
-                    .orElseThrow(() -> new NoSuchElementException("해당 쪽지를 찾을 수 없습니다: " + messageNo));
+            NoteReceiver receiver = noteReceiverRepository.findById(receiverId)
+                    .orElseThrow(() -> new NoSuchElementException("해당 쪽지를 찾을 수 없습니다: " + noteNo));
 
             // 수신자가 받은 메시지를 삭제하는 경우, 삭제 여부를 'Y'로 업데이트
-            recipient.setRecipientDeleteYn("Y");
-            messageRecipientRepository.save(recipient);
+            receiver.setNoteReceiverDeleteYn("Y");
+            noteReceiverRepository.save(receiver);
         }
 
         // 발신자와 수신자 모두 삭제 상태인 경우 메시지를 완전히 삭제
-        boolean allRecipientsDeleted = messageRecipientRepository
-                .countByMessageMessageNoAndRecipientDeleteYn(messageNo, "N") == 0;
+        boolean allReceiversDeleted = noteReceiverRepository
+                .countByNoteNoteNoAndReceiverDeleteYn(noteNo, "N") == 0;
 
-        Message message = messageRepository.findById(messageNo)
-                .orElseThrow(() -> new NoSuchElementException("해당 메시지를 찾을 수 없습니다: " + messageNo));
+        Note note = noteRepository.findById(noteNo)
+                .orElseThrow(() -> new NoSuchElementException("해당 메시지를 찾을 수 없습니다: " + noteNo));
 
-        if ("Y".equals(message.getMessageDeleteYn()) && allRecipientsDeleted) {
-            messageRepository.deleteById(messageNo);
+        if ("Y".equals(note.getNoteDeleteYn()) && allReceiversDeleted) {
+            noteRepository.deleteById(noteNo);
         }
     }
 
     // 실시간 쪽지 전송
-    public void sendNote(List<String> receiverIds, String messageContent) {
+    public void sendNote(List<String> noteReceiverIds, String noteContent) {
 
         // 나에게 보내기
         String employeeId = getEmployeeIdFromAuthentication();
-        if (receiverIds == null || receiverIds.isEmpty()) {
-            receiverIds.add(employeeId);
+        if (noteReceiverIds == null || noteReceiverIds.isEmpty()) {
+            noteReceiverIds.add(employeeId);
         }
 
-        for (String receiverId : receiverIds) {
-            SseEmitter emitter = emitters.get(receiverId);
+        for (String noteReceiverId : noteReceiverIds) {
+            SseEmitter emitter = emitters.get(noteReceiverId);
             if (emitter != null) {
                 try {
-                    emitter.send(SseEmitter.event().name("NEW_NOTE").data(messageContent));
+                    emitter.send(SseEmitter.event().name("NEW_NOTE").data(noteContent));
                 } catch (Exception e) {
-                    emitters.remove(receiverId);
-                    logger.error("SSE 전송 중 오류 발생 (사용자 ID: {}): {}", receiverId, e.getMessage());
+                    emitters.remove(noteReceiverId);
+                    logger.error("SSE 전송 중 오류 발생 (사용자 ID: {}): {}", noteReceiverId, e.getMessage());
                 }
             } else {
-                logger.info("구독 중이 아닌 사용자입니다: {}", receiverId);
+                logger.info("구독 중이 아닌 사용자입니다: {}", noteReceiverId);
             }
         }
 

@@ -361,7 +361,7 @@ function EmailWrite() {
 
               )}
               {fileInfo.length === 0 && (
-                <div className='no-files-message'>
+                <div className='no-files-note'>
                   선택한 파일이 이곳에 표시됩니다
                 </div>
               )}

@@ -13,7 +13,7 @@ const ChatRoomModal = ({chatTitle, chatList, setChatList, chatNo, closeChatModal
     const [isLoading, setIsLoading] = useState(false); // 로딩 state
     const {user} = useContext(UserContext); // 현재 로그인한 유저 state
     const [messages, setMessages] = useState([]); // 채팅방 메시지 목록 state
-    const [message, setMessage] = useState(""); // 현재 입력중인 메시지 state
+    const [note, setMessage] = useState(""); // 현재 입력중인 메시지 state
     const [image, setImage] = useState(null); // 이미지 파일
     const [imagePreview, setImagePreview] = useState(null); // 이미지 미리보기 URL
     const [showEmojiPicker, setShowEmojiPicker] = useState(false); // 이모티콘 state
@@ -130,8 +130,8 @@ const ChatRoomModal = ({chatTitle, chatList, setChatList, chatNo, closeChatModal
                 console.log(`기존 채팅방 /topic/chat/${chatNo} 구독 해제`);
             }
 
-            subscriptionRef.current = stompClientRef.current.subscribe(`/topic/chat/${chatNo}`, (message) => {
-                const newMessage = JSON.parse(message.body);
+            subscriptionRef.current = stompClientRef.current.subscribe(`/topic/chat/${chatNo}`, (note) => {
+                const newMessage = JSON.parse(note.body);
                 setMessages((prevMessages) => {
                     if (!prevMessages.some((msg) => msg.chatMessageNo === newMessage.chatMessageNo)) {
                         updateChatList(newMessage);
@@ -164,7 +164,7 @@ const ChatRoomModal = ({chatTitle, chatList, setChatList, chatNo, closeChatModal
 
 
     const handleSendMessage = async () => {
-        if (!message.trim() && !image) {
+        if (!note.trim() && !image) {
             alert("메시지 내용을 입력하세요.");
             return;
         }
@@ -195,10 +195,10 @@ const ChatRoomModal = ({chatTitle, chatList, setChatList, chatNo, closeChatModal
                 const newMessage = {
                     chatNo: chatNo,
                     chatSenderId: user.employeeId,
-                    chatMessageContent: message || "", // 텍스트 내용
+                    chatMessageContent: note || "", // 텍스트 내용
                     chatFileUrl: imageUrl,             // 이미지 URL
                     chatFileName: image ? image.name : null, // 이미지 파일명
-                    type: "message",
+                    type: "note",
                 };
 
                 stompClientRef.current.publish({
@@ -287,21 +287,21 @@ const ChatRoomModal = ({chatTitle, chatList, setChatList, chatNo, closeChatModal
                         <IoClose className="close-button" title="닫기" onClick={closeChatModal}/>
                     </div>
                     <div className="chat-room-body" ref={chatBodyRef}>
-                        {getMessagesWithDateSeparators().map((message, index) => (
-                            message.isDateSeparator ? (
+                        {getMessagesWithDateSeparators().map((note, index) => (
+                            note.isDateSeparator ? (
                                 <div key={index} className="date-separator">
-                                    <span>{formatDateHeader(message.date)}</span>
+                                    <span>{formatDateHeader(note.date)}</span>
                                 </div>
                             ) : (
                                 <div
                                     key={index}
-                                    className={`chat-message-container ${message.chatSenderId === user.employeeId ? "own" : "other"}`}
+                                    className={`chat-note-container ${note.chatSenderId === user.employeeId ? "own" : "other"}`}
                                 >
-                                    {message?.chatSenderId !== user.employeeId && (
-                                        <div className="message-recipient">
-                                            {message?.employeeImageUrl ? (
+                                    {note?.chatSenderId !== user.employeeId && (
+                                        <div className="note-recipient">
+                                            {note?.employeeImageUrl ? (
                                                 <img
-                                                    src={message.employeeImageUrl}
+                                                    src={note.employeeImageUrl}
                                                     alt="프로필 이미지"
                                                     className="profile-image"
                                                 />
@@ -310,28 +310,28 @@ const ChatRoomModal = ({chatTitle, chatList, setChatList, chatNo, closeChatModal
                                             )}
                                         </div>
                                     )}
-                                    <div className="message-wrap">
-                                        {message?.chatSenderId !== user.employeeId && (
-                                            <span className="sender-name">{message.chatSenderName}</span>
+                                    <div className="note-wrap">
+                                        {note?.chatSenderId !== user.employeeId && (
+                                            <span className="sender-name">{note.chatSenderName}</span>
                                         )}
                                         <div
-                                            className={`chat-message ${message.chatSenderId === user.employeeId ? "own" : "other"}`}
+                                            className={`chat-note ${note.chatSenderId === user.employeeId ? "own" : "other"}`}
                                         >
                                             {/* 이미지가 있을 경우 */}
-                                            {message.chatFileUrl && (
+                                            {note.chatFileUrl && (
                                                 <img
-                                                    src={message.chatFileUrl}
+                                                    src={note.chatFileUrl}
                                                     alt="이미지 메시지"
-                                                    className="message-image"
+                                                    className="note-image"
                                                 />
                                             )}
                                             {/* 텍스트 메시지 */}
-                                            {message.chatMessageContent && <p>{message.chatMessageContent}</p>}
+                                            {note.chatMessageContent && <p>{note.chatMessageContent}</p>}
                                         </div>
                                         <div
-                                            className={`message-timestamp ${message.chatSenderId === user.employeeId ? "timestamp-right" : "timestamp-left"}`}
+                                            className={`note-timestamp ${note.chatSenderId === user.employeeId ? "timestamp-right" : "timestamp-left"}`}
                                         >
-                                            {formatDate(message.chatSendDate)}
+                                            {formatDate(note.chatSendDate)}
                                         </div>
                                     </div>
                                 </div>
@@ -371,7 +371,7 @@ const ChatRoomModal = ({chatTitle, chatList, setChatList, chatNo, closeChatModal
                                 <input
                                     type="text"
                                     className="chat-input"
-                                    value={message}
+                                    value={note}
                                     onChange={(e) => setMessage(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                                 />

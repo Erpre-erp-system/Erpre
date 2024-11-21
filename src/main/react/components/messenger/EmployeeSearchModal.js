@@ -3,9 +3,9 @@ import {useDebounce} from "../common/useDebounce";
 import Pagination from "../common/Pagination";
 import axios from "axios";
 import {TiDelete} from "react-icons/ti";
-import UseSearch from "./UseSearch";
+import UseSearch from "./useSearch";
 
-const UseEmployeeSearchModal = ({closeEmployeeSearchModal, fetchChatList, createUrl, onSelectedEmployees, enableAutoComplete = false}) => {
+const EmployeeSearchModal = ({closeEmployeeSearchModal, fetchChatList, createUrl, onSelectedEmployees, enableAutoComplete = false}) => {
 
     // 🔴 직원 state
     const [selectedEmployees, setSelectedEmployees] = useState([]); // 선택된 직원
@@ -300,4 +300,4 @@ const UseEmployeeSearchModal = ({closeEmployeeSearchModal, fetchChatList, create
 );
 }
 
-export default UseEmployeeSearchModal;
+export default EmployeeSearchModal;

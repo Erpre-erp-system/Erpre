@@ -1,18 +1,16 @@
 package com.project.erpre.controller;
 
 import com.project.erpre.model.dto.ChatMessageDTO;
-import com.project.erpre.model.dto.MessageDTO;
+import com.project.erpre.model.dto.NoteDTO;
 import com.project.erpre.service.MessengerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 // 웹소켓 메시지 커치
@@ -33,23 +31,23 @@ public class TalkController {
 
     // 🟠 쪽지 메세지 전송 및 저장
     @MessageMapping("/note")
-    public void sendNote(MessageDTO message, Principal principal) {
+    public void sendNote(NoteDTO note, Principal principal) {
         if (principal == null) {
             throw new IllegalStateException("인증된 사용자가 필요합니다.");
         }
 
         String senderId = principal.getName();
-        Optional<LocalDateTime> scheduledDate = Optional.ofNullable(message.getMessageSendDate());
+        Optional<LocalDateTime> scheduledDate = Optional.ofNullable(note.getNoteSendDate());
 
         // 메시지 저장 처리
-        MessageDTO savedNote = messengerService.createNote(
+        NoteDTO savedNote = messengerService.createNote(
                 senderId,
-                message.getMessageContent(),
+                note.getNoteContent(),
                 scheduledDate,
-                message.getMessageReceiverIds());
+                note.getNoteReceiverIds());
 
         // 각 수신자에게 메시지 전송
-        for (String receiverId : message.getMessageReceiverIds()) {
+        for (String receiverId : note.getNoteReceiverIds()) {
             messagingTemplate.convertAndSendToUser(receiverId, "/queue/note", savedNote);
         }
     }

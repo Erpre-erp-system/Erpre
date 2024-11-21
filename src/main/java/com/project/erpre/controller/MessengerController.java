@@ -3,8 +3,6 @@ package com.project.erpre.controller;
 import com.project.erpre.event.StatusMessageUpdateEvent;
 import com.project.erpre.event.StatusUpdateEvent;
 import com.project.erpre.model.dto.*;
-import com.project.erpre.model.entity.ChatFile;
-import com.project.erpre.model.entity.ChatParticipant;
 import com.project.erpre.service.EmployeeService;
 import com.project.erpre.service.FileService;
 import com.project.erpre.service.MessengerService;
@@ -14,20 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/messengers")
@@ -130,13 +119,13 @@ public class MessengerController {
 
     // 상태에 따른 쪽지 목록 조회 및 검색 API
     @GetMapping("/note/list")
-    public ResponseEntity<List<MessageDTO>> getNoteList(
+    public ResponseEntity<List<NoteDTO>> getNoteList(
             @RequestParam(required = false) String searchKeyword,
             @RequestParam String noteStatus
     ) {
         logger.info("getNoteList API 호출됨 - searchKeyword: {}, status: {}", searchKeyword, noteStatus);
         try {
-            List<MessageDTO> notes = messengerService.getNoteListByUser(searchKeyword, noteStatus);
+            List<NoteDTO> notes = messengerService.getNoteListByUser(searchKeyword, noteStatus);
             return ResponseEntity.ok(notes);
 
 
@@ -148,8 +137,8 @@ public class MessengerController {
 
     // 쪽지 상세 정보 조회 및 읽음 여부 업데이트 API
     @PutMapping("/note/{messageNo}")
-    public ResponseEntity<MessageDTO> getNoteByNo(@PathVariable Long messageNo) {
-        MessageDTO messageDetail = messengerService.getNoteByNo(messageNo);
+    public ResponseEntity<NoteDTO> getNoteByNo(@PathVariable Long messageNo) {
+        NoteDTO messageDetail = messengerService.getNoteByNo(messageNo);
         return ResponseEntity.ok(messageDetail);
     }
 

@@ -1,7 +1,7 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import axios from "axios";
 import { useDebounce } from "../common/useDebounce";
-import useSearch from "./UseSearch";
+import useSearch from "./useSearch";
 import {UserContext} from "../../context/UserContext";
 
 
