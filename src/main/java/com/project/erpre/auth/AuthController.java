@@ -31,7 +31,7 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private AttendanceService attendanceService; // 근태쓰려구 주입
+    private AttendanceService attendanceService;
 
     @PostMapping("/api/login")
     @ResponseBody
@@ -70,16 +70,6 @@ public class AuthController {
 
             // 로그인 성공 시 출근 기록 추가
             attendanceService.recordCheckIn(employee); // 출근 시간 기록
-
-            // HTTP-only 쿠키 설정 (세션 ID를 쿠키에 설정)
-            Cookie sessionCookie = new Cookie("SESSION", session.getId());
-            sessionCookie.setHttpOnly(true); // JavaScript에서 쿠키에 접근하지 못하도록 설정
-            sessionCookie.setSecure(false); // HTTPS에서만 사용 (개발 중에는 false로 설정)
-            sessionCookie.setPath("/"); // 쿠키 유효 경로 설정
-            sessionCookie.setMaxAge(60 * 60 * 24); // 쿠키 만료 시간 설정 (1일)
-
-            // 응답에 쿠키 추가
-            response.addCookie(sessionCookie);
 
             // 로그인 성공
             System.out.println("로그인 성공: " + loginRequest.getEmployeeId());

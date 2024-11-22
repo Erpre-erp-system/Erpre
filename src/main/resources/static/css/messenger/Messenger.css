@@ -18,8 +18,8 @@ h3 { color: black; }
 .messenger-header .messenger-close { position: absolute; right: 20px; top: 10px; cursor: pointer; color: rgb(188, 187, 187); font-size: 25px; }
 
 /* 검색창 */
-.search-wrap { margin: 10px 0; padding: 1px 20px 0 19px; }
-.messenger-panel .search_box { border-radius: 23px; background-color: #f4f4f478;}
+.search-wrap { margin: 10px 0; padding: 1px 20px 0 19px; display: flex; align-items: center;}
+.messenger-panel .search_box { border-radius: 23px; background-color: #f4f4f478; margin-right: 4px;}
 .messenger-panel .box { background-color: #f4f4f478; border-radius: 23px; }
 .messenger-panel .search_box.has_text input { margin-left: 4px; }
 .messenger-panel .search_box.has_text { border-color: black; }
@@ -73,30 +73,16 @@ h3 { color: black; }
 }
 
 /* 체크 상태일 때의 스타일 */
-.rc-tree-checkbox-checked .rc-tree-treenode-checkbox-wrapper::before {
-    background-color: #0057a2;
-    border-color: #0057a2;
-}
+.rc-tree-checkbox-checked .rc-tree-treenode-checkbox-wrapper::before { background-color: #0057a2; border-color: #0057a2; }
 
-/* 조직도 상태 */
-.filter-buttons {
-    display: flex;
-    gap: 10px;
-    margin: 10px 0;
-}
-
-.filter-buttons button {
-    padding: 5px 10px;
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
-    cursor: pointer;
-}
-
-.filter-buttons button.active {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-}
+/* 조직도 상태 필터 */
+.org-status { display: flex; margin: 10px 0; }
+.org-status button { font-size:23px; padding: 5px 10px; cursor: pointer; border-radius: 5px; transition: background-color 0.3s ease, color 0.3s ease; }
+.org-status button .btn1 { color: #0057a2; }
+.org-status button .btn2 { color: #43B25C; }
+.org-status button .btn3 { color: #6C757D; }
+.org-status button:hover { background-color: #0056b3; color: white; }
+.org-status button:hover path { color: white; }
 
 /* 우클릭 메뉴 */
 .context-menu {

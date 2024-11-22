@@ -101,12 +101,11 @@ function Messenger({isOpen, toggleMessenger }) {
                         </div>
 
                         {/* 검색창 */}
-                        {activeView !== 'info' && (
+                        {(activeView !== 'info' && activeView !== 'home') && (
                             <div className="search-wrap messenger-search">
                                 <div className={`search_box ${messengerSearchText ? 'has_text' : ''}`}>
                                     <label className="label_floating">
-                                        {activeView === 'home' && '이름, 부서, 직급' ||
-                                            activeView === 'note' && '이름, 내용' ||
+                                        {activeView === 'note' && '이름, 내용' ||
                                             activeView === 'chat' && '참여자, 채팅방 이름, 메세지 내용'}
                                     </label>
                                     <i className="bi bi-search"></i>
@@ -145,10 +144,7 @@ function Messenger({isOpen, toggleMessenger }) {
                     <>
 
                         {/* 메신저 본문 동적 뷰*/}
-                        {activeView === 'home' &&
-                            <MessengerHome
-                                homeSearchKeyword={messengerSearchText}
-                            />}
+                        {activeView === 'home' && <MessengerHome />}
                         {activeView === 'info' &&
                             <Info />}
                         {activeView === 'chat' &&

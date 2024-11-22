@@ -16,7 +16,7 @@ public interface EmployeeRepositoryCustom {
     // 2. 현재 로그인한 직원 조회
     Employee getLoginEmployee(String employeeId);
 
-    // 3. 메신저 직원 조회 (조직도)
-    List<Employee> getMessengerEmployeeList(String searchKeyword);
+    // 3. 검색어와 상태 필터에 따른 메신저 조직도 조회
+    List<Employee> getMessengerEmployeeList(String status, String searchKeyword);
 
 }

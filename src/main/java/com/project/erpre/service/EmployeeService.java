@@ -29,8 +29,7 @@ public class EmployeeService {
     private DepartmentRepository departmentRepository;
 
     @Autowired
-    private JobRepository
-            jobRepository;
+    private JobRepository jobRepository;
             
     // EmployeeDTO -> Employee 엔티티로 변환하는 메서드
     private Employee convertToEntity(EmployeeDTO employeeDTO) {
@@ -80,10 +79,10 @@ public class EmployeeService {
                 .employeeName(employee.getEmployeeName())
                 .employeeEmail(employee.getEmployeeEmail())
                 .employeeTel(employee.getEmployeeTel())
-                .jobId(employee.getJob().getJobId())
-                .jobName(employee.getJob().getJobName())
-                .departmentId(employee.getDepartment().getDepartmentId())
-                .departmentName(employee.getDepartment().getDepartmentName())
+                .jobId(jobId)
+                .jobName(jobName)
+                .departmentId(departmentId)
+                .departmentName(departmentName)
                 .employeeInsertDate(employee.getEmployeeInsertDate())
                 .employeeUpdateDate(employee.getEmployeeUpdateDate())
                 .employeeDeleteYn(employee.getEmployeeDeleteYn())
@@ -96,11 +95,6 @@ public class EmployeeService {
                 .departmentName(employee.getDepartment().getDepartmentName())
                 .build();
     }
-
-    // 전체 직원 목록을 조회하는 메소드
-//    public List<Employee> getAllEmployees() {
-//        return employeeRepository.findAll();
-//    }
 
     //재직자
     public Page<EmployeeDTO> getPageEmployees(int page, int size) {
@@ -122,11 +116,6 @@ public class EmployeeService {
         Page<Employee> employeePage = employeeRepository.findByEmployeeDeleteYn("Y", pageable);
         return employeePage.map(this::convertToDTO);
     }
-
-//    public Page<Employee> getPageEmployees(int page, int size) {
-//        Pageable pageable = PageRequest.of(page, size);
-//        return employeeRepository.findAll(pageable);
-//    }
 
     //delete_yn만 바꾸기(논리적삭제)
     public void deleteLogicalEmployees(List<String> ids) {
@@ -229,9 +218,12 @@ public class EmployeeService {
         return new PageImpl<>(employeeDTO, pageable, employees.getTotalElements());
     }
 
-    // 메신저 직원 조회 (조직도)
-    public List<EmployeeDTO> getMessengerEmployeeList(String searchKeyword) {
-        return employeeRepository.getMessengerEmployeeList(searchKeyword)
+    // 🟢 검색어와 상태 필터에 따른 메신저 조직도 조회
+    public List<EmployeeDTO> getMessengerEmployeeList(String status, String searchKeyword) {
+
+        if (status == null || status.isEmpty()) { status = "all"; }
+
+        return employeeRepository.getMessengerEmployeeList(status, searchKeyword)
                .stream()
                .map(this::convertToDTO)
                .collect(Collectors.toList());

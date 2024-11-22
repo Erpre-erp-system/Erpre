@@ -37,15 +37,16 @@ public class MessengerController {
         this.eventPublisher = eventPublisher;
     }
 
-    /////////////////////////////////////////////////////////////////////// 🟢 공통
+    /////////////////////////////////////////////////////////////////////// 🟢 메신저홈
 
-    // 메신저 조직도 조회 API
+    // 🟢 검색어와 상태 필터에 따른 메신저 조직도 조회 API
     @GetMapping("/organization")
     public ResponseEntity<List<EmployeeDTO>> getMessengerEmployeeList(
+            @RequestParam(required = false) String status,
             @RequestParam(required = false) String searchKeyword
     ) {
         try {
-            List<EmployeeDTO> employees = employeeService.getMessengerEmployeeList(searchKeyword);
+            List<EmployeeDTO> employees = employeeService.getMessengerEmployeeList(status, searchKeyword);
             return ResponseEntity.ok(employees);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);

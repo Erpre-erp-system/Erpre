@@ -1,7 +1,7 @@
 import React, {useContext, useState} from 'react';
 import {FaUserCircle} from 'react-icons/fa';
 import ChatRoomModal from './ChatRoomModal'
-import UseEmployeeSearchModal from "./UseEmployeeSearchModal";
+import EmployeeSearchModal from "./EmployeeSearchModal";
 import {useChatHooks} from "./useChatHooks";
 import {RiChatNewFill} from "react-icons/ri";
 import {UserContext} from "../../context/UserContext";
@@ -148,7 +148,7 @@ const Chat = ({
                 <div className="new-chat-modal"
                      onClick={(e) => e.target === e.currentTarget && closeEmployeeSearchModal()}>
                     <div className="new-chat-modal-content">
-                        <UseEmployeeSearchModal
+                        <EmployeeSearchModal
                             closeEmployeeSearchModal={closeEmployeeSearchModal}
                             fetchChatList={fetchChatList}
                             createUrl="/api/messengers/chat/create"

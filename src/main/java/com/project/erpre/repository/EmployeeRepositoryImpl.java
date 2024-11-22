@@ -34,13 +34,14 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
         QJob job = QJob.job;
 
         BooleanBuilder builder = new BooleanBuilder();
+        builder.and(employee.employeeDeleteYn.eq("N"));
+        builder.and(containsKeyword(searchKeyword));
 
         List<Employee> results = queryFactory
                 .selectFrom(employee)
                 .leftJoin(employee.department, department).fetchJoin()
                 .leftJoin(employee.job, job).fetchJoin()
-                .where(employee.employeeDeleteYn.eq("N"),
-                        containsKeyword(searchKeyword))
+                .where(builder)
                 .orderBy(department.departmentName.asc(), employee.employeeName.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -53,6 +54,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
 
         return new PageImpl<>(results, pageable, total);
     }
+
 
     // 2. 현재 로그인한 직원 조회
     @Override
@@ -70,7 +72,28 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
 
     }
 
-    // 직원 검색 메서드 (직원 이름, 부서명, 직급명)
+    // 3. 검색어와 상태 필터에 따른 메신저 조직도 조회
+    @Override
+    public List<Employee> getMessengerEmployeeList(String status, String searchKeyword) {
+        QEmployee employee = QEmployee.employee;
+        QDepartment department = QDepartment.department;
+        QJob job = QJob.job;
+
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(employee.employeeDeleteYn.eq("N"));
+        builder.and(statusFilter(status));
+        builder.and(containsKeyword(searchKeyword));
+
+        return queryFactory
+                .selectFrom(employee)
+                .leftJoin(employee.department, department).fetchJoin()
+                .leftJoin(employee.job, job).fetchJoin()
+                .where(builder)
+                .orderBy(department.departmentName.asc(), employee.job.jobId.asc(), employee.employeeName.asc()) // 부서, 부서 내 직급, 직급 내 이름 순 정렬
+                .fetch();
+    }
+
+    // 직원 검색 메서드 (직원, 부서, 직급)
     private BooleanExpression containsKeyword(String searchKeyword) {
         if (searchKeyword == null || searchKeyword.isEmpty()) {
             return null;
@@ -84,27 +107,18 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
                 .or(job.jobName.containsIgnoreCase(searchKeyword));
     }
 
-    // 3. 메신저 조직도 조회
-    @Override
-    public List<Employee> getMessengerEmployeeList(String searchKeyword) {
+    // 직원 상태 메서드 (온라인, 오프라인)
+    private BooleanExpression statusFilter(String status) {
         QEmployee employee = QEmployee.employee;
-        QDepartment department = QDepartment.department;
-        QJob job = QJob.job;
 
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(employee.employeeDeleteYn.eq("N"));
-
-        if (searchKeyword != null && !searchKeyword.isEmpty()) {
-            builder.and(containsKeyword(searchKeyword));
+        if ("all".equals(status)) {
+            return null;
+        } else if ("offline".equals(status)) {
+            return employee.employeeStatus.eq("offline");
+        } else if ("online".equals(status)) {
+            return employee.employeeStatus.ne("offline");
         }
-
-        return queryFactory
-                .selectFrom(employee)
-                .leftJoin(employee.department, department).fetchJoin()
-                .leftJoin(employee.job, job).fetchJoin()
-                .where(builder)
-                .orderBy(department.departmentName.asc(), employee.employeeName.asc())
-                .fetch();
+        return null;
     }
 
 }
