@@ -2,18 +2,16 @@
 
 ## Release Notes
 
-### v1.0.0 (2024-10-02)
-- **첫 번째 릴리스: 기본 ERP 영업 시스템 기능 구현**
-  - 직원/고객 관리
-  - 카테고리/상품 관리
-  - 고객사별 상품 가격 관리
-  - 주문 등록 및 승인
-  - 주문 목록
-  - 주문 현황 보고서 차트
+### v2.0.0 (2024-10-02)
+- **두 번째 릴리스: 부서 간 원활한 소통과 체계적인 데이터 관리가 필요해짐에 따라 프로젝트를 기획**
+  - 인사 관리
+  - 영업 보고서
+  - 쪽지 / 채팅
+  - 이메일
+  - 출고 관리
 
-- **기업 연계 프로젝트** with ㈜ 쉐어드원
 - **개발 기간** : `2024/10/02 ~ 11/12` (4주)
-- **시연영상** : https://www.youtube.com/watch?v=da2D4uyioXY
+- **시연영상** : https://www.youtube.com/watch?v=fyCAS6lyy1s
 <br/>
 
 ## 🪅 팀원
@@ -44,7 +42,7 @@
 <details>
   <summary>E-R Diagram</summary>
   
-![ERD(2)](https://github.com/user-attachments/assets/53f6d577-63fb-4fea-a57b-e1642062783b)
+![Frame 4](https://github.com/user-attachments/assets/5321a3a2-220e-4f64-87ee-4cfa67aaf3a4)
 
 
 </details>
@@ -53,7 +51,7 @@
 <details>
   <summary>API 명세서</summary>
 
-![쉐어드원 3조](https://github.com/user-attachments/assets/64d1218b-d171-419a-af74-1d7beea3b370)
+![image](https://github.com/user-attachments/assets/7464390f-a442-4c51-9df9-fb1f10081e98)
 
 </details>
 
@@ -61,9 +59,8 @@
 <details>
   <summary>발표 PPT</summary>
  
-![1 (6)](https://github.com/user-attachments/assets/bd70e56c-ff8f-410f-96cb-a51c106c62d2)
-![2 (2)](https://github.com/user-attachments/assets/536ee9c4-37fa-4eea-962c-d2741e6e99da)
-![3](https://github.com/user-attachments/assets/9ed942df-1bff-498e-b14c-8224cd3d21e7)
+![Frame 5](https://github.com/user-attachments/assets/bac214a8-8f25-42fd-8436-4d5106ff97e7)
+
 </details>
 
 
